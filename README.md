@@ -1,7 +1,14 @@
-# [NOMBRE DEL PROYECTO]
-### Nombre y carné de los integrantes: 
+# Proyecto 1 - Bases de Datos 2
 
+## Integrantes
+- Alice Arias Salazar - 20231904639
+- Heldyis Agüero Espinoza - 2023296812
 
-### Estado del proyecto:
-### Enlace del video:
-Recordar que el video debe ser público para ser visto por el profesor
+## Objetivos alcanzados
+- 
+
+## Objetivos no alcanzados
+- 
+
+## Video de la aplicación
+[Ver video en YouTube](ENLACE_AQUI)

@@ -30,6 +30,7 @@ FROM   dbo.FormasEntrega;
 
 
 GO
+---------------------------------------------------------------------------------
 -- revisar contenido de las tablas clientes y relacionados
 -- 1. dbo.ClientesActuales
 -- CustomerID: Identificador único del cliente.

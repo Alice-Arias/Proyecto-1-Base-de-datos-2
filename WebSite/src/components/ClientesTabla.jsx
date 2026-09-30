@@ -1,33 +1,65 @@
-
 // Importamos tres iconos de la librería lucide-react:
-// Eye     icono para ver los detalles.
-// Pencil  icono para editar.
-// Trash2  cono para eliminar.
+//
+// Eye     → icono para ver los detalles.
+// Pencil  → icono para editar.
+// Trash2  → icono para eliminar.
 
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 
+
 // Este componente muestra los clientes dentro de una tabla.
-// Recibe cuatro datos/funciones desde el componente padre:
-// clientes:Lista de clientes que se mostrarán.
-// seleccionados: Lista con los CustomerID de los clientes seleccionados.
-// onToggleSeleccion: Función que selecciona o deselecciona un cliente.
-//onVerUno: Función que permite ver los detalles de un cliente.
+//
+// Recibe seis datos/funciones desde el componente padre:
+//
+// clientes:
+// Lista de clientes que se mostrarán.
+//
+// seleccionados:
+// Lista con los CustomerID de los clientes seleccionados.
+//
+// onToggleSeleccion:
+// Función que selecciona o deselecciona un cliente.
+//
+// onVerUno:
+// Función que permite ver los detalles de un cliente.
+//
+// onEditar:
+// Función que permite editar un cliente.
+//
+// onEliminar:
+// Función que permite eliminar un cliente.
 
 function ClientesTabla({
+
   clientes,
+
   seleccionados,
+
   onToggleSeleccion,
-  onVerUno
+
+  onVerUno,
+
+  onEditar,
+
+  onEliminar
+
 }) {
 
+
+  // Si no existen clientes, mostramos este mensaje.
 
   if (clientes.length === 0) {
 
     return (
+
       <p style={{ padding: '1rem' }}>
+
         No se encontraron clientes.
+
       </p>
+
     );
+
   }
 
 
@@ -36,6 +68,10 @@ function ClientesTabla({
     <table className="tabla-clientes">
 
 
+      {/* =================================================
+          ENCABEZADO DE LA TABLA
+          ================================================= */}
+
       <thead>
 
         <tr>
@@ -43,24 +79,28 @@ function ClientesTabla({
           <th></th>
 
           {/* Identificador del cliente */}
+
           <th>Identificador</th>
 
           {/* Nombre del cliente */}
+
           <th>Nombre Cliente</th>
 
           {/* Categoría del cliente */}
+
           <th>Categoría</th>
 
           {/* Método de entrega */}
+
           <th>Método de entrega</th>
 
           {/* Botones de acciones */}
+
           <th>Acciones</th>
 
         </tr>
 
       </thead>
-
 
 
       <tbody>
@@ -78,6 +118,7 @@ function ClientesTabla({
             <td>
 
               <input
+
                 type="checkbox"
 
                 // Determina si el checkbox aparece marcado.
@@ -90,31 +131,57 @@ function ClientesTabla({
 
                 // Cuando el usuario marca o desmarca el checkbox,
                 // enviamos el CustomerID al componente padre.
+
                 onChange={() =>
                   onToggleSeleccion(c.CustomerID)
                 }
+
               />
 
             </td>
 
 
+            {/* =================================================
+                IDENTIFICADOR
+                ================================================= */}
+
             <td>
+
               {c.CustomerID}
+
             </td>
 
 
+            {/* =================================================
+                NOMBRE
+                ================================================= */}
+
             <td>
+
               {c.Nombre_Cliente}
+
             </td>
 
 
+            {/* =================================================
+                CATEGORÍA
+                ================================================= */}
+
             <td>
+
               {c.Categoria_Cliente}
+
             </td>
 
 
+            {/* =================================================
+                MÉTODO DE ENTREGA
+                ================================================= */}
+
             <td>
+
               {c.Metodo_Entrega || '-'}
+
             </td>
 
 
@@ -132,8 +199,12 @@ function ClientesTabla({
                     ============================================= */}
 
                 <Eye
+
                   size={17}
+
                   className="ver"
+
+                  title="Ver detalles"
 
                   // Al hacer clic, enviamos el CustomerID
                   // para mostrar los detalles de ese cliente.
@@ -141,26 +212,58 @@ function ClientesTabla({
                   onClick={() =>
                     onVerUno(c.CustomerID)
                   }
+
                 />
 
 
                 {/* =============================================
-                    EDITAR AUN INAVILITADO
+                    EDITAR
                     ============================================= */}
 
                 <Pencil
+
                   size={17}
+
                   className="editar"
+
+                  title="Modificar cliente"
+
+                  // Al hacer clic, enviamos el cliente completo
+                  // al componente padre.
+                  //
+                  // El componente padre será el encargado de
+                  // abrir ClienteEditarModal.
+
+                  onClick={() =>
+                    onEditar(c)
+                  }
+
                 />
 
 
                 {/* =============================================
-                    ELIMINAR INAVILITADO
+                    ELIMINAR
                     ============================================= */}
 
                 <Trash2
+
                   size={17}
+
                   className="eliminar"
+
+                  title="Eliminar cliente"
+
+                  // Al hacer clic, enviamos el cliente completo
+                  // al componente padre.
+                  //
+                  // El componente padre será el encargado de
+                  // abrir ClienteEliminarModal y pedir
+                  // confirmación antes de eliminar.
+
+                  onClick={() =>
+                    onEliminar(c)
+                  }
+
                 />
 
 
@@ -175,7 +278,9 @@ function ClientesTabla({
       </tbody>
 
     </table>
+
   );
+
 }
 
 

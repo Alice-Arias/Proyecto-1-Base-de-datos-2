@@ -116,7 +116,7 @@ BEGIN
     WHERE c.CustomerID IN
     (
         SELECT TRY_CAST(value AS INT)
-        FROM STRING_SPLIT(@CustomerID, ',')
+        FROM STRING_SPLIT(@CustomerID, ',') 
         WHERE TRY_CAST(value AS INT) IS NOT NULL
     );
 
@@ -970,4 +970,54 @@ BEGIN
     END CATCH;
 
 END
+GO
+
+CREATE or alter PROCEDURE dbo.SP_Clientes_Opciones
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- 1. Categorías
+    SELECT
+        CustomerCategoryID AS ID,
+        CustomerCategoryName AS Nombre
+    FROM Sales.CustomerCategories
+    ORDER BY CustomerCategoryName;
+
+    -- 2. Grupos de compra
+    SELECT
+        BuyingGroupID AS ID,
+        BuyingGroupName AS Nombre
+    FROM Sales.BuyingGroups
+    ORDER BY BuyingGroupName;
+
+    -- 3. Personas / contactos
+    SELECT
+        PersonID AS ID,
+        FullName AS Nombre
+    FROM Application.People
+    WHERE IsSalesperson = 0
+    ORDER BY FullName;
+
+    -- 4. Clientes para facturación
+    SELECT
+        CustomerID AS ID,
+        CustomerName AS Nombre
+    FROM Sales.Customers
+    ORDER BY CustomerName;
+
+    -- 5. Métodos de entrega
+    SELECT
+        DeliveryMethodID AS ID,
+        DeliveryMethodName AS Nombre
+    FROM Application.DeliveryMethods
+    ORDER BY DeliveryMethodName;
+
+    -- 6. Ciudades
+    SELECT
+        CityID AS ID,
+        CityName AS Nombre
+    FROM Application.Cities
+    ORDER BY CityName;
+END;
 GO

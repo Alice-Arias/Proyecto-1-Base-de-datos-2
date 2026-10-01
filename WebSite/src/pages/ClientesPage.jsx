@@ -21,9 +21,9 @@ import {
   Search,
   Plus,
   Sun,
-  Eye
+  Eye,
+  AlertTriangle
 } from 'lucide-react';
-
 
 // ============================================================
 // COMPONENTES
@@ -302,7 +302,7 @@ function ClientesPage() {
 
     listarClientes()
       .then((datos) => setTodosClientes(datos))
-      .catch(() => {});
+      .catch(() => { });
 
   }, []);
 
@@ -647,44 +647,63 @@ function ClientesPage() {
   // ============================================================
 
   // Calculamos cuántas páginas existen.
-
   const totalPaginas = Math.max(
-
     1,
-
     Math.ceil(clientes.length / POR_PAGINA)
-
   );
-
 
   // Obtenemos únicamente los clientes que pertenecen
   // a la página actual.
-
   const clientesPagina = clientes.slice(
-
     (pagina - 1) * POR_PAGINA,
-
     pagina * POR_PAGINA
-
   );
 
+  // ============================================================
+  // NÚMEROS DE PÁGINA DINÁMICOS
+  // ============================================================
 
-  // Creamos los números de página que aparecerán.
-  //
   // Como máximo mostramos 5 botones.
+  // Los números se van desplazando conforme avanzamos.
+  const numerosPagina = (() => {
 
-  const numerosPagina = Array.from(
+    const maxBotones = 5;
 
-    {
+    // Si existen 5 páginas o menos,
+    // mostramos todas.
+    if (totalPaginas <= maxBotones) {
+      return Array.from(
+        { length: totalPaginas },
+        (_, i) => i + 1
+      );
+    }
 
-      length: Math.min(totalPaginas, 5)
+    // Intentamos colocar la página actual
+    // en el centro de los 5 botones.
+    let inicio = pagina - 2;
+    let fin = pagina + 2;
 
-    },
+    // Si estamos al principio,
+    // mantenemos 1, 2, 3, 4, 5.
+    if (inicio < 1) {
+      inicio = 1;
+      fin = maxBotones;
+    }
 
-    (_, i) => i + 1
+    // Si estamos al final,
+    // mostramos las últimas 5 páginas.
+    if (fin > totalPaginas) {
+      fin = totalPaginas;
+      inicio = totalPaginas - maxBotones + 1;
+    }
 
-  );
+    // Creamos los números.
+    return Array.from(
+      { length: fin - inicio + 1 },
+      (_, i) => inicio + i
+    );
 
+  })();
 
   // ============================================================
   // FECHA Y HORA
@@ -1108,14 +1127,12 @@ function ClientesPage() {
 
 
             {/* ==================================================
-                PAGINACIÓN
-                ================================================== */}
+    PAGINACIÓN
+    ================================================== */}
 
             <div className="paginacion">
 
-
               <span>
-
                 Mostrando{' '}
 
                 {clientes.length === 0
@@ -1125,11 +1142,8 @@ function ClientesPage() {
                 {' - '}
 
                 {Math.min(
-
                   pagina * POR_PAGINA,
-
                   clientes.length
-
                 )}
 
                 {' de '}
@@ -1137,87 +1151,61 @@ function ClientesPage() {
                 {clientes.length}
 
                 {' resultados'}
-
               </span>
 
 
               <div className="paginas">
 
+                {/* BOTÓN ANTERIOR */}
 
                 <button
-
+                  disabled={pagina === 1}
                   onClick={() =>
-
                     setPagina((p) =>
-
                       Math.max(1, p - 1)
-
                     )
-
                   }
-
                 >
-
                   ‹
-
                 </button>
 
+
+                {/* NÚMEROS DE PÁGINA */}
 
                 {numerosPagina.map((n) => (
 
                   <button
-
                     key={n}
-
                     className={
-
                       pagina === n
-
                         ? 'activo'
-
                         : ''
-
                     }
-
                     onClick={() =>
-
                       setPagina(n)
-
                     }
-
                   >
-
                     {n}
-
                   </button>
 
                 ))}
 
 
+                {/* BOTÓN SIGUIENTE */}
+
                 <button
-
+                  disabled={pagina === totalPaginas}
                   onClick={() =>
-
                     setPagina((p) =>
-
                       Math.min(
-
                         totalPaginas,
-
                         p + 1
-
                       )
-
                     )
-
                   }
-
                 >
-
                   ›
-
                 </button>
-
 
               </div>
 

@@ -286,3 +286,27 @@ export async function eliminarCliente(id) {
   return data;
 
 }
+
+// ============================================================
+// OBTENER OPCIONES PARA EL FORMULARIO DE CLIENTES
+// ============================================================
+
+export async function obtenerOpcionesClientes() {
+
+    const res = await fetch(
+        `${API_URL}/clientes/opciones`
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+
+        throw new Error(
+            data.error ||
+            'No se pudieron obtener las opciones de clientes.'
+        );
+
+    }
+
+    return data;
+}

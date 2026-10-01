@@ -560,139 +560,257 @@ body {
   transform: translateY(-1px);
 }
 
-
 /* =========================================================
    TABLA DE CLIENTES
    ========================================================= */
 
-.tabla-clientes {
-  width: 100%;
-  border-collapse: collapse;
-  background: #ffffff;
-  color: var(--text-dark);
+.table-card {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    overflow: hidden;
 }
+
+/* Contenedor para permitir desplazamiento horizontal */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* Tabla */
+.tabla-clientes {
+    width: 100%;
+    min-width: 700px;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #ffffff;
+    color: var(--text-dark);
+    table-layout: fixed;
+}
+
+/* =========================================================
+   ENCABEZADOS
+   ========================================================= */
 
 .tabla-clientes th {
-  text-align: left;
-  padding: 0.8rem 1rem;
-  background: #f9fbfd;
-  color: #4b5563;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-bottom: 1px solid var(--border);
+    height: 52px;
+    padding: 0.8rem 1rem;
+    background: #f8fafc;
+    color: #4b5563;
+    font-size: 0.84rem;
+    font-weight: 650;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
 }
 
+/* =========================================================
+   CELDAS
+   ========================================================= */
+
 .tabla-clientes td {
-  padding: 0.8rem 1rem;
-  border-bottom: 1px solid var(--border);
-  color: var(--text-dark);
-  font-size: 0.92rem;
-  background: #ffffff;
+    height: 58px;
+    padding: 0.8rem 1rem;
+    background: #ffffff;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Mantener encabezados y contenido alineados */
+.tabla-clientes th,
+.tabla-clientes td {
+    vertical-align: middle;
+}
+
+/* =========================================================
+   ANCHOS DE LAS 5 COLUMNAS
+   ========================================================= */
+
+/* 1. Checkbox */
+.tabla-clientes th:nth-child(1),
+.tabla-clientes td:nth-child(1) {
+    width: 55px;
+    text-align: center;
+    padding-left: 0.7rem;
+    padding-right: 0.7rem;
+}
+
+/* 2. Nombre */
+.tabla-clientes th:nth-child(2),
+.tabla-clientes td:nth-child(2) {
+    width: 20%;
+}
+
+/* 3. Categoría */
+.tabla-clientes th:nth-child(3),
+.tabla-clientes td:nth-child(3) {
+    width: 20%;
+}
+
+/* 4. Método de entrega */
+.tabla-clientes th:nth-child(4),
+.tabla-clientes td:nth-child(4) {
+    width: 20%;
+}
+
+/* 5. Acciones */
+.tabla-clientes th:nth-child(5),
+.tabla-clientes td:nth-child(5) {
+    width: 25%;
+    text-align: center;
+}
+/* =========================================================
+   TEXTO DE LA TABLA
+   ========================================================= */
+
+.tabla-clientes td:not(:first-child):not(:last-child) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Nombre y apellido */
+.tabla-clientes td:nth-child(3),
+.tabla-clientes td:nth-child(4) {
+    font-weight: 500;
+}
+
+/* =========================================================
+   HOVER
+   ========================================================= */
+
+.tabla-clientes tbody tr {
+    transition: background-color 0.2s ease;
 }
 
 .tabla-clientes tbody tr:hover td {
-  background: #f7fafd;
+    background: #f7fafd;
 }
-
-.tabla-clientes th:first-child,
-.tabla-clientes td:first-child {
-  width: 36px;
-}
-
 
 /* =========================================================
    CHECKBOX
    ========================================================= */
 
 .tabla-clientes input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  border: 2px solid #b8c1cc;
-  border-radius: 4px;
-  background: #ffffff;
-  cursor: pointer;
-  position: relative;
-  transition: background 0.15s ease, border-color 0.15s ease;
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 18px;
+    height: 18px;
+
+    margin: 0;
+
+    border: 2px solid #b8c1cc;
+    border-radius: 5px;
+
+    background: #ffffff;
+
+    cursor: pointer;
+
+    position: relative;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease;
 }
 
 .tabla-clientes input[type="checkbox"]:hover {
-  border-color: var(--primary);
+    border-color: var(--primary);
+    transform: scale(1.05);
 }
 
 .tabla-clientes input[type="checkbox"]:checked {
-  background: var(--primary);
-  border-color: var(--primary);
+    background: var(--primary);
+    border-color: var(--primary);
 }
 
 .tabla-clientes input[type="checkbox"]:checked::after {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 1px;
-  width: 5px;
-  height: 9px;
-  border: solid #ffffff;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+    content: "";
+
+    position: absolute;
+
+    left: 4px;
+    top: 1px;
+
+    width: 5px;
+    height: 9px;
+
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+
+    transform: rotate(45deg);
 }
 
-
 /* =========================================================
-   ICONOS DE ACCIONES
+   ACCIONES
    ========================================================= */
 
 .acciones-cel {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
 }
 
 .acciones-cel svg {
-  cursor: pointer;
-  transition: transform 0.15s ease;
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
 }
 
 .acciones-cel svg:hover {
-  transform: scale(1.1);
+    transform: scale(1.12);
 }
 
 .acciones-cel .ver {
-  color: var(--primary);
+    color: var(--primary);
 }
 
 .acciones-cel .editar {
-  color: var(--yellow);
+    color: var(--yellow);
 }
 
 .acciones-cel .eliminar {
-  color: var(--danger);
+    color: var(--danger);
 }
 
-
 /* =========================================================
-   ETIQUETAS / ESTADOS
+   ESTADOS
    ========================================================= */
 
 .pill {
-  padding: 0.2rem 0.6rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0.25rem 0.65rem;
+
+    border-radius: 20px;
+
+    font-size: 0.78rem;
+    font-weight: 600;
+
+    white-space: nowrap;
 }
 
 .pill.verde {
-  background: var(--green-light);
-  color: var(--green-dark);
+    background: var(--green-light);
+    color: var(--green-dark);
 }
 
 .pill.amarillo {
-  background: var(--yellow-light);
-  color: #c47b00;
+    background: var(--yellow-light);
+    color: #c47b00;
 }
-
 
 /* =========================================================
    PAGINACIÓN
@@ -747,8 +865,6 @@ body {
 /* =========================================================
    FILTRO ANTIGUO
    ========================================================= */
-
-/* Se mantiene por si todavía utilizas el componente ClientesFiltro. */
 
 .filtro {
   display: flex;
@@ -2010,4 +2126,525 @@ body {
     transition: none;
   }
 
+}
+
+
+/* =========================================================
+   MODAL ELIMINAR CLIENTE — extensión final (un solo bloque)
+   ========================================================= */
+
+
+/* Tarjeta del nombre del cliente + botón "Ver detalle" */
+
+.confirmacion-cliente-tarjeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+
+  margin-top: 1.1rem;
+
+  padding: 0.7rem 0.9rem;
+
+  background: var(--primary-light);
+  border: 1px solid #d7e4fb;
+  border-radius: 12px;
+}
+
+.confirmacion-cliente-info {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.confirmacion-cliente-avatar {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--primary);
+}
+
+.confirmacion-cliente-nombre {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--primary-dark);
+
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-ojo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+
+  height: 36px;
+  padding: 0 0.8rem;
+
+  border: 1px solid var(--primary);
+  border-radius: 9px;
+
+  background: #ffffff;
+  color: var(--primary);
+
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn-ojo:hover:not(:disabled) {
+  background: var(--primary);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(47, 111, 237, 0.25);
+}
+
+.btn-ojo:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-ojo:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* Botones "No, cancelar" / "Sí, eliminar": mismo ancho exacto,
+   texto centrado, animación suave y consistente */
+
+.modal-confirmacion .confirmacion-botones {
+  display: flex;
+  gap: 0.7rem;
+}
+
+.modal-confirmacion .btn-cancelar,
+.modal-confirmacion .btn-eliminar {
+  flex: 1;
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.modal-confirmacion .btn-cancelar:hover {
+  background: #f4f6f8;
+  border-color: #bfc9d6;
+  color: #1f2937;
+  transform: translateY(-1px);
+}
+
+.modal-confirmacion .btn-eliminar:hover:not(:disabled) {
+  background: #dc2626;
+  border-color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.modal-confirmacion .btn-eliminar:disabled,
+.modal-confirmacion .btn-cancelar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+/* Botones "Cerrar" / "Volver a intentar" del mensaje de error:
+   mismo arreglo, mismo ancho, texto centrado */
+
+.mensaje-modal .confirmacion-botones {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: 1.4rem;
+}
+
+.mensaje-modal .confirmacion-botones .btn-cancelar,
+.mensaje-modal .confirmacion-botones .btn-aceptar {
+  flex: 1;
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  margin-top: 0;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.mensaje-modal .confirmacion-botones .btn-cancelar:hover {
+  background: #f4f6f8;
+  border-color: #bfc9d6;
+  color: #1f2937;
+  transform: translateY(-1px);
+}
+
+.mensaje-modal .confirmacion-botones .btn-aceptar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(47, 111, 237, 0.25);
+}
+
+
+/* Ícono girando (estado "eliminando...") */
+
+.girando {
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+/* =========================================================
+   FLECHAS LATERALES
+   ========================================================= */
+
+.cd-flecha {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width:60px;
+  height: 60px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #2A4590;
+  color: #ffffff;
+
+  font-size: 25px;
+  font-weight: 700;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  z-index: 30;
+
+  box-shadow: 0 10px 14px rgba(42, 69, 144, 0.25);
+
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+
+/* Flecha izquierda */
+.cd-flecha-izquierda {
+  left: -85px;
+}
+
+/* Flecha derecha */
+.cd-flecha-derecha {
+  right: -85px;
+}
+
+
+/* =========================================================
+   ANIMACIÓN DE LAS FLECHAS
+   ========================================================= */
+
+.cd-flecha:hover {
+  background: #ffffff;
+  color: #2A4590;
+
+  box-shadow: 0 8px 20px rgba(42, 69, 144, 0.30);
+}
+
+
+/* Izquierda se mueve hacia afuera */
+.cd-flecha-izquierda:hover {
+  transform: translate(-5px, -50%) scale(1.10);
+}
+
+
+/* Derecha se mueve hacia afuera */
+.cd-flecha-derecha:hover {
+  transform: translate(5px, -50%) scale(1.10);
+}
+
+
+/* Click */
+.cd-flecha:active {
+  transform: translateY(-50%) scale(0.90);
+}
+
+.cd-flecha-izquierda:active {
+  transform: translate(-3px, -50%) scale(0.90);
+}
+
+.cd-flecha-derecha:active {
+  transform: translate(3px, -50%) scale(0.90);
+}
+
+
+/* =========================================================
+   CONTROLES INFERIORES
+   ========================================================= */
+
+.cd-carrusel-controles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 22px;
+
+  padding: 14px 0 4px;
+}
+
+
+/* Contador */
+.cd-contador {
+  min-width: 75px;
+
+  padding: 6px 12px;
+
+  text-align: center;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  color: #2A4590;
+
+  background: #f4f7fc;
+
+  border: 1px solid #dbe3f2;
+  border-radius: 20px;
+}
+
+
+/* Botones inferiores */
+.cd-control {
+  width: 36px;
+  height: 36px;
+
+  border: 2px solid #2A4590;
+  border-radius: 50%;
+
+  background: #2A4590;
+  color: #ffffff;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 4px 10px rgba(42, 69, 144, 0.20);
+
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+
+/* Hover */
+.cd-control:hover {
+  background: #ffffff;
+  color: #808daf;
+
+  transform: translateY(-3px) scale(1.08);
+
+  box-shadow: 0 7px 16px rgba(42, 69, 144, 0.28);
+}
+
+
+/* Click */
+.cd-control:active {
+  transform: scale(0.92);
+}
+
+
+/* =========================================================
+   AJUSTE DEL MODAL
+   ========================================================= */
+
+.modal-cliente-form,
+.modal-contenido {
+  position: relative;
+}
+
+
+/* Evita separación vertical entre clientes */
+.cd-carrusel .cd-separador {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .cd-carrusel {
+    width: 94%;
+    padding: 0 42px;
+  }
+
+  .cd-flecha {
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+  }
+
+  .cd-flecha-izquierda {
+    left: 0;
+  }
+
+  .cd-flecha-derecha {
+    right: 0;
+  }
+}
+
+
+@media (max-width: 600px) {
+
+  .cd-carrusel {
+    width: 100%;
+    padding: 0 38px;
+  }
+
+  .cd-flecha {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+
+  .cd-flecha-izquierda {
+    left: 0;
+  }
+
+  .cd-flecha-derecha {
+    right: 0;
+  }
+
+  .cd-carrusel-controles {
+    gap: 14px;
+  }
+
+  .cd-contador {
+    min-width: 70px;
+    font-size: 11px;
+  }
+
+  .cd-control {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+}
+
+/* ============================================================
+   BOTONES CON REACT ICONS
+============================================================ */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+}
+
+.cd-acciones {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+/* ============================================================
+   ICONOS DE LAS SECCIONES
+============================================================ */
+
+.cd-ico {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+
+/* ============================================================
+   LÍNEAS DE INFORMACIÓN
+============================================================ */
+
+.cd-linea {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+
+/* ============================================================
+   BOTÓN CERRAR
+============================================================ */
+
+.cerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* ============================================================
+   FLECHAS DEL CARRUSEL
+============================================================ */
+
+.cd-flecha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

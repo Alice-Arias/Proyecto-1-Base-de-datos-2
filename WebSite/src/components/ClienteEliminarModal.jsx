@@ -1,26 +1,55 @@
 // ============================================================
 // MODAL PARA ELIMINAR CLIENTE
 // ============================================================
+//
+// Estados:
+//   'confirmar'  -> usa .modal-confirmacion (ya existe en tu CSS)
+//   'eliminando' -> mismo contenedor, botón en estado "cargando"
+//   'exito'      -> usa .mensaje-modal.exito (ya existe en tu CSS)
+//   'error'      -> usa .mensaje-modal.error (ya existe en tu CSS)
+//
+// El botón de ojo abre ClienteDetalleModal, que espera un
+// ARRAY de clientes (prop `clientes`), no un objeto suelto.
+// ============================================================
 
 import {
-    X,
     Trash2,
-    AlertTriangle
+    Eye,
+    User,
+    CheckCircle2,
+    XCircle
 } from 'lucide-react';
 
 import { useState } from 'react';
 
-import { eliminarCliente } from '../services/api';
+import {
+    eliminarCliente,
+    obtenerDetalleClientes
+} from '../services/api';
+import ClienteDetalleModal from './ClienteDetalleModal';
 
 
 function ClienteEliminarModal({
     cliente,
     onCerrar,
-    onEliminado,
-    onMostrarMensaje
+    onEliminado
 }) {
 
-    const [eliminando, setEliminando] = useState(false);
+    // 'confirmar' | 'eliminando' | 'exito' | 'error'
+    const [estado, setEstado] = useState('confirmar');
+
+    // Mensaje de error devuelto por el backend, si lo hay.
+    const [mensajeError, setMensajeError] = useState('');
+
+    // Controla si el modal de detalle está abierto encima de este.
+    const [verDetalle, setVerDetalle] = useState(false);
+
+    // Detalle COMPLETO del cliente (distinto del objeto "resumen"
+    // que llega de la lista). Se pide recién al tocar el ojo.
+    const [detalleCompleto, setDetalleCompleto] = useState(null);
+
+    // Indica si el detalle todavía se está cargando.
+    const [cargandoDetalle, setCargandoDetalle] = useState(false);
 
 
     if (!cliente) {
@@ -34,217 +63,259 @@ function ClienteEliminarModal({
 
     const confirmarEliminacion = async () => {
 
-        setEliminando(true);
+        setEstado('eliminando');
 
         try {
 
-            // Llamamos al servicio de la API.
-            const data = await eliminarCliente(
-                cliente.CustomerID
-            );
+            await eliminarCliente(cliente.CustomerID);
 
-            // Avisamos al componente padre.
-            await onEliminado(data);
+            setEstado('exito');
 
         } catch (error) {
 
             console.error(error);
 
-            if (onMostrarMensaje) {
+            setMensajeError(
+                error.message ||
+                'No se pudo eliminar el cliente.'
+            );
 
-                onMostrarMensaje({
-                    tipo: 'error',
-                    titulo: 'No se puede eliminar el cliente',
-                    mensaje: error.message
-                });
-
-            }
-
-        } finally {
-
-            setEliminando(false);
+            setEstado('error');
 
         }
     };
 
 
+    // ========================================================
+    // CERRAR DESPUÉS DE UN ÉXITO
+    // ========================================================
+
+    const cerrarConExito = async () => {
+
+        if (onEliminado) {
+            await onEliminado(cliente.CustomerID);
+        }
+
+    };
+
+
+    // ========================================================
+    // ABRIR EL DETALLE COMPLETO (pide los datos completos al
+    // backend antes de mostrar el modal, en vez de reusar el
+    // objeto resumido que trae la lista)
+    // ========================================================
+
+    const abrirDetalle = async () => {
+
+        setCargandoDetalle(true);
+
+        try {
+
+            const data = await obtenerDetalleClientes(
+                cliente.CustomerID
+            );
+
+            // obtenerDetalleClientes devuelve un arreglo
+            // (puede pedir varios IDs a la vez).
+            setDetalleCompleto(data);
+            setVerDetalle(true);
+
+        } catch (error) {
+
+            console.error(error);
+
+            setMensajeError(
+                'No se pudo cargar la información del cliente.'
+            );
+            setEstado('error');
+
+        } finally {
+
+            setCargandoDetalle(false);
+
+        }
+
+    };
+
+
+    // ========================================================
+    // ESTADO: CONFIRMAR / ELIMINANDO
+    // Usa .modal-confirmacion, ya definido en tu CSS.
+    // ========================================================
+
+    if (estado === 'confirmar' || estado === 'eliminando') {
+
+        return (
+
+            <>
+
+                <div className="modal-fondo" onClick={onCerrar}>
+
+                    <div
+                        className="modal-confirmacion"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+
+                        <div className="confirmacion-icono">
+                            <Trash2 size={28} />
+                        </div>
+
+                        <h2>¿Desea eliminar este cliente?</h2>
+                        <p>Esta acción no se puede deshacer.</p>
+
+                        {/* Nombre del cliente + botón para ver el detalle */}
+                        <div className="confirmacion-cliente-tarjeta">
+
+                            <div className="confirmacion-cliente-info">
+
+                                <span className="confirmacion-cliente-avatar">
+                                    <User size={17} />
+                                </span>
+
+                                <span className="confirmacion-cliente-nombre">
+                                    {cliente.Nombre_Cliente}
+                                </span>
+
+                            </div>
+
+                            <button
+                                type="button"
+                                className="btn-ojo"
+                                onClick={abrirDetalle}
+                                disabled={cargandoDetalle}
+                                title="Ver información del cliente"
+                                aria-label="Ver información del cliente"
+                            >
+                                <Eye size={16} />
+                                {cargandoDetalle ? 'Cargando...' : 'Ver detalle'}
+                            </button>
+
+                        </div>
+
+                        <div className="confirmacion-botones">
+
+                            <button
+                                type="button"
+                                className="btn-cancelar"
+                                onClick={onCerrar}
+                                disabled={estado === 'eliminando'}
+                            >
+                                No, cancelar
+                            </button>
+
+                            <button
+                                type="button"
+                                className="btn-eliminar"
+                                onClick={confirmarEliminacion}
+                                disabled={estado === 'eliminando'}
+                            >
+                                {estado === 'eliminando'
+                                    ? 'Eliminando...'
+                                    : 'Sí, eliminar'}
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {verDetalle && detalleCompleto && (
+
+                    <ClienteDetalleModal
+                        clientes={detalleCompleto}
+                        onCerrar={() => setVerDetalle(false)}
+                    />
+
+                )}
+
+            </>
+
+        );
+
+    }
+
+
+    // ========================================================
+    // ESTADO: ÉXITO
+    // Usa .mensaje-modal.exito, ya definido en tu CSS.
+    // ========================================================
+
+    if (estado === 'exito') {
+
+        return (
+
+            <div className="modal-fondo" onClick={cerrarConExito}>
+
+                <div
+                    className="mensaje-modal exito"
+                    onClick={(e) => e.stopPropagation()}
+                >
+
+                    <div className="mensaje-icono">
+                        <CheckCircle2 size={28} />
+                    </div>
+
+                    <h2>Cliente eliminado</h2>
+                    <p>
+                        "{cliente.Nombre_Cliente}" se eliminó correctamente
+                        y ya no aparecerá en la lista.
+                    </p>
+
+                    <button
+                        type="button"
+                        className="btn-aceptar"
+                        onClick={cerrarConExito}
+                    >
+                        Entendido
+                    </button>
+
+                </div>
+
+            </div>
+
+        );
+
+    }
+
+
+    // ========================================================
+    // ESTADO: ERROR
+    // Usa .mensaje-modal.error, ya definido en tu CSS.
+    // ========================================================
+
     return (
 
-        <div
-            className="modal-fondo"
-            onClick={onCerrar}
-        >
+        <div className="modal-fondo" onClick={onCerrar}>
 
             <div
-                className="modal-contenido modal-confirmacion"
+                className="mensaje-modal error"
                 onClick={(e) => e.stopPropagation()}
             >
 
-                {/* ==================================================
-                    ENCABEZADO
-                ================================================== */}
+                <div className="mensaje-icono">
+                    <XCircle size={28} />
+                </div>
 
-                <header className="cd-encabezado">
+                <h2>No se puede eliminar</h2>
+                <p>{mensajeError}</p>
 
-                    <div className="cd-avatar cd-avatar-peligro">
-
-                        <Trash2 size={25} />
-
-                    </div>
-
-
-                    <div className="cd-titulo">
-
-                        <h2>Eliminar cliente</h2>
-
-                        <p className="cd-subtitulo">
-                            Confirme la eliminación del cliente seleccionado.
-                        </p>
-
-                    </div>
-
+                <div className="confirmacion-botones">
 
                     <button
                         type="button"
-                        className="modal-cerrar"
+                        className="btn-cancelar"
                         onClick={onCerrar}
-                        aria-label="Cerrar"
                     >
-
-                        <X size={22} />
-
+                        Cerrar
                     </button>
 
-                </header>
-
-
-                {/* ==================================================
-                    ADVERTENCIA
-                ================================================== */}
-
-                <div className="cd-panel cd-panel-advertencia">
-
-                    <div className="confirmacion-icono">
-
-                        <AlertTriangle size={32} />
-
-                    </div>
-
-
-                    <div>
-
-                        <h3>
-                            ¿Está seguro de eliminar este cliente?
-                        </h3>
-
-                        <p>
-                            Esta acción intentará eliminar el registro
-                            de forma permanente.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                {/* ==================================================
-                    DATOS DEL CLIENTE
-                ================================================== */}
-
-                <div className="cd-panel">
-
-                    <h3 className="cd-panel-titulo">
-
-                        <span className="cd-ico azul">
-                            👤
-                        </span>
-
-                        Cliente seleccionado
-
-                    </h3>
-
-
-                    <dl className="cd-datos">
-
-                        <dt>ID del cliente</dt>
-
-                        <dd>
-                            {cliente.CustomerID}
-                        </dd>
-
-
-                        <dt>Nombre</dt>
-
-                        <dd>
-                            {cliente.Nombre_Cliente || '-'}
-                        </dd>
-
-
-                        <dt>Categoría</dt>
-
-                        <dd>
-                            {cliente.Categoria_Cliente || '-'}
-                        </dd>
-
-
-                        <dt>Método de entrega</dt>
-
-                        <dd>
-                            {cliente.Metodo_Entrega || '-'}
-                        </dd>
-
-                    </dl>
-
-                </div>
-
-
-                {/* ==================================================
-                    NOTA
-                ================================================== */}
-
-                <div className="cd-nota-eliminacion">
-
-                    <AlertTriangle size={18} />
-
-                    <span>
-                        Si el cliente tiene registros relacionados,
-                        como órdenes, facturas o transacciones,
-                        SQL Server puede impedir la eliminación.
-                    </span>
-
-                </div>
-
-
-                {/* ==================================================
-                    BOTONES
-                ================================================== */}
-
-                <div className="modal-footer">
-
                     <button
                         type="button"
-                        className="btn btn-claro"
-                        onClick={onCerrar}
-                        disabled={eliminando}
+                        className="btn-aceptar"
+                        onClick={() => setEstado('confirmar')}
                     >
-                        Cancelar
-                    </button>
-
-
-                    <button
-                        type="button"
-                        className="btn btn-rojo"
-                        onClick={confirmarEliminacion}
-                        disabled={eliminando}
-                    >
-
-                        <Trash2 size={17} />
-
-                        {eliminando
-                            ? 'Eliminando...'
-                            : 'Eliminar cliente'
-                        }
-
+                        Volver a intentar
                     </button>
 
                 </div>
@@ -252,6 +323,7 @@ function ClienteEliminarModal({
             </div>
 
         </div>
+
     );
 }
 

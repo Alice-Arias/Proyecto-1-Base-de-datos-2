@@ -6,6 +6,50 @@ const { sql, poolPromise } = require('../db');
 
 
 // =========================================================
+// 0. OPCIONES PARA EL FORMULARIO
+// GET /api/clientes/opciones
+//
+// IMPORTANTE: esta ruta debe ir ANTES de '/:id',
+// porque si no, Express la intercepta como si "opciones"
+// fuera un CustomerID.
+// =========================================================
+
+router.get('/opciones', async (req, res) => {
+
+    try {
+
+        const pool = await poolPromise;
+
+        const result = await pool.request().execute(
+            'SP_Clientes_Opciones'
+        );
+
+        // SP_Clientes_Opciones devuelve 6 SELECTs distintos,
+        // por eso usamos result.recordsets (plural),
+        // no result.recordset (singular).
+
+        res.json({
+            categorias: result.recordsets[0],
+            gruposCompra: result.recordsets[1],
+            contactos: result.recordsets[2],
+            clientes: result.recordsets[3],
+            metodosEntrega: result.recordsets[4],
+            ciudades: result.recordsets[5]
+        });
+
+    } catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+            error: 'Error al obtener las opciones del formulario'
+        });
+    }
+
+});
+
+
+// =========================================================
 // 1. LISTAR CLIENTES
 // GET /api/clientes
 // GET /api/clientes?nombre=ABC&categoria=Minorista

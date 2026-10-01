@@ -1,3 +1,4 @@
+
 // ============================================================
 // MODAL PARA CREAR UN NUEVO CLIENTE
 // ============================================================
@@ -15,12 +16,14 @@ import {
     Loader2
 } from 'lucide-react';
 
-// Hook para manejar el formulario.
-import { useState } from 'react';
+// Hooks de React.
+import { useEffect, useState } from 'react';
 
-// Función de la API para insertar el cliente.
-import { insertarCliente } from '../services/api';
-
+// Funciones de la API.
+import {
+    insertarCliente,
+    obtenerOpcionesClientes
+} from '../services/api';
 
 function ClienteNuevoModal({
     onCerrar,
@@ -33,7 +36,6 @@ function ClienteNuevoModal({
     // ========================================================
 
     const [formulario, setFormulario] = useState({
-
         Nombre: '',
         CategoriaID: '',
         GrupoCompraID: '',
@@ -42,30 +44,86 @@ function ClienteNuevoModal({
         ClienteFacturarID: '',
         MetodoEntregaID: '',
         CiudadEntregaID: '',
-
         LimiteCredito: '',
         Descuento: '0',
         DiasGracia: '7',
-
         Telefono: '',
         Fax: '',
         SitioWeb: '',
-
         DireccionEntrega1: '',
         DireccionEntrega2: '',
-
         CodigoPostal: '',
-
         DireccionPostal1: '',
         DireccionPostal2: '',
-
         UsuarioID: 1
     });
 
+    // ========================================================
+    // OPCIONES QUE VIENEN DE LA BASE DE DATOS
+    // ========================================================
 
-    // Indica si se está guardando.
+    const [opciones, setOpciones] = useState({
+        categorias: [],
+        gruposCompra: [],
+        contactos: [],
+        clientes: [],
+        metodosEntrega: [],
+        ciudades: []
+    });
+
+    // Indica si las opciones todavía están cargando.
+    const [cargandoOpciones, setCargandoOpciones] = useState(true);
+
+    // Indica si se está guardando el cliente.
     const [guardando, setGuardando] = useState(false);
 
+    // ========================================================
+    // CARGAR OPCIONES DESDE LA BASE DE DATOS
+    // ========================================================
+
+    useEffect(() => {
+
+        const cargarOpciones = async () => {
+
+            try {
+
+                setCargandoOpciones(true);
+
+                const data = await obtenerOpcionesClientes();
+
+                setOpciones({
+                    categorias: data.categorias || [],
+                    gruposCompra: data.gruposCompra || [],
+                    contactos: data.contactos || [],
+                    clientes: data.clientes || [],
+                    metodosEntrega: data.metodosEntrega || [],
+                    ciudades: data.ciudades || []
+                });
+
+            } catch (error) {
+
+                console.error(error);
+
+                if (onMostrarMensaje) {
+
+                    onMostrarMensaje({
+                        tipo: 'error',
+                        titulo: 'No se pudieron cargar las opciones',
+                        mensaje: error.message
+                    });
+
+                }
+
+            } finally {
+
+                setCargandoOpciones(false);
+
+            }
+        };
+
+        cargarOpciones();
+
+    }, [onMostrarMensaje]);
 
     // ========================================================
     // CAMBIAR VALOR DE UN CAMPO
@@ -79,8 +137,8 @@ function ClienteNuevoModal({
             ...anterior,
             [name]: value
         }));
-    };
 
+    };
 
     // ========================================================
     // GUARDAR CLIENTE
@@ -94,11 +152,16 @@ function ClienteNuevoModal({
 
         try {
 
-            // Convertimos los campos numéricos.
+            // ==================================================
+            // CONVERTIR LOS CAMPOS NUMÉRICOS
+            // ==================================================
+
             const datos = {
+
                 ...formulario,
 
-                CategoriaID: Number(formulario.CategoriaID),
+                CategoriaID:
+                    Number(formulario.CategoriaID),
 
                 GrupoCompraID:
                     formulario.GrupoCompraID === ''
@@ -136,20 +199,19 @@ function ClienteNuevoModal({
                     Number(formulario.DiasGracia)
             };
 
+            // ==================================================
+            // ENVIAR CLIENTE A LA API
+            // ==================================================
 
-            // Llamamos al servicio de la API.
             const data = await insertarCliente(datos);
-
 
             // Avisamos al componente padre.
             await onClienteCreado(data);
-
 
         } catch (error) {
 
             console.error(error);
 
-            // Mostramos el error en el modal de mensajes.
             if (onMostrarMensaje) {
 
                 onMostrarMensaje({
@@ -165,8 +227,12 @@ function ClienteNuevoModal({
             setGuardando(false);
 
         }
+
     };
 
+    // ========================================================
+    // RENDERIZADO
+    // ========================================================
 
     return (
 
@@ -192,10 +258,13 @@ function ClienteNuevoModal({
 
                     <div className="cd-titulo">
 
-                        <h2>Nuevo cliente</h2>
+                        <h2>
+                            Nuevo cliente
+                        </h2>
 
                         <p className="cd-subtitulo">
-                            Complete la información para registrar un nuevo cliente.
+                            Complete la información para registrar
+                            un nuevo cliente.
                         </p>
 
                     </div>
@@ -205,12 +274,12 @@ function ClienteNuevoModal({
                         className="modal-cerrar"
                         onClick={onCerrar}
                         aria-label="Cerrar"
+                        disabled={guardando}
                     >
                         <X size={22} />
                     </button>
 
                 </header>
-
 
                 {/* ==================================================
                     FORMULARIO
@@ -234,7 +303,6 @@ function ClienteNuevoModal({
 
                         </h3>
 
-
                         <div className="form-grid">
 
                             {/* Nombre */}
@@ -251,49 +319,96 @@ function ClienteNuevoModal({
                                     value={formulario.Nombre}
                                     onChange={cambiarCampo}
                                     required
+                                    maxLength={100}
+                                    placeholder="Nombre del cliente"
                                 />
 
                             </div>
-
 
                             {/* Categoría */}
 
                             <div className="campo">
 
                                 <label>
+
                                     <Tag size={14} />
+
                                     Categoría
+
                                 </label>
 
-                                <input
-                                    type="number"
+                                <select
                                     name="CategoriaID"
                                     value={formulario.CategoriaID}
                                     onChange={cambiarCampo}
                                     required
-                                />
+                                    disabled={cargandoOpciones}
+                                >
+
+                                    <option value="">
+
+                                        {cargandoOpciones
+                                            ? 'Cargando categorías...'
+                                            : 'Seleccione una categoría'}
+
+                                    </option>
+
+                                    {opciones.categorias.map(
+                                        (categoria) => (
+
+                                            <option
+                                                key={categoria.ID}
+                                                value={categoria.ID}
+                                            >
+                                                {categoria.Nombre}
+                                            </option>
+
+                                        )
+                                    )}
+
+                                </select>
 
                             </div>
-
 
                             {/* Grupo de compra */}
 
                             <div className="campo">
 
                                 <label>
+
                                     <Users size={14} />
+
                                     Grupo de compra
+
                                 </label>
 
-                                <input
-                                    type="number"
+                                <select
                                     name="GrupoCompraID"
                                     value={formulario.GrupoCompraID}
                                     onChange={cambiarCampo}
-                                />
+                                    disabled={cargandoOpciones}
+                                >
+
+                                    <option value="">
+                                        Sin grupo de compra
+                                    </option>
+
+                                    {opciones.gruposCompra.map(
+                                        (grupo) => (
+
+                                            <option
+                                                key={grupo.ID}
+                                                value={grupo.ID}
+                                            >
+                                                {grupo.Nombre}
+                                            </option>
+
+                                        )
+                                    )}
+
+                                </select>
 
                             </div>
-
 
                             {/* Contacto principal */}
 
@@ -303,16 +418,38 @@ function ClienteNuevoModal({
                                     Contacto principal
                                 </label>
 
-                                <input
-                                    type="number"
+                                <select
                                     name="ContactoPrimarioID"
                                     value={formulario.ContactoPrimarioID}
                                     onChange={cambiarCampo}
                                     required
-                                />
+                                    disabled={cargandoOpciones}
+                                >
+
+                                    <option value="">
+
+                                        {cargandoOpciones
+                                            ? 'Cargando contactos...'
+                                            : 'Seleccione un contacto'}
+
+                                    </option>
+
+                                    {opciones.contactos.map(
+                                        (contacto) => (
+
+                                            <option
+                                                key={contacto.ID}
+                                                value={contacto.ID}
+                                            >
+                                                {contacto.Nombre}
+                                            </option>
+
+                                        )
+                                    )}
+
+                                </select>
 
                             </div>
-
 
                             {/* Contacto alternativo */}
 
@@ -322,15 +459,33 @@ function ClienteNuevoModal({
                                     Contacto alternativo
                                 </label>
 
-                                <input
-                                    type="number"
+                                <select
                                     name="ContactoAlternativoID"
                                     value={formulario.ContactoAlternativoID}
                                     onChange={cambiarCampo}
-                                />
+                                    disabled={cargandoOpciones}
+                                >
+
+                                    <option value="">
+                                        Sin contacto alternativo
+                                    </option>
+
+                                    {opciones.contactos.map(
+                                        (contacto) => (
+
+                                            <option
+                                                key={contacto.ID}
+                                                value={contacto.ID}
+                                            >
+                                                {contacto.Nombre}
+                                            </option>
+
+                                        )
+                                    )}
+
+                                </select>
 
                             </div>
-
 
                             {/* Cliente por facturar */}
 
@@ -340,19 +495,37 @@ function ClienteNuevoModal({
                                     Cliente por facturar
                                 </label>
 
-                                <input
-                                    type="number"
+                                <select
                                     name="ClienteFacturarID"
                                     value={formulario.ClienteFacturarID}
                                     onChange={cambiarCampo}
-                                />
+                                    disabled={cargandoOpciones}
+                                >
+
+                                    <option value="">
+                                        El mismo cliente
+                                    </option>
+
+                                    {opciones.clientes.map(
+                                        (cliente) => (
+
+                                            <option
+                                                key={cliente.ID}
+                                                value={cliente.ID}
+                                            >
+                                                {cliente.Nombre}
+                                            </option>
+
+                                        )
+                                    )}
+
+                                </select>
 
                             </div>
 
                         </div>
 
                     </div>
-
 
                     {/* ==================================================
                         ENTREGA Y CONTACTO
@@ -370,8 +543,9 @@ function ClienteNuevoModal({
 
                         </h3>
 
-
                         <div className="form-grid">
+
+                            {/* Método de entrega */}
 
                             <div className="campo">
 
@@ -379,16 +553,40 @@ function ClienteNuevoModal({
                                     Método de entrega
                                 </label>
 
-                                <input
-                                    type="number"
+                                <select
                                     name="MetodoEntregaID"
                                     value={formulario.MetodoEntregaID}
                                     onChange={cambiarCampo}
                                     required
-                                />
+                                    disabled={cargandoOpciones}
+                                >
+
+                                    <option value="">
+
+                                        {cargandoOpciones
+                                            ? 'Cargando métodos...'
+                                            : 'Seleccione un método'}
+
+                                    </option>
+
+                                    {opciones.metodosEntrega.map(
+                                        (metodo) => (
+
+                                            <option
+                                                key={metodo.ID}
+                                                value={metodo.ID}
+                                            >
+                                                {metodo.Nombre}
+                                            </option>
+
+                                        )
+                                    )}
+
+                                </select>
 
                             </div>
 
+                            {/* Ciudad */}
 
                             <div className="campo">
 
@@ -396,22 +594,49 @@ function ClienteNuevoModal({
                                     Ciudad de entrega
                                 </label>
 
-                                <input
-                                    type="number"
+                                <select
                                     name="CiudadEntregaID"
                                     value={formulario.CiudadEntregaID}
                                     onChange={cambiarCampo}
                                     required
-                                />
+                                    disabled={cargandoOpciones}
+                                >
+
+                                    <option value="">
+
+                                        {cargandoOpciones
+                                            ? 'Cargando ciudades...'
+                                            : 'Seleccione una ciudad'}
+
+                                    </option>
+
+                                    {opciones.ciudades.map(
+                                        (ciudad) => (
+
+                                            <option
+                                                key={ciudad.ID}
+                                                value={ciudad.ID}
+                                            >
+                                                {ciudad.Nombre}
+                                            </option>
+
+                                        )
+                                    )}
+
+                                </select>
 
                             </div>
 
+                            {/* Teléfono */}
 
                             <div className="campo">
 
                                 <label>
+
                                     <Phone size={14} />
+
                                     Teléfono
+
                                 </label>
 
                                 <input
@@ -420,10 +645,13 @@ function ClienteNuevoModal({
                                     value={formulario.Telefono}
                                     onChange={cambiarCampo}
                                     required
+                                    maxLength={20}
+                                    placeholder="Teléfono"
                                 />
 
                             </div>
 
+                            {/* Fax */}
 
                             <div className="campo">
 
@@ -436,10 +664,13 @@ function ClienteNuevoModal({
                                     name="Fax"
                                     value={formulario.Fax}
                                     onChange={cambiarCampo}
+                                    maxLength={20}
+                                    placeholder="Fax"
                                 />
 
                             </div>
 
+                            {/* Sitio web */}
 
                             <div className="campo campo-completo">
 
@@ -452,6 +683,7 @@ function ClienteNuevoModal({
                                     name="SitioWeb"
                                     value={formulario.SitioWeb}
                                     onChange={cambiarCampo}
+                                    maxLength={256}
                                     placeholder="https://..."
                                 />
 
@@ -460,7 +692,6 @@ function ClienteNuevoModal({
                         </div>
 
                     </div>
-
 
                     {/* ==================================================
                         INFORMACIÓN DE PAGO
@@ -478,8 +709,9 @@ function ClienteNuevoModal({
 
                         </h3>
 
-
                         <div className="form-grid">
+
+                            {/* Límite de crédito */}
 
                             <div className="campo">
 
@@ -494,10 +726,12 @@ function ClienteNuevoModal({
                                     name="LimiteCredito"
                                     value={formulario.LimiteCredito}
                                     onChange={cambiarCampo}
+                                    placeholder="0.00"
                                 />
 
                             </div>
 
+                            {/* Descuento */}
 
                             <div className="campo">
 
@@ -517,6 +751,7 @@ function ClienteNuevoModal({
 
                             </div>
 
+                            {/* Días de gracia */}
 
                             <div className="campo">
 
@@ -539,7 +774,6 @@ function ClienteNuevoModal({
 
                     </div>
 
-
                     {/* ==================================================
                         DIRECCIONES
                     ================================================== */}
@@ -556,8 +790,9 @@ function ClienteNuevoModal({
 
                         </h3>
 
-
                         <div className="form-grid">
+
+                            {/* Dirección de entrega */}
 
                             <div className="campo campo-completo">
 
@@ -571,10 +806,13 @@ function ClienteNuevoModal({
                                     value={formulario.DireccionEntrega1}
                                     onChange={cambiarCampo}
                                     required
+                                    maxLength={60}
+                                    placeholder="Dirección principal"
                                 />
 
                             </div>
 
+                            {/* Dirección de entrega adicional */}
 
                             <div className="campo campo-completo">
 
@@ -587,10 +825,13 @@ function ClienteNuevoModal({
                                     name="DireccionEntrega2"
                                     value={formulario.DireccionEntrega2}
                                     onChange={cambiarCampo}
+                                    maxLength={60}
+                                    placeholder="Información adicional"
                                 />
 
                             </div>
 
+                            {/* Código postal */}
 
                             <div className="campo">
 
@@ -604,10 +845,13 @@ function ClienteNuevoModal({
                                     value={formulario.CodigoPostal}
                                     onChange={cambiarCampo}
                                     required
+                                    maxLength={10}
+                                    placeholder="Código postal"
                                 />
 
                             </div>
 
+                            {/* Dirección postal */}
 
                             <div className="campo">
 
@@ -621,10 +865,13 @@ function ClienteNuevoModal({
                                     value={formulario.DireccionPostal1}
                                     onChange={cambiarCampo}
                                     required
+                                    maxLength={60}
+                                    placeholder="Dirección postal"
                                 />
 
                             </div>
 
+                            {/* Dirección postal adicional */}
 
                             <div className="campo campo-completo">
 
@@ -637,6 +884,8 @@ function ClienteNuevoModal({
                                     name="DireccionPostal2"
                                     value={formulario.DireccionPostal2}
                                     onChange={cambiarCampo}
+                                    maxLength={60}
+                                    placeholder="Información adicional"
                                 />
 
                             </div>
@@ -644,7 +893,6 @@ function ClienteNuevoModal({
                         </div>
 
                     </div>
-
 
                     {/* ==================================================
                         BOTONES
@@ -661,14 +909,17 @@ function ClienteNuevoModal({
                             Cancelar
                         </button>
 
-
                         <button
                             type="submit"
                             className="btn btn-azul"
-                            disabled={guardando}
+                            disabled={
+                                guardando ||
+                                cargandoOpciones
+                            }
                         >
 
                             {guardando ? (
+
                                 <>
                                     <Loader2
                                         size={17}
@@ -677,12 +928,15 @@ function ClienteNuevoModal({
 
                                     Guardando...
                                 </>
+
                             ) : (
+
                                 <>
                                     <Save size={17} />
 
                                     Crear cliente
                                 </>
+
                             )}
 
                         </button>
@@ -694,8 +948,8 @@ function ClienteNuevoModal({
             </div>
 
         </div>
+
     );
 }
-
 
 export default ClienteNuevoModal;

@@ -17,4 +17,12 @@ CREATE SYNONYM dbo.FormasEntrega FOR Application.DeliveryMethods;
 GO
 
 CREATE SYNONYM dbo.Ciudades FOR Application.Cities;
+GO
+
+CREATE SYNONYM dbo.ProveedoresActuales FOR Purchasing.Suppliers;
+GO
+
+CREATE SYNONYM dbo.CategoriaProveedores FOR Purchasing.SupplierCategories;
+GO
+
 

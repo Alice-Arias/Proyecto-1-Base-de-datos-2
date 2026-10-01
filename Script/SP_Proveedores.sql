@@ -56,6 +56,72 @@ BEGIN
 END
 GO
 
+/* =========================================================
+   2. DETALLE
+
+   Devuelve toda la informacion de un proveedor.
+   Recibe el SupplierID.
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Proveedores_Detalle
+    @SupplierID NVARCHAR(MAX)
+AS
+BEGIN
+
+    SET NOCOUNT ON;
+
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+    SELECT
+        p.SupplierID,
+        p.SupplierName AS Nombre_Proveedor,
+        p.SupplierCategoryID AS Categoria_ID,
+        cat.SupplierCategoryName AS Categoria,
+        p.PrimaryContactPersonID AS Contacto_Primario_ID,
+        p1.FullName AS Contacto_Primario,
+        p.AlternateContactPersonID AS Contacto_Alternativo_ID,
+        p2.FullName AS Contacto_Alternativo,
+        p.DeliveryMethodID AS Metodo_Entrega_ID,
+        dm.DeliveryMethodName AS Metodo_Entrega,
+        p.DeliveryCityID AS Ciudad_Entrega_ID,
+        ciu.CityName AS Ciudad_Entrega,
+        p.DeliveryPostalCode AS Codigo_Postal,
+        p.SupplierReference AS Referencia_Proveedor,
+        p.BankAccountName AS Nombre_Cuenta_Bancaria,
+        p.BankAccountBranch AS Sucursal_Cuenta_Bancaria,
+        p.BankAccountCode AS Codigo_Cuenta_Bancaria,
+        p.BankAccountNumber AS Numero_Cuenta_Bancaria,
+        p.BankInternationalCode AS Codigo_Bancario_Internacional,
+        p.PaymentDays AS Dias_De_Gracia,
+        p.InternalComments AS Comentarios_Internos,
+        p.PhoneNumber AS Telefono,
+        p.FaxNumber AS Fax,
+        p.WebsiteURL AS Sitio_Web,
+        p.DeliveryAddressLine1 AS Direccion_Entrega1,
+        p.DeliveryAddressLine2 AS Direccion_Entrega2,
+        p.DeliveryPostalCode AS Codigo_Postal_Entrega,
+        p.PostalAddressLine1 AS Direccion_Postal1,
+        p.PostalAddressLine2 AS Direccion_Postal2,
+        p.DeliveryLocation.Lat AS Latitud,
+        p.DeliveryLocation.Long AS Longitud
+
+    FROM dbo.ProveedoresActuales AS p
+    INNER JOIN dbo.CategoriaProveedores AS cat  ON p.SupplierCategoryID = cat.SupplierCategoryID
+    LEFT JOIN dbo.Contactos AS p1  ON p.PrimaryContactPersonID = p1.PersonID
+    LEFT JOIN dbo.Contactos AS p2  ON p.AlternateContactPersonID = p2.PersonID
+    LEFT JOIN dbo.FormasEntrega AS dm ON P.DeliveryMethodID = dm.DeliveryMethodID
+    LEFT JOIN dbo.Ciudades AS ciu ON P.DeliveryCityID = ciu.CityID
+
+    WHERE p.SupplierID IN
+    (
+        SELECT TRY_CAST(value AS INT)
+        FROM STRING_SPLIT(@SupplierID, ',') 
+        WHERE TRY_CAST(value AS INT) IS NOT NULL
+    );
+
+END
+GO
+
 -- ID, Nombre, ID de categoría, ID de contactos, ID de método de entrega, ID de ciudad de entrega
 -- ID de código postal, teléfono y fax, sitio web, nombre del banco, número de cuenta y paymentDays
 SELECT * FROM Purchasing.Suppliers; 

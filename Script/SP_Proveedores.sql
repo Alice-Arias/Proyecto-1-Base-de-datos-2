@@ -748,6 +748,148 @@ BEGIN
 END
 GO
 
+
+/* =========================================================
+   5. ELIMINAR
+
+   Elimina un proveedor solamente si no posee registros
+   relacionados.
+
+   Antes de eliminar se verifica:
+
+       - Ordenes de compra
+       - Listas de ordenes de compra
+       - Transacciones
+       - Artículos en stock
+       - Movimientos de inventario
+
+   Utiliza una TRANSACCION para proteger el DELETE.
+
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Proveedores_Eliminar
+
+    @SupplierID INT
+
+AS 
+BEGIN
+
+    IF @SupplierID IS NULL
+    BEGIN
+        RAISERROR('El Supplier es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.ProveedoresActuales
+        WHERE SupplierID = @SupplierID
+    )
+    BEGIN
+        RAISERROR('El proveedor que intenta eliminar no existe.', 16, 5);
+        RETURN;
+    END
+
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM Purchasing.PurchaseOrders
+        WHERE SupplierID = @SupplierID
+    )
+    BEGIN
+        RAISERROR(
+            'No se puede eliminar: el proveedor tiene ordenes de compra.',
+            16,
+            6
+        );
+        RETURN;
+    END
+
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM Purchasing.SupplierTransactions
+        WHERE SupplierID = @SupplierID
+    )
+    BEGIN
+        RAISERROR(
+            'No se puede eliminar: el proveedor tiene transacciones.',
+            16,
+            6
+        );
+        RETURN;
+    END
+
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM Warehouse.StockItems
+        WHERE SupplierID = @SupplierID
+    )
+    BEGIN
+        RAISERROR(
+            'No se puede eliminar: el proveedor tiene artículos en inventario.',
+            16,
+            6
+        );
+        RETURN;
+    END
+
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM Warehouse.StockItemTransactions
+        WHERE SupplierID = @SupplierID
+    )
+    BEGIN
+        RAISERROR(
+            'No se puede eliminar: el proveedor tiene movimientos de inventario.',
+            16,
+            6
+        );
+        RETURN;
+    END
+
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+    SET XACT_ABORT ON;
+
+
+    BEGIN TRY
+
+        BEGIN TRANSACTION;
+
+        DELETE FROM dbo.ProveedoresActuales
+        WHERE SupplierID = @SupplierID;
+
+        COMMIT TRANSACTION;
+
+
+        SELECT @SupplierID AS SupplierID_Eliminado;
+
+
+    END TRY
+
+    BEGIN CATCH
+
+        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+
+        THROW;
+
+    END CATCH;
+
+END
+GO
+
+
+
+
 -- ID, Nombre, ID de categoría, ID de contactos, ID de método de entrega, ID de ciudad de entrega
 -- ID de código postal, teléfono y fax, sitio web, nombre del banco, número de cuenta y paymentDays
 SELECT * FROM Purchasing.Suppliers; 
@@ -763,3 +905,19 @@ SELECT * FROM Application.DeliveryMethods;
 
 -- ID de ciudad y nombre
 SELECT * FROM Application.Cities;
+
+
+
+
+
+SELECT * FROM Purchasing.SupplierTransactions;
+
+SELECT * FROM Purchasing.PurchaseOrders;
+
+SELECT * FROM Purchasing.PurchaseOrderLines;
+
+SELECT * FROM Warehouse.StockItems;
+
+SELECT * FROM Warehouse.StockItemTransactions;
+
+SELECT * FROM Warehouse.StockGroups;

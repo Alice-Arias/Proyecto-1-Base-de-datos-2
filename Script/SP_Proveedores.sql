@@ -122,6 +122,319 @@ BEGIN
 END
 GO
 
+/* =========================================================
+   3. INSERTAR
+
+   Utiliza una TRANSACCION porque realiza dos operaciones:
+    INSERT del proveedor.
+    UPDATE para establecer que el proveedor se facture a sí mismo cuando corresponde.
+   Si ambas operaciones funcionan:  COMMIT
+   Si ocurre un error: ROLLBACK
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Proveedores_Insertar
+
+    @Nombre NVARCHAR(100),
+    @CategoriaID INT,
+    @ContactoPrimarioID INT,
+    @ContactoAlternativoID INT = NULL,
+    @MetodoEntregaID INT,
+    @CiudadEntregaID INT,
+    @CiudadPostalID INT,
+    @ReferenciaProveedor NVARCHAR(20) = NULL,
+    @NombreCuentaBancaria NVARCHAR(50) = NULL,
+    @SucursalBancaria NVARCHAR(50) = NULL,
+    @CodigoBanco NVARCHAR(20) = NULL,
+    @NumeroCuentaBancaria NVARCHAR(50) = NULL,
+    @CodigoInternacionalBanco NVARCHAR(20) = NULL,
+    @DiasPago INT = 7,
+    @ComentariosInternos NVARCHAR(MAX) = NULL,
+    @Telefono NVARCHAR(20),
+    @Fax NVARCHAR(20) = '',
+    @SitioWeb NVARCHAR(256) = '',
+    @DireccionEntrega1 NVARCHAR(60),
+    @DireccionEntrega2 NVARCHAR(60) = NULL,
+    @CodigoPostalEntrega NVARCHAR(10),
+    @UbicacionEntrega GEOGRAPHY = NULL,
+    @DireccionPostal1 NVARCHAR(60),
+    @DireccionPostal2 NVARCHAR(60) = NULL,
+    @CodigoPostalPostal NVARCHAR(10),
+    @UsuarioID INT = 1
+
+AS
+BEGIN
+
+    IF @Fax IS NULL 
+        SET @Fax = '';
+    IF @SitioWeb IS NULL 
+        SET @SitioWeb = '';
+
+    
+    IF @Nombre IS NULL OR @Nombre = ''
+    BEGIN
+        RAISERROR('El nombre del proveedor es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @CategoriaID IS NULL
+    BEGIN
+        RAISERROR('La categoría es obligatoria.', 16, 1);
+        RETURN;
+    END
+
+    IF @ContactoPrimarioID IS NULL
+    BEGIN
+        RAISERROR('El contacto primario es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @MetodoEntregaID IS NULL
+    BEGIN
+        RAISERROR('El método de entrega es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @CiudadEntregaID IS NULL
+    BEGIN
+        RAISERROR('La ciudad de entrega es obligatoria.', 16, 1);
+        RETURN;
+    END
+
+    IF @CiudadPostalID IS NULL
+    BEGIN
+        RAISERROR('La ciudad postal es obligatoria.', 16, 1);
+        RETURN;
+    END
+
+    IF @Telefono IS NULL OR @Telefono = ''
+    BEGIN
+        RAISERROR('El teléfono es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @DireccionEntrega1 IS NULL OR @DireccionEntrega1 = ''
+    BEGIN
+        RAISERROR('La dirección de entrega 1 es obligatoria.', 16, 1);
+        RETURN;
+    END
+
+    IF @CodigoPostalEntrega IS NULL OR @CodigoPostalEntrega = ''
+    BEGIN
+        RAISERROR('El código postal de entrega es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @DireccionPostal1 IS NULL OR @DireccionPostal1 = ''
+    BEGIN
+        RAISERROR('La dirección postal 1 es obligatoria.', 16, 1);
+        RETURN;
+    END
+
+    IF @CodigoPostalPostal IS NULL OR @CodigoPostalPostal = ''
+    BEGIN
+        RAISERROR('El código postal de dirección postal es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    
+    IF @SitioWeb <> '' AND @SitioWeb NOT LIKE 'http%'
+    BEGIN
+        RAISERROR('El sitio web debe empezar con http', 16, 1);
+        RETURN;
+    END
+
+    IF @DiasPago < 0 OR @DiasPago > 365
+    BEGIN
+        RAISERROR('Los días de pago deben estar entre 0 y 365.', 16, 2);
+        RETURN;
+    END
+
+    
+    IF NOT EXISTS 
+    (
+        SELECT 1 
+        FROM dbo.CategoriaProveedores 
+        WHERE SupplierCategoryID = @CategoriaID
+    )
+    BEGIN
+        RAISERROR('La categoría indicada no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS 
+    (
+        SELECT 1 
+        FROM dbo.Contactos 
+        WHERE PersonID = @ContactoPrimarioID
+    )
+    BEGIN
+        RAISERROR('El contacto primario indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF @ContactoAlternativoID IS NOT NULL 
+        AND NOT EXISTS 
+        (
+            SELECT 1 
+            FROM dbo.Contactos 
+            WHERE PersonID = @ContactoAlternativoID
+        )
+    BEGIN
+        RAISERROR('El contacto alternativo indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS 
+    (
+        SELECT 1 
+        FROM dbo.FormasEntrega 
+        WHERE DeliveryMethodID = @MetodoEntregaID
+    )
+    BEGIN
+        RAISERROR('El método de entrega indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS 
+    (
+        SELECT 1 
+        FROM dbo.Ciudades 
+        WHERE CityID = @CiudadEntregaID
+    )
+    BEGIN
+        RAISERROR('La ciudad de entrega indicada no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS 
+    (
+        SELECT 1 
+        FROM dbo.Ciudades 
+        WHERE CityID = @CiudadPostalID
+    )
+    BEGIN
+        RAISERROR('La ciudad postal indicada no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS 
+    (
+        SELECT 1 
+        FROM dbo.Contactos 
+        WHERE PersonID = @UsuarioID
+    )
+    BEGIN
+        RAISERROR('El usuario que registra no existe.', 16, 3);
+        RETURN;
+    END
+
+
+    IF EXISTS 
+    (
+        SELECT 1 
+        FROM dbo.ProveedoresActuales 
+        WHERE SupplierName = @Nombre
+    )
+    BEGIN
+        RAISERROR('Ya existe un proveedor con ese nombre.', 16, 4);
+        RETURN;
+    END
+
+    -- Si ocurre un error dentro de la transaccion, SQL Server aborta la transaccion.
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+
+        BEGIN TRANSACTION;
+
+
+        INSERT INTO dbo.ProveedoresActuales
+        (
+            SupplierName,
+            SupplierCategoryID,
+            PrimaryContactPersonID,
+            AlternateContactPersonID,
+            DeliveryMethodID,
+            DeliveryCityID,
+            PostalCityID,
+            SupplierReference,
+            BankAccountName,
+            BankAccountBranch,
+            BankAccountCode,
+            BankAccountNumber,
+            BankInternationalCode,
+            PaymentDays,
+            InternalComments,
+            PhoneNumber,
+            FaxNumber,
+            WebsiteURL,
+            DeliveryAddressLine1,
+            DeliveryAddressLine2,
+            DeliveryPostalCode,
+            DeliveryLocation,
+            PostalAddressLine1,
+            PostalAddressLine2,
+            PostalPostalCode,
+            LastEditedBy
+        )
+        VALUES
+    (
+        @Nombre,                  
+        @CategoriaID,              
+        @ContactoPrimarioID,       
+        @ContactoAlternativoID,    
+        @MetodoEntregaID,          
+        @CiudadEntregaID,          
+        @CiudadPostalID,           
+        @ReferenciaProveedor,      
+        @NombreCuentaBancaria,     
+        @SucursalBancaria,         
+        @CodigoBanco,              
+        @NumeroCuentaBancaria,     
+        @CodigoInternacionalBanco, 
+        @DiasPago,                 
+        @ComentariosInternos,      
+        @Telefono,                 
+        @Fax,                      
+        @SitioWeb,                 
+        @DireccionEntrega1,        
+        @DireccionEntrega2,        
+        @CodigoPostalEntrega,      
+        @UbicacionEntrega,         
+        @DireccionPostal1,         
+        @DireccionPostal2,         
+        @CodigoPostalPostal,       
+        @UsuarioID                 
+    );
+
+        DECLARE @NuevoID INT;
+
+        SELECT @NuevoID = SupplierID
+        FROM dbo.ProveedoresActuales
+        WHERE SupplierName = @Nombre;
+
+
+        COMMIT TRANSACTION;
+
+        SELECT @NuevoID AS SupplierID;
+
+    END TRY
+    BEGIN CATCH
+
+        /* DESHACER TRANSACCION */
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        THROW;
+
+    END CATCH;
+
+END
+GO
+   
+
 -- ID, Nombre, ID de categoría, ID de contactos, ID de método de entrega, ID de ciudad de entrega
 -- ID de código postal, teléfono y fax, sitio web, nombre del banco, número de cuenta y paymentDays
 SELECT * FROM Purchasing.Suppliers; 

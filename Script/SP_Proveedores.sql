@@ -887,37 +887,43 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE dbo.SP_Proveedores_Opciones
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- 1. Categorías de proveedores
+    SELECT
+        SupplierCategoryID AS ID,
+        SupplierCategoryName AS Nombre
+    FROM dbo.CategoriaProveedores 
+    ORDER BY SupplierCategoryName;
 
 
-
--- ID, Nombre, ID de categoría, ID de contactos, ID de método de entrega, ID de ciudad de entrega
--- ID de código postal, teléfono y fax, sitio web, nombre del banco, número de cuenta y paymentDays
-SELECT * FROM Purchasing.Suppliers; 
-
--- ID de categoría, Nombre de categoría
-SELECT * FROM Purchasing.SupplierCategories;
-
--- ID de contactos
-SELECT * FROM Application.People;
-
--- Métodos de entrega
-SELECT * FROM Application.DeliveryMethods;
-
--- ID de ciudad y nombre
-SELECT * FROM Application.Cities;
+    -- 2. contactos
+    SELECT
+        PersonID AS ID,
+        FullName AS Nombre
+    FROM dbo.Contactos
+    WHERE IsSalesperson = 0
+    ORDER BY FullName;
 
 
+    -- 3. Métodos de entrega
+    SELECT
+        DeliveryMethodID AS ID,
+        DeliveryMethodName AS Nombre
+    FROM dbo.FormasEntrega
+    ORDER BY DeliveryMethodName;
 
 
+    -- 4. Ciudades
+    SELECT
+        CityID AS ID,
+        CityName AS Nombre
+    FROM dbo.Ciudades
+    ORDER BY CityName;
 
-SELECT * FROM Purchasing.SupplierTransactions;
+END;
+GO
 
-SELECT * FROM Purchasing.PurchaseOrders;
-
-SELECT * FROM Purchasing.PurchaseOrderLines;
-
-SELECT * FROM Warehouse.StockItems;
-
-SELECT * FROM Warehouse.StockItemTransactions;
-
-SELECT * FROM Warehouse.StockGroups;

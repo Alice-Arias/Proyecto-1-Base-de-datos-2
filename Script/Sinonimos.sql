@@ -28,6 +28,15 @@ GO
 CREATE SYNONYM dbo.ProductosActuales FOR Warehouse.StockItems;
 GO
 
+CREATE SYNONYM dbo.ProductosInventario FOR Warehouse.StockItemHoldings;
+GO
+
+CREATE SYNONYM dbo.Grupos FOR Warehouse.StockGroups;
+GO
+
+CREATE SYNONYM dbo.ItemGrupos FOR Warehouse.StockItemStockGroups;
+GO
+
 CREATE SYNONYM dbo.Colores FOR Warehouse.Colors;
 GO
 

@@ -840,35 +840,3 @@ BEGIN
 
 END;
 GO
-
-
--- Nombre producto, proveedor ID, color ID, unidad de empaquetamiento ID, empaquetamiento ID,
--- cantidad de empaquetamiento, marca, talla, impuesto y precio unitario
-SELECT * FROM dbo.ProductosActuales;
-
--- Conexión item grupo
-SELECT * FROM dbo.ItemGrupos;
-
---Grupos
-SELECT * FROM dbo.GruposInventario;
-
--- Productos en inventario
-SELECT * FROM dbo.ProductosInventario;
-
---Proveedor ID
-SELECT * FROM dbo.ProveedoresActuales;
-
---Color ID
-SELECT * FROM dbo.ColoresProductos
-
---Unidad de empaquetamiento, empaquetamiento
-SELECT * FROM dbo.EmpaquetamientoInventario
-
--- Revisar que no tenga transacciones
-SELECT * FROM Warehouse.StockItemTransactions;
-
--- Revisar que no esté en ordenes de compra detalles
-SELECT * FROM Sales.OrderLines;
-
--- Revisar que no esté facturado
-Select * FROM Sales.InvoiceLines

@@ -310,3 +310,191 @@ export async function obtenerOpcionesClientes() {
 
     return data;
 }
+
+// ============================================================
+// PROVEEDORES
+// ============================================================
+
+
+// ============================================================
+// OBTENER LISTA DE PROVEEDORES
+// ============================================================
+
+export async function listarProveedores(filtros = {}) {
+
+  const params = new URLSearchParams();
+
+  // Filtro por nombre
+  if (filtros.nombre) {
+    params.append('nombre', filtros.nombre);
+  }
+
+  // Filtro por categoría
+  if (filtros.categoria) {
+    params.append('categoria', filtros.categoria);
+  }
+
+  // Filtro por método de entrega
+  if (filtros.metodoEntrega) {
+    params.append('metodoEntrega', filtros.metodoEntrega);
+  }
+
+  const res = await fetch(
+    `${API_URL}/proveedores?${params.toString()}`
+  );
+
+  if (!res.ok) {
+    throw new Error('Error al obtener proveedores');
+  }
+
+  return res.json();
+
+}
+
+
+// ============================================================
+// OBTENER DETALLE DE PROVEEDORES
+// ============================================================
+//
+// Acepta un ID o un arreglo de IDs.
+// [1, 2, 3] → "1,2,3"
+
+export async function obtenerDetalleProveedores(ids) {
+
+  const idsStr = Array.isArray(ids)
+    ? ids.join(',')
+    : String(ids);
+
+  const res = await fetch(
+    `${API_URL}/proveedores/${idsStr}`
+  );
+
+  if (!res.ok) {
+    throw new Error('Error al obtener el detalle');
+  }
+
+  return res.json();
+
+}
+
+
+// ============================================================
+// INSERTAR PROVEEDOR
+// POST /api/proveedores → SP_Proveedores_Insertar
+// ============================================================
+
+export async function insertarProveedor(proveedor) {
+
+  const res = await fetch(
+    `${API_URL}/proveedores`,
+    {
+      method: 'POST',
+
+      headers: {
+        'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify(proveedor)
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      data.error ||
+      'No se pudo crear el proveedor'
+    );
+  }
+
+  return data;
+
+}
+
+
+// ============================================================
+// ACTUALIZAR PROVEEDOR
+// PUT /api/proveedores/:id → SP_Proveedores_Actualizar
+// ============================================================
+
+export async function actualizarProveedor(id, proveedor) {
+
+  const res = await fetch(
+    `${API_URL}/proveedores/${id}`,
+    {
+      method: 'PUT',
+
+      headers: {
+        'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify(proveedor)
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      data.error ||
+      'No se pudo actualizar el proveedor'
+    );
+  }
+
+  return data;
+
+}
+
+
+// ============================================================
+// ELIMINAR PROVEEDOR
+// DELETE /api/proveedores/:id → SP_Proveedores_Eliminar
+// ============================================================
+
+export async function eliminarProveedor(id) {
+
+  const res = await fetch(
+    `${API_URL}/proveedores/${id}`,
+    {
+      method: 'DELETE'
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      data.error ||
+      'No se pudo eliminar el proveedor'
+    );
+  }
+
+  return data;
+
+}
+
+
+// ============================================================
+// OBTENER OPCIONES PARA EL FORMULARIO DE PROVEEDORES
+// ============================================================
+//
+// Devuelve: categorias, contactos, metodosEntrega y ciudades.
+
+export async function obtenerOpcionesProveedores() {
+
+  const res = await fetch(
+    `${API_URL}/proveedores/opciones`
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      data.error ||
+      'No se pudieron obtener las opciones de proveedores.'
+    );
+  }
+
+  return data;
+
+}

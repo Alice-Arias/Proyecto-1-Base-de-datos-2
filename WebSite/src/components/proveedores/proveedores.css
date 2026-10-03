@@ -1,0 +1,654 @@
+/* ============================================================
+   ESTILOS DEL MÓDULO DE PROVEEDORES
+
+   Todas las clases empiezan con "prov-" para no chocar con las
+   de clientes ni con las globales de App.css.
+
+   Aquí también se pueden agregar después los estilos de los
+   modales de nuevo / editar / eliminar.
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   VARIABLES (colores del módulo)
+   ------------------------------------------------------------ */
+
+.prov-overlay {
+  --prov-texto: #1f2a5c;
+  --prov-titulo: #0f1f5c;
+  --prov-suave: #6b7694;
+  --prov-borde: #e3eafb;
+  --prov-fondo: #fbfcff;
+  --prov-azul: #2563eb;
+  --prov-azul-claro: #e3edff;
+  --prov-verde-claro: #d7f5e0;
+  --prov-verde: #166534;
+  --prov-ambar: #d97706;
+  --prov-ambar-fondo: #fff6e8;
+  --prov-ambar-borde: #fde7c3;
+}
+
+
+/* ------------------------------------------------------------
+   FONDO OSCURO Y VENTANA
+   ------------------------------------------------------------ */
+
+.prov-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px 16px;
+  overflow-y: auto;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.prov-modal {
+  position: relative;
+  width: 100%;
+  max-width: 1040px;
+  margin: auto;
+  padding: 32px 28px 28px;
+  background: var(--prov-fondo);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+  color: var(--prov-texto);
+  box-sizing: border-box;
+}
+
+.prov-cerrar {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--prov-titulo);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.prov-cerrar:hover {
+  background: var(--prov-azul-claro);
+}
+
+
+/* ------------------------------------------------------------
+   CARRUSEL
+   La tarjeta ocupa todo el ancho. Las flechas se posicionan
+   de forma absoluta respecto a .prov-modal, fuera de sus bordes.
+   ------------------------------------------------------------ */
+
+.prov-carrusel {
+  display: block;
+}
+
+.prov-tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+
+/* ------------------------------------------------------------
+   FLECHAS LATERALES
+   ------------------------------------------------------------ */
+
+.prov-flecha {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 60px;
+  height: 60px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #2A4590;
+  color: #ffffff;
+
+  font-size: 25px;
+  font-weight: 700;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  z-index: 30;
+
+  box-shadow: 0 10px 14px rgba(42, 69, 144, 0.25);
+
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+/* Flecha izquierda */
+.prov-flecha-izquierda {
+  left: -85px;
+}
+
+/* Flecha derecha */
+.prov-flecha-derecha {
+  right: -85px;
+}
+
+/* Hover */
+.prov-flecha:hover {
+  background: #ffffff;
+  color: #2A4590;
+
+  box-shadow: 0 8px 20px rgba(42, 69, 144, 0.30);
+}
+
+/* Izquierda se mueve hacia afuera */
+.prov-flecha-izquierda:hover {
+  transform: translate(-5px, -50%) scale(1.10);
+}
+
+/* Derecha se mueve hacia afuera */
+.prov-flecha-derecha:hover {
+  transform: translate(5px, -50%) scale(1.10);
+}
+
+/* Click */
+.prov-flecha:active {
+  transform: translateY(-50%) scale(0.90);
+}
+
+.prov-flecha-izquierda:active {
+  transform: translate(-3px, -50%) scale(0.90);
+}
+
+.prov-flecha-derecha:active {
+  transform: translate(3px, -50%) scale(0.90);
+}
+
+
+/* ------------------------------------------------------------
+   CONTROLES INFERIORES
+   ------------------------------------------------------------ */
+
+.prov-controles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 22px;
+
+  padding: 14px 0 4px;
+}
+
+/* Contador */
+.prov-contador {
+  min-width: 75px;
+
+  padding: 6px 12px;
+
+  text-align: center;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  color: #2A4590;
+
+  background: #f4f7fc;
+
+  border: 1px solid #dbe3f2;
+  border-radius: 20px;
+}
+
+/* Botones inferiores */
+.prov-control {
+  width: 36px;
+  height: 36px;
+
+  border: 2px solid #2A4590;
+  border-radius: 50%;
+
+  background: #2A4590;
+  color: #ffffff;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 4px 10px rgba(42, 69, 144, 0.20);
+
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.prov-control:hover {
+  background: #ffffff;
+  color: #808daf;
+
+  transform: translateY(-3px) scale(1.08);
+
+  box-shadow: 0 7px 16px rgba(42, 69, 144, 0.28);
+}
+
+.prov-control:active {
+  transform: scale(0.92);
+}
+
+
+/* ------------------------------------------------------------
+   ENCABEZADO
+   Tres columnas: avatar | título centrado | espacio del mismo
+   ancho que el avatar (así el título queda centrado de verdad).
+   ------------------------------------------------------------ */
+
+.prov-encabezado {
+  display: grid;
+  grid-template-columns: 64px 1fr 64px;
+  align-items: center;
+  gap: 16px;
+}
+
+.prov-avatar {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--prov-azul-claro);
+  font-size: 30px;
+}
+
+.prov-titulo {
+  text-align: center;
+}
+
+.prov-titulo h2 {
+  margin: 0 0 4px;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--prov-titulo);
+}
+
+.prov-titulo p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--prov-suave);
+}
+
+/* Botones opcionales (Editar / Volver) */
+
+.prov-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.prov-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--prov-borde);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--prov-titulo);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.prov-btn-azul {
+  background: var(--prov-azul);
+  border-color: var(--prov-azul);
+  color: #fff;
+}
+
+
+/* ------------------------------------------------------------
+   CONTACTOS: 2 cajas del mismo alto
+   ------------------------------------------------------------ */
+
+.prov-cajas {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.prov-caja {
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid var(--prov-borde);
+  border-radius: 14px;
+  box-sizing: border-box;
+}
+
+.prov-caja-ambar {
+  background: var(--prov-ambar-fondo);
+  border-color: var(--prov-ambar-borde);
+}
+
+.prov-caja-titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  color: var(--prov-suave);
+}
+
+.prov-caja-titulo.ambar {
+  color: var(--prov-ambar);
+}
+
+.prov-caja-nombre {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--prov-titulo);
+}
+
+/* Pares "etiqueta / valor" de la caja bancaria (3 en una fila) */
+
+.prov-pares {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.prov-par {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.prov-par span {
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--prov-suave);
+}
+
+.prov-par strong {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--prov-titulo);
+  overflow-wrap: anywhere;
+}
+
+
+/* ------------------------------------------------------------
+   ICONOS CUADRADOS PEQUEÑOS
+   ------------------------------------------------------------ */
+
+.prov-ico {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 15px;
+  background: var(--prov-azul-claro);
+}
+
+.prov-ico.verde {
+  background: #e6f6ec;
+}
+
+.prov-ico.ambar {
+  background: #ffe9c7;
+}
+
+
+/* ------------------------------------------------------------
+   COLUMNAS: información general | direcciones + mapa
+   ------------------------------------------------------------ */
+
+.prov-columnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.prov-derecha {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.prov-panel {
+  padding: 20px 22px;
+  background: #fff;
+  border: 1px solid var(--prov-borde);
+  border-radius: 14px;
+  box-sizing: border-box;
+}
+
+.prov-panel-titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--prov-titulo);
+}
+
+
+/* ------------------------------------------------------------
+   FILAS "ETIQUETA ........ VALOR"
+   Etiqueta a la izquierda, valor a la derecha, con una línea
+   fina entre filas. Todo queda alineado en dos columnas.
+   ------------------------------------------------------------ */
+
+.prov-fila {
+  display: grid;
+  grid-template-columns: 45% 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--prov-borde);
+}
+
+.prov-fila:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.prov-etiqueta {
+  font-size: 14px;
+  color: var(--prov-suave);
+}
+
+.prov-valor {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--prov-titulo);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.prov-valor a {
+  color: var(--prov-azul);
+  text-decoration: none;
+}
+
+.prov-valor a:hover {
+  text-decoration: underline;
+}
+
+
+/* ------------------------------------------------------------
+   CHIPS (métodos de entrega)
+   ------------------------------------------------------------ */
+
+.prov-chip {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.prov-chip-verde {
+  background: var(--prov-verde-claro);
+  color: var(--prov-verde);
+}
+
+.prov-chip-azul {
+  background: var(--prov-azul-claro);
+  color: var(--prov-azul);
+}
+
+
+/* ------------------------------------------------------------
+   DIRECCIONES
+   ------------------------------------------------------------ */
+
+.prov-direccion {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.prov-direccion + .prov-direccion {
+  border-top: 1px solid var(--prov-borde);
+}
+
+.prov-direccion strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 15px;
+  color: var(--prov-titulo);
+}
+
+.prov-direccion p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--prov-suave);
+  overflow-wrap: anywhere;
+}
+
+
+/* ------------------------------------------------------------
+   MAPA
+   ------------------------------------------------------------ */
+
+.prov-mapa {
+  display: block;
+  width: 100%;
+  height: 260px;
+  border: 0;
+  border-radius: 12px;
+}
+
+
+/* ------------------------------------------------------------
+   PANTALLAS PEQUEÑAS
+   ------------------------------------------------------------ */
+
+@media (max-width: 860px) {
+
+  .prov-cajas,
+  .prov-pares,
+  .prov-columnas {
+    grid-template-columns: 1fr;
+  }
+
+  .prov-modal {
+    padding: 24px 16px 20px;
+  }
+
+  .prov-titulo h2 {
+    font-size: 22px;
+  }
+
+}
+
+
+/* ------------------------------------------------------------
+   FLECHAS EN PANTALLAS MEDIANAS Y PEQUEÑAS
+   Cuando ya no hay espacio afuera del modal, las flechas pasan
+   adentro y la ventana deja un margen lateral para ellas.
+   ------------------------------------------------------------ */
+
+@media (max-width: 1250px) {
+
+  .prov-modal {
+    padding-left: 64px;
+    padding-right: 64px;
+  }
+
+  .prov-flecha {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+
+  .prov-flecha-izquierda {
+    left: 10px;
+  }
+
+  .prov-flecha-derecha {
+    right: 10px;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .prov-modal {
+    padding-left: 46px;
+    padding-right: 46px;
+  }
+
+  .prov-flecha {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+
+  .prov-flecha-izquierda {
+    left: 6px;
+  }
+
+  .prov-flecha-derecha {
+    right: 6px;
+  }
+
+  .prov-controles {
+    gap: 14px;
+  }
+
+  .prov-contador {
+    min-width: 70px;
+    font-size: 11px;
+  }
+
+  .prov-control {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+}

@@ -103,7 +103,9 @@ BEGIN
         p.PostalAddressLine1 AS Direccion_Postal1,
         p.PostalAddressLine2 AS Direccion_Postal2,
         p.DeliveryLocation.Lat AS Latitud,
-        p.DeliveryLocation.Long AS Longitud
+        p.DeliveryLocation.Long AS Longitud,
+        p.PostalCityID AS Ciudad_Postal_ID,
+        p.PostalPostalCode AS Codigo_Postal_Postal
 
     FROM dbo.ProveedoresActuales AS p
     INNER JOIN dbo.CategoriaProveedores AS cat  ON p.SupplierCategoryID = cat.SupplierCategoryID
@@ -486,6 +488,13 @@ BEGIN
         RETURN;
     END
 
+    IF EXISTS
+(
+    SELECT 1
+    FROM dbo.ProveedoresActuales
+    WHERE SupplierName = @Nombre
+      AND SupplierID <> @SupplierID
+)
 
     IF NOT EXISTS
     (
@@ -926,4 +935,3 @@ BEGIN
 
 END;
 GO
-

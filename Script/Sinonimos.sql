@@ -31,6 +31,12 @@ GO
 CREATE SYNONYM dbo.CategoriaProveedores FOR Purchasing.SupplierCategories;
 GO
 
+CREATE SYNONYM dbo.TransaccionesProveedores FOR Purchasing.SupplierTransactions;
+GO
+
+CREATE SYNONYM dbo.OrdenesCompra FOR Purchasing.PurchaseOrders;
+GO
+
 CREATE SYNONYM dbo.ProductosActuales FOR Warehouse.StockItems;
 GO
 

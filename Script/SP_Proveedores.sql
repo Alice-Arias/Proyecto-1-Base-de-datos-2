@@ -794,7 +794,7 @@ BEGIN
     IF EXISTS
     (
         SELECT 1
-        FROM Purchasing.PurchaseOrders
+        FROM dbo.OrdenesCompra
         WHERE SupplierID = @SupplierID
     )
     BEGIN
@@ -810,7 +810,7 @@ BEGIN
     IF EXISTS
     (
         SELECT 1
-        FROM Purchasing.SupplierTransactions
+        FROM dbo.TransaccionesProveedores
         WHERE SupplierID = @SupplierID
     )
     BEGIN
@@ -826,7 +826,7 @@ BEGIN
     IF EXISTS
     (
         SELECT 1
-        FROM Warehouse.StockItems
+        FROM dbo.ProductosActuales
         WHERE SupplierID = @SupplierID
     )
     BEGIN
@@ -842,7 +842,7 @@ BEGIN
     IF EXISTS
     (
         SELECT 1
-        FROM Warehouse.StockItemTransactions
+        FROM dbo.ProductosTransacciones
         WHERE SupplierID = @SupplierID
     )
     BEGIN

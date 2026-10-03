@@ -57,3 +57,9 @@ GO
 
 CREATE SYNONYM dbo.ProductosTransacciones FOR Warehouse.StockItemTransactions;
 GO
+
+CREATE SYNONYM dbo.Facturas FOR Sales.Invoices;
+GO
+
+CREATE SYNONYM dbo.DetalleFacturas FOR Sales.InvoiceLines;
+GO

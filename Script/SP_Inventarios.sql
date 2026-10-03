@@ -89,6 +89,7 @@ BEGIN
         pto.StockItemName AS Producto,
         p.SupplierID AS Proveedor_ID,
         p.SupplierName AS Proveedor,
+        c.ColorName AS Color,
         e.PackageTypeName AS Unidad_Empaquetamiento,
         em.PackageTypeName AS Empaquetamiento,
         pto.QuantityPerOuter AS Cantidad_Empaquetamiento,

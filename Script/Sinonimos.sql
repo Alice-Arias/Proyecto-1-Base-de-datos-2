@@ -31,16 +31,16 @@ GO
 CREATE SYNONYM dbo.ProductosInventario FOR Warehouse.StockItemHoldings;
 GO
 
-CREATE SYNONYM dbo.Grupos FOR Warehouse.StockGroups;
+CREATE SYNONYM dbo.GruposInventario FOR Warehouse.StockGroups;
 GO
 
 CREATE SYNONYM dbo.ItemGrupos FOR Warehouse.StockItemStockGroups;
 GO
 
-CREATE SYNONYM dbo.Colores FOR Warehouse.Colors;
+CREATE SYNONYM dbo.ColoresProductos FOR Warehouse.Colors;
 GO
 
-CREATE SYNONYM dbo.Empaquetamiento FOR Warehouse.PackageTypes;
+CREATE SYNONYM dbo.EmpaquetamientoInventario FOR Warehouse.PackageTypes;
 GO
 
 

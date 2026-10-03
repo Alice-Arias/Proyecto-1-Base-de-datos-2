@@ -45,7 +45,7 @@ BEGIN
         pi.QuantityOnHand AS Cantidad_Inventario
     FROM dbo.ProductosActuales AS pto
     INNER JOIN dbo.ItemGrupos AS ig ON pto.StockItemID = ig.StockItemID
-    INNER JOIN dbo.Grupos AS g ON ig.StockGroupID = g.StockGroupID
+    INNER JOIN dbo.GruposInventario AS g ON ig.StockGroupID = g.StockGroupID
     INNER JOIN dbo.ProductosInventario AS pi ON pto.StockItemID = pi.StockItemID
 
     WHERE
@@ -104,9 +104,9 @@ BEGIN
 
     FROM dbo.ProductosActuales AS pto
     INNER JOIN dbo.ProveedoresActuales AS p ON pto.SupplierID = p.SupplierID
-    INNER JOIN dbo.Colores AS c ON pto.ColorID = c.ColorID
-    INNER JOIN dbo.Empaquetamiento e ON pto.UnitPackageID = e.PackageTypeID
-    INNER JOIN dbo.Empaquetamiento AS em ON pto.OuterPackageID = em.PackageTypeID
+    INNER JOIN dbo.ColoresProductos AS c ON pto.ColorID = c.ColorID
+    INNER JOIN dbo.EmpaquetamientoInventario e ON pto.UnitPackageID = e.PackageTypeID
+    INNER JOIN dbo.EmpaquetamientoInventario AS em ON pto.OuterPackageID = em.PackageTypeID
     INNER JOIN dbo.ProductosInventario AS pi ON pto.StockItemID = pi.StockItemID
 
     WHERE pto.StockItemID IN
@@ -119,24 +119,297 @@ BEGIN
 END
 GO
 
+/* =========================================================
+   3. INSERTAR
+
+   Utiliza una TRANSACCION porque realiza dos operaciones:
+    INSERT del cliente.
+    UPDATE para establecer que el clientese facture a sí mismo cuando corresponde.
+   Si ambas operaciones funcionan:  COMMIT
+   Si ocurre un error: ROLLBACK
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Inventario_Insertar
+
+    @StockItemName NVARCHAR(100),
+    @SupplierID INT,
+    @ColorID INT,
+    @UnitPackageID INT,
+    @OuterPackageID INT,
+    @Brand NVARCHAR(50),
+    @Size NVARCHAR(20),
+    @LeadTimeDays INT,
+    @QuantityPerOuter INT,
+    @IsChillerStock BIT,
+    @Barcode NVARCHAR(50),
+    @TaxRate DECIMAL(18,3),
+    @UnitPrice DECIMAL(18,2),
+    @RecommendedRetailPrice DECIMAL(18,2),
+    @Weight DECIMAL(18,3),
+    @MarketingComments NVARCHAR(MAX),
+    @InternalComments NVARCHAR(MAX),
+    @Photo VARBINARY(MAX),
+    @CustomFields NVARCHAR(MAX),
+    @LastEditedBy INT = 1
+
+AS
+BEGIN
+
+    
+    IF @StockItemName IS NULL
+    BEGIN
+        RAISERROR('El nombre del producto es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @SupplierID IS NULL
+    BEGIN
+        RAISERROR('El proveedor es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @UnitPackageID IS NULL
+    BEGIN
+        RAISERROR('El paquete por unidad es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @OuterPackageID IS NULL
+    BEGIN
+        RAISERROR('El paquete exterior es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @LeadTimeDays IS NULL
+    BEGIN
+        RAISERROR('Los días de entrega son obligatorios.', 16, 1);
+        RETURN;
+    END
+
+    IF @QuantityPerOuter IS NULL
+    BEGIN
+        RAISERROR('La cantidad por empaque es obligatoria.', 16, 1);
+        RETURN;
+    END
+
+    IF @IsChillerStock IS NULL
+    BEGIN
+        RAISERROR('El indicador de almacenamiento refrigerado es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @TaxRate IS NULL
+    BEGIN
+        RAISERROR('La tasa de impuesto es obligatoria.', 16, 1);
+        RETURN;
+    END
+
+    IF @UnitPrice IS NULL
+    BEGIN
+        RAISERROR('El precio unitario es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @Weight IS NULL
+    BEGIN
+        RAISERROR('El peso es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @LeadTimeDays < 0
+    BEGIN
+        RAISERROR('Los días de entrega no pueden ser negativos.', 16, 2);
+        RETURN;
+    END
+
+    IF @QuantityPerOuter <= 0
+    BEGIN
+        RAISERROR('La cantidad por empaque debe ser mayor que cero.', 16, 2);
+        RETURN;
+    END
+
+    IF @TaxRate < 0
+    BEGIN
+        RAISERROR('La tasa de impuesto no puede ser negativa.', 16, 2);
+        RETURN;
+    END
+
+    IF @UnitPrice < 0
+    BEGIN
+        RAISERROR('El precio unitario no puede ser negativo.', 16, 2);
+        RETURN;
+    END
+
+    IF @RecommendedRetailPrice < 0
+    BEGIN
+        RAISERROR('El precio de venta recomendado no puede ser negativo.', 16, 2);
+        RETURN;
+    END
+
+    IF @Weight < 0
+    BEGIN
+        RAISERROR('El peso no puede ser negativo.', 16, 2);
+        RETURN;
+    END
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.ProveedoresActuales
+        WHERE SupplierID = @SupplierID
+    )
+    BEGIN
+        RAISERROR('El proveedor indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF @ColorID IS NOT NULL
+        AND NOT EXISTS
+        (
+            SELECT 1
+            FROM dbo.ColoresProductos
+            WHERE ColorID = @ColorID
+        )
+    BEGIN
+        RAISERROR('El color indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.EmpaquetamientoInventario
+        WHERE PackageTypeID = @UnitPackageID
+    )
+    BEGIN
+        RAISERROR('El tipo de paquete por unidad indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.EmpaquetamientoInventario
+        WHERE PackageTypeID = @OuterPackageID
+    )
+    BEGIN
+        RAISERROR('El tipo de paquete exterior indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+
+    -- Verificar duplicado
+    IF EXISTS
+    (
+        SELECT 1
+        FROM dbo.ProductosActuales
+        WHERE StockItemName = @StockItemName
+    )
+    BEGIN
+        RAISERROR('Ya existe un producto con ese nombre.', 16, 4);
+        RETURN;
+    END
+
+
+    -- Si ocurre un error dentro de la transacción, SQL Server aborta la transacción.
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+
+        BEGIN TRANSACTION;
+
+        INSERT INTO dbo.ProductosActuales
+        (
+            StockItemName,
+            SupplierID,
+            ColorID,
+            UnitPackageID,
+            OuterPackageID,
+            Brand,
+            Size,
+            LeadTimeDays,
+            QuantityPerOuter,
+            IsChillerStock,
+            Barcode,
+            TaxRate,
+            UnitPrice,
+            RecommendedRetailPrice,
+            TypicalWeightPerUnit,
+            MarketingComments,
+            InternalComments,
+            Photo,
+            CustomFields,
+            LastEditedBy
+        )
+        VALUES
+        (
+            @StockItemName,
+            @SupplierID,
+            @ColorID,
+            @UnitPackageID,
+            @OuterPackageID,
+            @Brand,
+            @Size,
+            @LeadTimeDays,
+            @QuantityPerOuter,
+            @IsChillerStock,
+            @Barcode,
+            @TaxRate,
+            @UnitPrice,
+            @RecommendedRetailPrice,
+            @Weight,
+            @MarketingComments,
+            @InternalComments,
+            @Photo,
+            @CustomFields,
+            @LastEditedBy
+        );
+
+        DECLARE @NuevoID INT;
+
+        SELECT @NuevoID = StockItemID
+        FROM dbo.ProductosActuales
+        WHERE StockItemName = @StockItemName;
+
+
+        COMMIT TRANSACTION;
+
+        SELECT @NuevoID AS StockItemID;
+
+    END TRY
+    BEGIN CATCH
+
+        /* DESHACER TRANSACCION */
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        THROW;
+
+    END CATCH;
+
+END
+GO
+
 -- Nombre producto, proveedor ID, color ID, unidad de empaquetamiento ID, empaquetamiento ID,
 -- cantidad de empaquetamiento, marca, talla, impuesto y precio unitario
-SELECT * FROM Warehouse.StockItems;
+SELECT * FROM dbo.ProductosActuales;
 
 -- Conexión item grupo
-SELECT * FROM Warehouse.StockItemStockGroups;
+SELECT * FROM dbo.ItemGrupos;
 
 --Grupos
-SELECT * FROM Warehouse.StockGroups;
+SELECT * FROM dbo.GruposInventario;
 
 -- Productos en inventario
-SELECT * FROM Warehouse.StockItemHoldings;
+SELECT * FROM dbo.ProductosInventario;
 
 --Proveedor ID
 SELECT * FROM dbo.ProveedoresActuales;
 
 --Color ID
-SELECT * FROM Warehouse.Colors;
+SELECT * FROM dbo.ColoresProductos
 
 --Unidad de empaquetamiento, empaquetamiento
-SELECT * FROM Warehouse.PackageTypes;
+SELECT * FROM dbo.EmpaquetamientoInventario

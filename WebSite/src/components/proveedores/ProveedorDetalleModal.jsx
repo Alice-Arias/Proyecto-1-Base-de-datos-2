@@ -89,17 +89,7 @@ function ProveedorDetalleModal({
 
                 <div className="prov-carrusel">
 
-                    {varios && (
-                        <button
-                            type="button"
-                            className="prov-flecha prov-flecha-izquierda"
-                            onClick={anterior}
-                            aria-label="Proveedor anterior"
-                        >
-                            ‹
-                        </button>
-                    )}
-
+                    
                     <TarjetaProveedor
                         key={
                             proveedorActual.SupplierID ??
@@ -111,16 +101,7 @@ function ProveedorDetalleModal({
                         onVolver={onVolver}
                     />
 
-                    {varios && (
-                        <button
-                            type="button"
-                            className="prov-flecha prov-flecha-derecha"
-                            onClick={siguiente}
-                            aria-label="Proveedor siguiente"
-                        >
-                            ›
-                        </button>
-                    )}
+                    
 
                 </div>
 

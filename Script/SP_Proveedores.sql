@@ -13,8 +13,8 @@ GO
        2 = valor fuera de rango
        3 = un registro relacionado no existe
        4 = duplicado (ya existe un proveedor con ese nombre)
-       5 = el cliente no existe
-       6 = el cliente tiene registros relacionados (no se puede borrar)
+       5 = el proveedor no existe
+       6 = el proveedor tiene registros relacionados (no se puede borrar)
  */
 
 
@@ -89,11 +89,9 @@ BEGIN
         p.SupplierReference AS Referencia_Proveedor,
         p.BankAccountName AS Nombre_Cuenta_Bancaria,
         p.BankAccountBranch AS Sucursal_Cuenta_Bancaria,
-        p.BankAccountCode AS Codigo_Cuenta_Bancaria,
         p.BankAccountNumber AS Numero_Cuenta_Bancaria,
         p.BankInternationalCode AS Codigo_Bancario_Internacional,
         p.PaymentDays AS Dias_De_Gracia,
-        p.InternalComments AS Comentarios_Internos,
         p.PhoneNumber AS Telefono,
         p.FaxNumber AS Fax,
         p.WebsiteURL AS Sitio_Web,

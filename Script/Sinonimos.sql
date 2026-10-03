@@ -25,4 +25,13 @@ GO
 CREATE SYNONYM dbo.CategoriaProveedores FOR Purchasing.SupplierCategories;
 GO
 
+CREATE SYNONYM dbo.ProductosActuales FOR Warehouse.StockItems;
+GO
+
+CREATE SYNONYM dbo.Colores FOR Warehouse.Colors;
+GO
+
+CREATE SYNONYM dbo.Empaquetamiento FOR Warehouse.PackageTypes;
+GO
+
 

@@ -10,6 +10,12 @@ GO
 CREATE SYNONYM dbo.GruposCompradores FOR Sales.BuyingGroups;
 GO
 
+CREATE SYNONYM dbo.DetallesPedido FOR Sales.OrderLines;
+GO
+
+CREATE SYNONYM dbo.DetallesFactura FOR Sales.InvoiceLines;
+GO
+
 CREATE SYNONYM dbo.Contactos FOR Application.People;
 GO
 
@@ -43,4 +49,5 @@ GO
 CREATE SYNONYM dbo.EmpaquetamientoInventario FOR Warehouse.PackageTypes;
 GO
 
-
+CREATE SYNONYM dbo.ProductosTransacciones FOR Warehouse.StockItemTransactions;
+GO

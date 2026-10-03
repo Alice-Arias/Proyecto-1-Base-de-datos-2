@@ -660,6 +660,157 @@ BEGIN
 END
 GO
 
+/* =========================================================
+   5. ELIMINAR
+
+   Elimina un producto solamente si no posee registros
+   relacionados que impidan su eliminación.
+
+   Antes de eliminar se verifica:
+       - Transacciones del producto
+       - Registros de inventario
+       - Detalles de pedidos
+       - Detalles de facturas
+
+   Si el producto pertenece a grupos, se eliminan primero
+   sus relaciones en ItemGrupos.
+
+   Utiliza una TRANSACCION para proteger los DELETE.
+
+   ========================================================= */
+
+
+CREATE OR ALTER PROCEDURE dbo.SP_Inventario_Eliminar
+
+    @StockItemID INT
+
+AS 
+BEGIN
+
+    IF @StockItemID IS NULL
+    BEGIN
+        RAISERROR('El StockItemID es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.ProductosActuales
+        WHERE StockItemID = @StockItemID
+    )
+    BEGIN
+        RAISERROR('El producto que intenta eliminar no existe.', 16, 5);
+        RETURN;
+    END
+
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM dbo.ProductosTransacciones
+        WHERE StockItemID = @StockItemID
+    )
+    BEGIN
+        RAISERROR(
+            'No se puede eliminar: el producto tiene transacciones registradas.',
+            16,
+            6
+        );
+        RETURN;
+    END
+
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM dbo.ProductosInventario
+        WHERE StockItemID = @StockItemID
+    )
+    BEGIN
+        RAISERROR(
+            'No se puede eliminar: el producto tiene registros de inventario.',
+            16,
+            6
+        );
+        RETURN;
+    END
+
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM dbo.DetallesPedido
+        WHERE StockItemID = @StockItemID
+    )
+    BEGIN
+        RAISERROR(
+            'No se puede eliminar: el producto pertenece a uno o más pedidos.',
+            16,
+            6
+        );
+        RETURN;
+    END
+
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM dbo.DetallesFactura
+        WHERE StockItemID = @StockItemID
+    )
+    BEGIN
+        RAISERROR(
+            'No se puede eliminar: el producto pertenece a una o más facturas.',
+            16,
+            6
+        );
+        RETURN;
+    END
+
+
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+    SET XACT_ABORT ON;
+
+
+    BEGIN TRY
+
+        BEGIN TRANSACTION;
+
+        -- Eliminar relaciones del producto con grupos si es que existen
+        DELETE FROM dbo.ItemGrupos
+        WHERE StockItemID = @StockItemID;
+
+
+        -- Se elimina el producto
+        DELETE FROM dbo.ProductosActuales
+        WHERE StockItemID = @StockItemID;
+
+
+        COMMIT TRANSACTION;
+
+
+        SELECT @StockItemID AS StockItemID_Eliminado;
+
+
+    END TRY
+
+    BEGIN CATCH
+
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        THROW;
+
+    END CATCH;
+
+END
+GO
+
+
+
 -- Nombre producto, proveedor ID, color ID, unidad de empaquetamiento ID, empaquetamiento ID,
 -- cantidad de empaquetamiento, marca, talla, impuesto y precio unitario
 SELECT * FROM dbo.ProductosActuales;
@@ -681,3 +832,12 @@ SELECT * FROM dbo.ColoresProductos
 
 --Unidad de empaquetamiento, empaquetamiento
 SELECT * FROM dbo.EmpaquetamientoInventario
+
+-- Revisar que no tenga transacciones
+SELECT * FROM Warehouse.StockItemTransactions;
+
+-- Revisar que no esté en ordenes de compra detalles
+SELECT * FROM Sales.OrderLines;
+
+-- Revisar que no esté facturado
+Select * FROM Sales.InvoiceLines

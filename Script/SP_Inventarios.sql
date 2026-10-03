@@ -21,8 +21,8 @@ GO
 /* =========================================================
    1. LISTAR
 
-   Devuelve la lista de proveedores para la tabla principal.
-   Permite filtrar por nombre, categoria y metodo de entrega.
+   Devuelve la lista de productos para la tabla principal.
+   Permite filtrar por nombre, grupo y cantidad en stock.
    Los resultados se ordenan por nombre de la A - Z.
    ========================================================= */
 
@@ -70,8 +70,8 @@ GO
 /* =========================================================
    2. DETALLE
 
-   Devuelve toda la informacion de un proveedor.
-   Recibe el SupplierID.
+   Devuelve toda la informacion de un producto.
+   Recibe el StockItermID.
    ========================================================= */
 
 
@@ -123,8 +123,7 @@ GO
    3. INSERTAR
 
    Utiliza una TRANSACCION porque realiza dos operaciones:
-    INSERT del cliente.
-    UPDATE para establecer que el clientese facture a sí mismo cuando corresponde.
+    INSERT del producto.
    Si ambas operaciones funcionan:  COMMIT
    Si ocurre un error: ROLLBACK
    ========================================================= */
@@ -311,7 +310,6 @@ BEGIN
     END
 
 
-    -- Si ocurre un error dentro de la transacción, SQL Server aborta la transacción.
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
     SET XACT_ABORT ON;
@@ -382,6 +380,276 @@ BEGIN
     BEGIN CATCH
 
         /* DESHACER TRANSACCION */
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        THROW;
+
+    END CATCH;
+
+END
+GO
+
+/* =========================================================
+   4. ACTUALIZAR
+
+   Modifica los datos de un producto existente.
+
+   Utiliza una TRANSACCION para proteger el UPDATE.
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Inventario_Actualizar
+
+    @StockItemID INT,
+    @StockItemName NVARCHAR(100),
+    @SupplierID INT,
+    @ColorID INT,
+    @UnitPackageID INT,
+    @OuterPackageID INT,
+    @Brand NVARCHAR(50),
+    @Size NVARCHAR(20),
+    @LeadTimeDays INT,
+    @QuantityPerOuter INT,
+    @IsChillerStock BIT,
+    @Barcode NVARCHAR(50),
+    @TaxRate DECIMAL(18,3),
+    @UnitPrice DECIMAL(18,2),
+    @RecommendedRetailPrice DECIMAL(18,2),
+    @Weight DECIMAL(18,3),
+    @MarketingComments NVARCHAR(MAX),
+    @InternalComments NVARCHAR(MAX),
+    @Photo VARBINARY(MAX),
+    @CustomFields NVARCHAR(MAX),
+    @LastEditedBy INT
+
+AS
+BEGIN
+
+    IF @StockItemID IS NULL
+    BEGIN
+        RAISERROR('El StockItemID es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.ProductosActuales
+        WHERE StockItemID = @StockItemID
+    )
+    BEGIN
+        RAISERROR('El producto que intenta actualizar no existe.', 16, 5);
+        RETURN;
+    END
+
+    IF @StockItemName IS NULL
+    BEGIN
+        RAISERROR('El nombre del producto es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @SupplierID IS NULL
+    BEGIN
+        RAISERROR('El proveedor es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @UnitPackageID IS NULL
+    BEGIN
+        RAISERROR('El paquete por unidad es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @OuterPackageID IS NULL
+    BEGIN
+        RAISERROR('El paquete exterior es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @LeadTimeDays IS NULL
+    BEGIN
+        RAISERROR('Los días de entrega son obligatorios.', 16, 1);
+        RETURN;
+    END
+
+    IF @QuantityPerOuter IS NULL
+    BEGIN
+        RAISERROR('La cantidad por empaque es obligatoria.', 16, 1);
+        RETURN;
+    END
+
+    IF @IsChillerStock IS NULL
+    BEGIN
+        RAISERROR('El indicador de almacenamiento refrigerado es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @TaxRate IS NULL
+    BEGIN
+        RAISERROR('La tasa de impuesto es obligatoria.', 16, 1);
+        RETURN;
+    END
+
+    IF @UnitPrice IS NULL
+    BEGIN
+        RAISERROR('El precio unitario es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @Weight IS NULL
+    BEGIN
+        RAISERROR('El peso es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @LastEditedBy IS NULL
+    BEGIN
+        RAISERROR('El usuario que registra es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+
+    IF @LeadTimeDays < 0
+    BEGIN
+        RAISERROR('Los días de entrega no pueden ser negativos.', 16, 2);
+        RETURN;
+    END
+
+    IF @QuantityPerOuter <= 0
+    BEGIN
+        RAISERROR('La cantidad por empaque debe ser mayor que cero.', 16, 2);
+        RETURN;
+    END
+
+    IF @TaxRate < 0
+    BEGIN
+        RAISERROR('La tasa de impuesto no puede ser negativa.', 16, 2);
+        RETURN;
+    END
+
+    IF @UnitPrice < 0
+    BEGIN
+        RAISERROR('El precio unitario no puede ser negativo.', 16, 2);
+        RETURN;
+    END
+
+    IF @RecommendedRetailPrice < 0
+    BEGIN
+        RAISERROR('El precio de venta recomendado no puede ser negativo.', 16, 2);
+        RETURN;
+    END
+
+    IF @Weight < 0
+    BEGIN
+        RAISERROR('El peso no puede ser negativo.', 16, 2);
+        RETURN;
+    END
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.ProveedoresActuales
+        WHERE SupplierID = @SupplierID
+    )
+    BEGIN
+        RAISERROR('El proveedor indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF @ColorID IS NOT NULL
+        AND NOT EXISTS
+        (
+            SELECT 1
+            FROM dbo.ColoresProductos
+            WHERE ColorID = @ColorID
+        )
+    BEGIN
+        RAISERROR('El color indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.EmpaquetamientoInventario
+        WHERE PackageTypeID = @UnitPackageID
+    )
+    BEGIN
+        RAISERROR('El tipo de paquete por unidad indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.EmpaquetamientoInventario
+        WHERE PackageTypeID = @OuterPackageID
+    )
+    BEGIN
+        RAISERROR('El tipo de paquete exterior indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM dbo.ProductosActuales
+        WHERE StockItemName = @StockItemName
+          AND StockItemID <> @StockItemID
+    )
+    BEGIN
+        RAISERROR('Ya existe un producto con ese nombre.', 16, 4);
+        RETURN;
+    END
+
+
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+    SET XACT_ABORT ON;
+
+
+    BEGIN TRY
+
+        BEGIN TRANSACTION;
+
+
+        UPDATE dbo.ProductosActuales
+        SET
+            StockItemName = @StockItemName,
+            SupplierID = @SupplierID,
+            ColorID = @ColorID,
+            UnitPackageID = @UnitPackageID,
+            OuterPackageID = @OuterPackageID,
+            Brand = @Brand,
+            Size = @Size,
+            LeadTimeDays = @LeadTimeDays,
+            QuantityPerOuter = @QuantityPerOuter,
+            IsChillerStock = @IsChillerStock,
+            Barcode = @Barcode,
+            TaxRate = @TaxRate,
+            UnitPrice = @UnitPrice,
+            RecommendedRetailPrice = @RecommendedRetailPrice,
+            TypicalWeightPerUnit = @Weight,
+            MarketingComments = @MarketingComments,
+            InternalComments = @InternalComments,
+            Photo = @Photo,
+            CustomFields = @CustomFields,
+            LastEditedBy = @LastEditedBy
+
+        WHERE StockItemID = @StockItemID;
+
+
+        COMMIT TRANSACTION;
+
+
+        SELECT @StockItemID AS StockItemID;
+
+
+    END TRY
+
+    BEGIN CATCH
+
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
 

@@ -810,6 +810,37 @@ END
 GO
 
 
+CREATE OR ALTER PROCEDURE dbo.SP_Inventario_Opciones
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- 1. Proveedores
+    SELECT
+        SupplierID AS ID,
+        SupplierName AS Nombre
+    FROM dbo.ProveedoresActuales
+    ORDER BY SupplierName;
+
+
+    -- 2. Colores
+    SELECT
+        ColorID AS ID,
+        ColorName AS Nombre
+    FROM dbo.ColoresProductos
+    ORDER BY ColorName;
+
+
+    -- 3. Tipos de paquete
+    SELECT
+        PackageTypeID AS ID,
+        PackageTypeName AS Nombre
+    FROM dbo.EmpaquetamientoInventario
+    ORDER BY PackageTypeName;
+
+END;
+GO
+
 
 -- Nombre producto, proveedor ID, color ID, unidad de empaquetamiento ID, empaquetamiento ID,
 -- cantidad de empaquetamiento, marca, talla, impuesto y precio unitario

@@ -1,11 +1,9 @@
+
 /* ============================================================
    ESTILOS DEL MÓDULO DE PROVEEDORES
 
    Todas las clases empiezan con "prov-" para no chocar con las
    de clientes ni con las globales de App.css.
-
-   Aquí también se pueden agregar después los estilos de los
-   modales de nuevo / editar / eliminar.
    ============================================================ */
 
 
@@ -81,8 +79,6 @@
 
 /* ------------------------------------------------------------
    CARRUSEL
-   La tarjeta ocupa todo el ancho. Las flechas se posicionan
-   de forma absoluta respecto a .prov-modal, fuera de sus bordes.
    ------------------------------------------------------------ */
 
 .prov-carrusel {
@@ -105,63 +101,48 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-
   width: 60px;
   height: 60px;
-
   border: none;
   border-radius: 50%;
-
   background: #2A4590;
   color: #ffffff;
-
   font-size: 25px;
   font-weight: 700;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   cursor: pointer;
   z-index: 30;
-
   box-shadow: 0 10px 14px rgba(42, 69, 144, 0.25);
-
   transition:
     transform 0.25s ease,
     background 0.25s ease,
     box-shadow 0.25s ease;
 }
 
-/* Flecha izquierda */
 .prov-flecha-izquierda {
   left: -85px;
 }
 
-/* Flecha derecha */
 .prov-flecha-derecha {
   right: -85px;
 }
 
-/* Hover */
 .prov-flecha:hover {
   background: #ffffff;
   color: #2A4590;
-
   box-shadow: 0 8px 20px rgba(42, 69, 144, 0.30);
 }
 
-/* Izquierda se mueve hacia afuera */
 .prov-flecha-izquierda:hover {
   transform: translate(-5px, -50%) scale(1.10);
 }
 
-/* Derecha se mueve hacia afuera */
 .prov-flecha-derecha:hover {
   transform: translate(5px, -50%) scale(1.10);
 }
 
-/* Click */
 .prov-flecha:active {
   transform: translateY(-50%) scale(0.90);
 }
@@ -183,53 +164,36 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
   gap: 22px;
-
   padding: 14px 0 4px;
 }
 
-/* Contador */
 .prov-contador {
   min-width: 75px;
-
   padding: 6px 12px;
-
   text-align: center;
-
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
-
   color: #2A4590;
-
   background: #f4f7fc;
-
   border: 1px solid #dbe3f2;
   border-radius: 20px;
 }
 
-/* Botones inferiores */
 .prov-control {
-  width: 36px;
-  height: 36px;
-
+  width: 38px;
+  height: 38px;
   border: 2px solid #2A4590;
   border-radius: 50%;
-
   background: #2A4590;
   color: #ffffff;
-
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
-
   cursor: pointer;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   box-shadow: 0 4px 10px rgba(42, 69, 144, 0.20);
-
   transition:
     transform 0.25s ease,
     background 0.25s ease,
@@ -240,9 +204,7 @@
 .prov-control:hover {
   background: #ffffff;
   color: #808daf;
-
   transform: translateY(-3px) scale(1.08);
-
   box-shadow: 0 7px 16px rgba(42, 69, 144, 0.28);
 }
 
@@ -253,8 +215,6 @@
 
 /* ------------------------------------------------------------
    ENCABEZADO
-   Tres columnas: avatar | título centrado | espacio del mismo
-   ancho que el avatar (así el título queda centrado de verdad).
    ------------------------------------------------------------ */
 
 .prov-encabezado {
@@ -288,11 +248,14 @@
 
 .prov-titulo p {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--prov-suave);
 }
 
-/* Botones opcionales (Editar / Volver) */
+
+/* ------------------------------------------------------------
+   BOTONES OPCIONALES
+   ------------------------------------------------------------ */
 
 .prov-acciones {
   display: flex;
@@ -306,7 +269,7 @@
   border-radius: 8px;
   background: #fff;
   color: var(--prov-titulo);
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
 }
 
@@ -318,7 +281,7 @@
 
 
 /* ------------------------------------------------------------
-   CONTACTOS: 2 cajas del mismo alto
+   CONTACTOS: 2 CAJAS DEL MISMO ALTO
    ------------------------------------------------------------ */
 
 .prov-cajas {
@@ -346,7 +309,7 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 14px;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--prov-suave);
 }
 
@@ -356,12 +319,15 @@
 
 .prov-caja-nombre {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--prov-titulo);
 }
 
-/* Pares "etiqueta / valor" de la caja bancaria (3 en una fila) */
+
+/* ------------------------------------------------------------
+   PARES "ETIQUETA / VALOR"
+   ------------------------------------------------------------ */
 
 .prov-pares {
   display: grid;
@@ -377,14 +343,14 @@
 }
 
 .prov-par span {
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--prov-suave);
 }
 
 .prov-par strong {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--prov-titulo);
   overflow-wrap: anywhere;
@@ -403,7 +369,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 16px;
   background: var(--prov-azul-claro);
 }
 
@@ -417,7 +383,7 @@
 
 
 /* ------------------------------------------------------------
-   COLUMNAS: información general | direcciones + mapa
+   COLUMNAS
    ------------------------------------------------------------ */
 
 .prov-columnas {
@@ -447,7 +413,7 @@
   align-items: center;
   gap: 10px;
   margin: 0 0 14px;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--prov-titulo);
 }
@@ -455,8 +421,6 @@
 
 /* ------------------------------------------------------------
    FILAS "ETIQUETA ........ VALOR"
-   Etiqueta a la izquierda, valor a la derecha, con una línea
-   fina entre filas. Todo queda alineado en dos columnas.
    ------------------------------------------------------------ */
 
 .prov-fila {
@@ -474,12 +438,12 @@
 }
 
 .prov-etiqueta {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--prov-suave);
 }
 
 .prov-valor {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--prov-titulo);
   text-align: right;
@@ -497,7 +461,7 @@
 
 
 /* ------------------------------------------------------------
-   CHIPS (métodos de entrega)
+   CHIPS
    ------------------------------------------------------------ */
 
 .prov-chip {
@@ -505,7 +469,7 @@
   margin-left: 6px;
   padding: 4px 12px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
 }
 
@@ -538,13 +502,13 @@
 .prov-direccion strong {
   display: block;
   margin-bottom: 2px;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--prov-titulo);
 }
 
 .prov-direccion p {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--prov-suave);
   overflow-wrap: anywhere;
 }
@@ -564,33 +528,274 @@
 
 
 /* ------------------------------------------------------------
-   PANTALLAS PEQUEÑAS
+   MODAL COMPACTO
    ------------------------------------------------------------ */
 
-@media (max-width: 860px) {
+.prov-overlay {
+  padding: 14px;
+  align-items: center;
+}
 
-  .prov-cajas,
-  .prov-pares,
-  .prov-columnas {
-    grid-template-columns: 1fr;
-  }
-
-  .prov-modal {
-    padding: 24px 16px 20px;
-  }
-
-  .prov-titulo h2 {
-    font-size: 22px;
-  }
-
+.prov-modal {
+  width: min(1040px, 96vw);
+  max-height: 92vh;
+  padding: 24px 22px 20px;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 
 /* ------------------------------------------------------------
-   FLECHAS EN PANTALLAS MEDIANAS Y PEQUEÑAS
-   Cuando ya no hay espacio afuera del modal, las flechas pasan
-   adentro y la ventana deja un margen lateral para ellas.
+   ENCABEZADO COMPACTO
    ------------------------------------------------------------ */
+
+.prov-encabezado {
+  grid-template-columns: 52px 1fr 52px;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.prov-avatar {
+  width: 52px;
+  height: 52px;
+  font-size: 25px;
+}
+
+.prov-titulo h2 {
+  margin-bottom: 3px;
+  font-size: 27px;
+}
+
+.prov-titulo p {
+  font-size: 15px;
+}
+
+
+/* ------------------------------------------------------------
+   TARJETA
+   ------------------------------------------------------------ */
+
+.prov-tarjeta {
+  gap: 12px;
+}
+
+
+/* ------------------------------------------------------------
+   CAJAS
+   ------------------------------------------------------------ */
+
+.prov-cajas {
+  gap: 12px;
+}
+
+.prov-caja {
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+
+.prov-caja-titulo {
+  gap: 8px;
+  margin-bottom: 9px;
+  font-size: 15px;
+}
+
+.prov-caja-nombre {
+  font-size: 19px;
+}
+
+.prov-pares {
+  gap: 12px;
+}
+
+.prov-par span {
+  font-size: 12px;
+}
+
+.prov-par strong {
+  font-size: 15px;
+}
+
+
+/* ------------------------------------------------------------
+   ICONOS
+   ------------------------------------------------------------ */
+
+.prov-ico {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  font-size: 15px;
+}
+
+
+/* ------------------------------------------------------------
+   COLUMNAS Y PANELES
+   ------------------------------------------------------------ */
+
+.prov-columnas {
+  gap: 12px;
+}
+
+.prov-derecha {
+  gap: 12px;
+}
+
+.prov-panel {
+  padding: 15px 17px;
+  border-radius: 12px;
+}
+
+.prov-panel-titulo {
+  gap: 8px;
+  margin-bottom: 9px;
+  font-size: 17px;
+}
+
+
+/* ------------------------------------------------------------
+   FILAS DE INFORMACIÓN
+   ------------------------------------------------------------ */
+
+.prov-fila {
+  gap: 9px;
+  padding: 8px 0;
+}
+
+.prov-etiqueta {
+  font-size: 14px;
+}
+
+.prov-valor {
+  font-size: 15px;
+}
+
+
+/* ------------------------------------------------------------
+   DIRECCIONES
+   ------------------------------------------------------------ */
+
+.prov-direccion {
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.prov-direccion strong {
+  margin-bottom: 2px;
+  font-size: 15px;
+}
+
+.prov-direccion p {
+  font-size: 14px;
+}
+
+
+/* ------------------------------------------------------------
+   MAPA
+   ------------------------------------------------------------ */
+
+.prov-mapa {
+  height: 200px;
+  border-radius: 10px;
+}
+
+
+/* ------------------------------------------------------------
+   CHIPS
+   ------------------------------------------------------------ */
+
+.prov-chip {
+  margin-left: 4px;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+
+/* ------------------------------------------------------------
+   BOTONES
+   ------------------------------------------------------------ */
+
+.prov-btn {
+  padding: 8px 13px;
+  font-size: 14px;
+}
+
+.prov-acciones {
+  gap: 8px;
+}
+
+
+/* ------------------------------------------------------------
+   CONTROLES INFERIORES
+   ------------------------------------------------------------ */
+
+.prov-controles {
+  gap: 14px;
+  padding: 9px 0 3px;
+}
+
+.prov-contador {
+  min-width: 68px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.prov-control {
+  width: 34px;
+  height: 34px;
+  font-size: 15px;
+}
+
+
+/* ------------------------------------------------------------
+   CERRAR
+   ------------------------------------------------------------ */
+
+.prov-cerrar {
+  top: 12px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  font-size: 20px;
+}
+
+
+/* ------------------------------------------------------------
+   FLECHAS
+   ------------------------------------------------------------ */
+
+.prov-flecha {
+  width: 48px;
+  height: 48px;
+  font-size: 22px;
+}
+
+
+/* ------------------------------------------------------------
+   SCROLLBAR DEL MODAL
+   ------------------------------------------------------------ */
+
+.prov-modal {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.prov-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.prov-modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.prov-modal::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+
+/* ============================================================
+   FLECHAS EN PANTALLAS MEDIANAS
+   ============================================================ */
 
 @media (max-width: 1250px) {
 
@@ -612,43 +817,209 @@
   .prov-flecha-derecha {
     right: 10px;
   }
-
 }
+
+
+/* ============================================================
+   PANTALLAS MEDIANAS
+   ============================================================ */
+
+@media (max-width: 860px) {
+
+  .prov-cajas,
+  .prov-pares,
+  .prov-columnas {
+    grid-template-columns: 1fr;
+  }
+
+  .prov-overlay {
+    padding: 10px;
+  }
+
+  .prov-modal {
+    width: 96vw;
+    max-height: 92vh;
+    padding: 20px 14px 17px;
+  }
+
+  .prov-encabezado {
+    grid-template-columns: 46px 1fr 46px;
+  }
+
+  .prov-avatar {
+    width: 46px;
+    height: 46px;
+    font-size: 22px;
+  }
+
+  .prov-titulo h2 {
+    font-size: 24px;
+  }
+
+  .prov-titulo p {
+    font-size: 14px;
+  }
+
+  .prov-caja-nombre {
+    font-size: 18px;
+  }
+
+  .prov-par span {
+    font-size: 12px;
+  }
+
+  .prov-par strong {
+    font-size: 15px;
+  }
+
+  .prov-panel-titulo {
+    font-size: 17px;
+  }
+
+  .prov-etiqueta {
+    font-size: 14px;
+  }
+
+  .prov-valor {
+    font-size: 15px;
+  }
+
+  .prov-direccion strong {
+    font-size: 15px;
+  }
+
+  .prov-direccion p {
+    font-size: 14px;
+  }
+
+  .prov-mapa {
+    height: 185px;
+  }
+}
+
+
+/* ============================================================
+   PANTALLAS PEQUEÑAS
+   ============================================================ */
 
 @media (max-width: 600px) {
 
+  .prov-overlay {
+    padding: 6px;
+  }
+
   .prov-modal {
-    padding-left: 46px;
-    padding-right: 46px;
+    width: 98vw;
+    max-height: 94vh;
+    padding: 18px 10px 14px;
+    border-radius: 14px;
+  }
+
+  .prov-encabezado {
+    grid-template-columns: 40px 1fr 40px;
+    gap: 7px;
+  }
+
+  .prov-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 19px;
+  }
+
+  .prov-titulo h2 {
+    font-size: 21px;
+  }
+
+  .prov-titulo p {
+    font-size: 13px;
+  }
+
+  .prov-caja,
+  .prov-panel {
+    padding: 11px 11px;
+  }
+
+  .prov-caja-titulo {
+    font-size: 14px;
+  }
+
+  .prov-caja-nombre {
+    font-size: 17px;
+  }
+
+  .prov-par span {
+    font-size: 11px;
+  }
+
+  .prov-par strong {
+    font-size: 14px;
+  }
+
+  .prov-panel-titulo {
+    font-size: 16px;
+  }
+
+  .prov-fila {
+    grid-template-columns: 42% 1fr;
+    padding: 7px 0;
+  }
+
+  .prov-etiqueta {
+    font-size: 13px;
+  }
+
+  .prov-valor {
+    font-size: 14px;
+  }
+
+  .prov-direccion strong {
+    font-size: 14px;
+  }
+
+  .prov-direccion p {
+    font-size: 13px;
+  }
+
+  .prov-mapa {
+    height: 165px;
   }
 
   .prov-flecha {
     width: 32px;
     height: 32px;
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .prov-flecha-izquierda {
-    left: 6px;
+    left: 4px;
   }
 
   .prov-flecha-derecha {
-    right: 6px;
+    right: 4px;
   }
 
   .prov-controles {
-    gap: 14px;
-  }
-
-  .prov-contador {
-    min-width: 70px;
-    font-size: 11px;
+    gap: 10px;
   }
 
   .prov-control {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     font-size: 14px;
   }
 
+  .prov-contador {
+    min-width: 60px;
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+
+  .prov-btn {
+    padding: 7px 11px;
+    font-size: 13px;
+  }
+
+  .prov-chip {
+    font-size: 12px;
+  }
 }

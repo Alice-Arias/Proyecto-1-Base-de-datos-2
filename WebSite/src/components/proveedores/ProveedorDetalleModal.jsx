@@ -1,3 +1,4 @@
+
 // ============================================================
 // MODAL CON EL DETALLE DE UNO O VARIOS PROVEEDORES
 // ============================================================
@@ -19,7 +20,10 @@ function Fila({ etiqueta, children }) {
     return (
         <div className="prov-fila">
             <span className="prov-etiqueta">{etiqueta}</span>
-            <span className="prov-valor">{children}</span>
+
+            <span className="prov-valor">
+                {children}
+            </span>
         </div>
     );
 }
@@ -37,7 +41,6 @@ function ProveedorDetalleModal({
 }) {
 
     // Los hooks siempre van ANTES de cualquier "return" condicional.
-
     const [indiceActual, setIndiceActual] = useState(0);
 
     // Cuando llega una lista nueva, volvemos al primero.
@@ -63,12 +66,14 @@ function ProveedorDetalleModal({
     };
 
     const proveedorActual = proveedores[indiceActual];
+
     const varios = proveedores.length > 1;
 
     return (
-
-        <div className="prov-overlay" onClick={onCerrar}>
-
+        <div
+            className="prov-overlay"
+            onClick={onCerrar}
+        >
             <div
                 className="prov-modal"
                 onClick={(e) => e.stopPropagation()}
@@ -96,7 +101,10 @@ function ProveedorDetalleModal({
                     )}
 
                     <TarjetaProveedor
-                        key={proveedorActual.SupplierID ?? indiceActual}
+                        key={
+                            proveedorActual.SupplierID ??
+                            indiceActual
+                        }
                         proveedor={proveedorActual}
                         indice={indiceActual}
                         onEditar={onEditar}
@@ -117,7 +125,6 @@ function ProveedorDetalleModal({
                 </div>
 
                 {varios && (
-
                     <div className="prov-controles">
 
                         <button
@@ -143,13 +150,10 @@ function ProveedorDetalleModal({
                         </button>
 
                     </div>
-
                 )}
 
             </div>
-
         </div>
-
     );
 }
 
@@ -172,42 +176,57 @@ function TarjetaProveedor({
 
     const mapaUrl =
         p.Latitud &&
-        p.Longitud &&
-        !isNaN(lat) &&
-        !isNaN(lng)
+            p.Longitud &&
+            !isNaN(lat) &&
+            !isNaN(lng)
             ? `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.01}%2C${lat - 0.01}%2C${lng + 0.01}%2C${lat + 0.01}&marker=${lat}%2C${lng}`
             : null;
+
 
     // ---------- MÉTODOS DE ENTREGA ----------
 
     const metodos = String(p.Metodo_Entrega || '')
-        .split(/[,/;]/)
+        .split(',')
         .map((m) => m.trim())
         .filter(Boolean);
-
     // ---------- DIRECCIONES ----------
 
-    const dirEntrega = [p.Direccion_Entrega1, p.Direccion_Entrega2]
+    const dirEntrega = [
+        p.Direccion_Entrega1,
+        p.Direccion_Entrega2
+    ]
         .filter(Boolean)
         .join(' ');
 
-    const dirPostal = [p.Direccion_Postal1, p.Direccion_Postal2]
+    const dirPostal = [
+        p.Direccion_Postal1,
+        p.Direccion_Postal2
+    ]
         .filter(Boolean)
         .join(' ');
+
 
     return (
-
         <section className="prov-tarjeta">
 
             {/* ================= ENCABEZADO ================= */}
 
             <header className="prov-encabezado">
 
-                <div className="prov-avatar">🚚</div>
+                <div className="prov-avatar">
+                    🚚
+                </div>
 
                 <div className="prov-titulo">
-                    <h2>{p.Nombre_Proveedor}</h2>
-                    <p>Código: {p.Referencia_Proveedor || '-'}</p>
+
+                    <h2>
+                        {p.Nombre_Proveedor}
+                    </h2>
+
+                    <p>
+                        Código: {p.Referencia_Proveedor || '-'}
+                    </p>
+
                 </div>
 
                 {/* Espacio vacío para que el título quede centrado */}
@@ -215,12 +234,17 @@ function TarjetaProveedor({
 
             </header>
 
-            {(onVolver || onEditar) && (
 
+            {/* ================= BOTONES ================= */}
+
+            {(onVolver || onEditar) && (
                 <div className="prov-acciones">
 
                     {onVolver && (
-                        <button className="prov-btn" onClick={onVolver}>
+                        <button
+                            className="prov-btn"
+                            onClick={onVolver}
+                        >
                             ← Volver a la lista
                         </button>
                     )}
@@ -235,127 +259,197 @@ function TarjetaProveedor({
                     )}
 
                 </div>
-
             )}
 
-            {/* ============ DATOS BANCARIOS (arriba, ancho completo) ============ */}
+
+            {/* ============ DATOS BANCARIOS ============ */}
 
             <div className="prov-caja prov-caja-ambar">
 
                 <div className="prov-caja-titulo ambar">
-                    <span className="prov-ico ambar">🏦</span>
+
+                    <span className="prov-ico ambar">
+                        🏦
+                    </span>
+
                     Datos bancarios
+
                 </div>
 
                 <div className="prov-pares">
 
                     <div className="prov-par">
-                        <span>Banco y sucursal</span>
-                        <strong>{p.Sucursal_Cuenta_Bancaria || '-'}</strong>
+
+                        <span>
+                            Banco y sucursal
+                        </span>
+
+                        <strong>
+                            {p.Sucursal_Cuenta_Bancaria || '-'}
+                        </strong>
+
                     </div>
 
                     <div className="prov-par">
-                        <span>Titular de la cuenta</span>
-                        <strong>{p.Nombre_Cuenta_Bancaria || '-'}</strong>
+
+                        <span>
+                            Titular de la cuenta
+                        </span>
+
+                        <strong>
+                            {p.Nombre_Cuenta_Bancaria || '-'}
+                        </strong>
+
                     </div>
 
                     <div className="prov-par">
-                        <span>Cuenta corriente</span>
-                        <strong>{p.Numero_Cuenta_Bancaria || '-'}</strong>
+
+                        <span>
+                            Cuenta corriente
+                        </span>
+
+                        <strong>
+                            {p.Numero_Cuenta_Bancaria || '-'}
+                        </strong>
+
                     </div>
 
                 </div>
 
             </div>
 
-            {/* ============ CONTACTOS (debajo de los datos bancarios) ============ */}
+
+            {/* ============ CONTACTOS ============ */}
 
             <div className="prov-cajas">
 
                 <div className="prov-caja">
+
                     <div className="prov-caja-titulo">
-                        <span className="prov-ico verde">👤</span>
+
+                        <span className="prov-ico verde">
+                            👤
+                        </span>
+
                         Contacto principal
+
                     </div>
+
                     <p className="prov-caja-nombre">
                         {p.Contacto_Primario || '-'}
                     </p>
+
                 </div>
 
+
                 <div className="prov-caja">
+
                     <div className="prov-caja-titulo">
-                        <span className="prov-ico verde">👤</span>
+
+                        <span className="prov-ico verde">
+                            👤
+                        </span>
+
                         Contacto alternativo
+
                     </div>
+
                     <p className="prov-caja-nombre">
                         {p.Contacto_Alternativo || '-'}
                     </p>
+
                 </div>
 
             </div>
 
+
             {/* ============ INFORMACIÓN + DIRECCIONES + MAPA ============ */}
 
             <div className="prov-columnas">
+
 
                 {/* ---------- INFORMACIÓN GENERAL ---------- */}
 
                 <div className="prov-panel">
 
                     <h3 className="prov-panel-titulo">
-                        <span className="prov-ico">📋</span>
+
+                        <span className="prov-ico">
+                            📋
+                        </span>
+
                         Información general
+
                     </h3>
+
 
                     <Fila etiqueta="Código del proveedor">
                         {p.Referencia_Proveedor || '-'}
                     </Fila>
 
+
                     <Fila etiqueta="Categoría">
                         {p.Categoria || '-'}
                     </Fila>
 
+
                     <Fila etiqueta="Métodos de entrega">
-                        {metodos.length
-                            ? metodos.map((m, i) => (
-                                <span
-                                    key={`${m}-${i}`}
-                                    className={`prov-chip ${
-                                        i % 2 === 0
-                                            ? 'prov-chip-verde'
-                                            : 'prov-chip-azul'
-                                    }`}
-                                >
-                                    {m}
-                                </span>
-                            ))
-                            : '-'}
+                        <div className="prov-metodos">
+                            {metodos.length ? (
+                                metodos.map((metodo, indice) => (
+                                    <span
+                                        key={`${metodo}-${indice}`}
+                                        className={
+                                            indice % 2 === 0
+                                                ? 'prov-chip prov-chip-azul'
+                                                : 'prov-chip prov-chip-verde'
+                                        }
+                                    >
+                                        {metodo}
+                                    </span>
+                                ))
+                            ) : (
+                                <span>-</span>
+                            )}
+                        </div>
                     </Fila>
+
+
 
                     <Fila etiqueta="Ciudad de entrega">
                         {p.Ciudad_Entrega || '-'}
                     </Fila>
 
+
                     <Fila etiqueta="Código postal de entrega">
                         {p.Codigo_Postal_Entrega || '-'}
                     </Fila>
+
 
                     <Fila etiqueta="Teléfono">
                         {p.Telefono || '-'}
                     </Fila>
 
+
                     <Fila etiqueta="Fax">
                         {p.Fax || '-'}
                     </Fila>
 
+
                     <Fila etiqueta="Días de gracia para pagar">
+
                         {p.Dias_De_Gracia != null
                             ? `${p.Dias_De_Gracia} días`
-                            : '-'}
+                            : '-'
+                        }
+
                     </Fila>
 
+
                     <Fila etiqueta="Sitio web">
+
                         {p.Sitio_Web ? (
+
                             <a
                                 href={p.Sitio_Web}
                                 target="_blank"
@@ -363,12 +457,15 @@ function TarjetaProveedor({
                             >
                                 {p.Sitio_Web}
                             </a>
+
                         ) : (
                             '-'
                         )}
+
                     </Fila>
 
                 </div>
+
 
                 {/* ---------- COLUMNA DERECHA ---------- */}
 
@@ -377,35 +474,74 @@ function TarjetaProveedor({
                     <div className="prov-panel">
 
                         <h3 className="prov-panel-titulo">
-                            <span className="prov-ico">📍</span>
+
+                            <span className="prov-ico">
+                                📍
+                            </span>
+
                             Direcciones
+
                         </h3>
 
-                        <div className="prov-direccion">
-                            <span className="prov-ico">🚚</span>
-                            <div>
-                                <strong>Dirección de entrega</strong>
-                                <p>{dirEntrega || '-'}</p>
-                            </div>
-                        </div>
 
                         <div className="prov-direccion">
-                            <span className="prov-ico">✉️</span>
+
+                            <span className="prov-ico">
+                                🚚
+                            </span>
+
                             <div>
-                                <strong>Dirección postal</strong>
-                                <p>{dirPostal || '-'}</p>
+
+                                <strong>
+                                    Dirección de entrega
+                                </strong>
+
+                                <p>
+                                    {dirEntrega || '-'}
+                                </p>
+
                             </div>
+
+                        </div>
+
+
+                        <div className="prov-direccion">
+
+                            <span className="prov-ico">
+                                ✉️
+                            </span>
+
+                            <div>
+
+                                <strong>
+                                    Dirección postal
+                                </strong>
+
+                                <p>
+                                    {dirPostal || '-'}
+                                </p>
+
+                            </div>
+
                         </div>
 
                     </div>
+
+
+                    {/* ---------- MAPA ---------- */}
 
                     {mapaUrl && (
 
                         <div className="prov-panel">
 
                             <h3 className="prov-panel-titulo">
-                                <span className="prov-ico">📌</span>
+
+                                <span className="prov-ico">
+                                    📌
+                                </span>
+
                                 Ubicación en el mapa
+
                             </h3>
 
                             <iframe
@@ -424,8 +560,8 @@ function TarjetaProveedor({
             </div>
 
         </section>
-
     );
 }
+
 
 export default ProveedorDetalleModal;

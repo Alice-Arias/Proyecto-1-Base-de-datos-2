@@ -2,12 +2,11 @@ USE WideWorldImporters;
 GO
 
 /* 
-   MODULO PROVEEDORES
-       SP_Proveedores_Listar
-       SP_Proveedores_Detalle
-       SP_Proveedores_Insertar
-       SP_Proveedores_Actualizar
-       SP_Proveedores_Eliminar
+   MODULO Ventas
+       SP_Ventas_Listar
+       SP_Ventas_Detalle
+       SP_Ventas_Insertar
+       SP_Ventas_Actualizar
    TIPOS DE ERROR
        1 = falta un dato obligatorio o el formato es malo
        2 = valor fuera de rango

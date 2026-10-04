@@ -2,24 +2,21 @@ USE WideWorldImporters;
 GO
 
 /* 
-   MODULO PROVEEDORES
+
+   MODULO REPORTES Y DATOS ESTADISTICOS
+
        SP_Reporte_ComprasProveedores
-       SP_Ventas_Clientes
-       SP_Top_Productos
-       SP_Top_Clientes
-       SP_Top_Proveedores
-       SP_Ventas_Categorias
+       SP_Reporte_VentasClientes
+       SP_Top_GananciaProductos
+       SP_Top_ClientesFacturas
+       SP_Top_ProveedoresOrdenes
+       SP_Resumen_VentasCategorias
        SP_Seguimiento_Compras_Clientes
        SP_Seguimiento_Compras_Proveedores
        SP_Rotacion_Inventario
        SP_Metodo_Envio_Favorito
-   TIPOS DE ERROR
-       1 = falta un dato obligatorio o el formato es malo
-       2 = valor fuera de rango
-       3 = un registro relacionado no existe
-       4 = duplicado (ya existe un proveedor con ese nombre)
-       5 = el proveedor no existe
-       6 = el proveedor tiene registros relacionados (no se puede borrar)
+       SP_Reportes_Opciones
+
  */
 
 

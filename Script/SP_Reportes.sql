@@ -828,6 +828,19 @@ END
 GO
 
 
+/* =========================================================
+
+   OPCIONES DE REPORTES
+
+   Devuelve las opciones disponibles para los filtros de los
+   procedimientos del modulo de reportes y datos estadisticos.
+
+   Incluye años disponibles para ventas y compras, meses,
+   categorias de clientes, categorias de productos y
+   proveedores.
+
+   ========================================================= */
+
 CREATE OR ALTER PROCEDURE dbo.SP_Reportes_Opciones
 AS
 BEGIN
@@ -902,138 +915,26 @@ BEGIN
     FROM dbo.GruposInventario
     ORDER BY StockGroupName;
 
+    -- 5. Categorías de clientes
+    SELECT
+        CustomerCategoryID AS ID,
+        CustomerCategoryName AS Nombre
+    FROM dbo.TiposCliente
+    ORDER BY CustomerCategoryName;
+
+    -- 6. Proveedores
+    SELECT
+        SupplierID AS ID,
+        SupplierName AS Nombre
+    FROM dbo.ProveedoresActuales
+    ORDER BY SupplierName;
+
+    -- 7. Productos
+    SELECT
+        StockItemID AS ID,
+        StockItemName AS Nombre
+    FROM dbo.ProductosActuales
+    ORDER BY StockItemName;
+
 END
 GO
-
-
--- Select de apoyo para desarrollo
-SELECT * FROM dbo.ProductosActuales;
-
-SELECT * FROM dbo.ProductosInventario;
-
-SELECT * FROM dbo.DetalleOrdenCompra;
-
-SELECT * FROM dbo.OrdenesCompra;
-
-SELECT * FROM dbo.TransaccionesProveedores;
-
-SELECT * FROM Purchasing.PurchaseOrderLines;
-
-SELECT * FROM dbo.CategoriaProveedores;
-
-SELECT * FROM dbo.Facturas;
-
-SELECT * FROM dbo.DetalleFacturas;
-
-SELECT * FROM dbo.ClientesActuales;
-
-SELECT * FROM dbo.TiposCliente;
-
-SELECT * FROM dbo.OrdenesCompra;
-
-SELECT TOP 5 *
-FROM dbo.DetalleOrdenCompra;
-
-SELECT * FROM dbo.ItemGrupos;
-
-SELECT * FROM dbo.GruposInventario;
-
-SELECT * FROM dbo.ProductosTransacciones;
-
-
-SELECT COLUMN_NAME, DATA_TYPE
-FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_SCHEMA = 'dbo'
-  AND TABLE_NAME = 'ProductosTransacciones'
-ORDER BY ORDINAL_POSITION;
-
-
-SELECT TOP 10
-    StockItemID,
-    TransactionOccurredWhen,
-    Quantity
-FROM dbo.ProductosTransacciones;
-
-SELECT TOP 20
-    pt.StockItemID,
-    pt.TransactionOccurredWhen,
-    pt.Quantity,
-    pt.InvoiceID,
-    pt.PurchaseOrderID
-FROM dbo.ProductosTransacciones AS pt
-ORDER BY
-    pt.StockItemID,
-    pt.TransactionOccurredWhen;
-
-
-    SELECT
-        pa.StockItemID,
-        pa.StockItemName,
-        pi.QuantityOnHand,
-        SUM(pt.Quantity) AS TotalMovimientos,
-        pi.QuantityOnHand - SUM(pt.Quantity) AS InventarioInicialEstimado
-    FROM dbo.ProductosActuales AS pa
-    INNER JOIN dbo.ProductosInventario AS pi
-        ON pa.StockItemID = pi.StockItemID
-    INNER JOIN dbo.ProductosTransacciones AS pt
-        ON pa.StockItemID = pt.StockItemID
-    GROUP BY
-        pa.StockItemID,
-        pa.StockItemName,
-        pi.QuantityOnHand
-    ORDER BY
-        pa.StockItemID;
-
-
-SELECT
-    pi.StockItemID,
-    pi.QuantityOnHand,
-    pi.LastEditedWhen,
-    MAX(pt.TransactionOccurredWhen) AS UltimaTransaccion
-FROM dbo.ProductosInventario AS pi
-INNER JOIN dbo.ProductosTransacciones AS pt
-    ON pi.StockItemID = pt.StockItemID
-GROUP BY
-    pi.StockItemID,
-    pi.QuantityOnHand,
-    pi.LastEditedWhen
-ORDER BY
-    pi.StockItemID;
-
-SELECT
-    pt.TransactionOccurredWhen,
-    pt.Quantity,
-    pt.InvoiceID,
-    pt.PurchaseOrderID
-FROM dbo.ProductosTransacciones AS pt
-WHERE pt.StockItemID = 98 -- AQUÍ EL ID DEL PRODUCTO
-ORDER BY pt.TransactionOccurredWhen;
-
-SELECT
-    MIN(pt.TransactionOccurredWhen) AS PrimeraTransaccion,
-    MAX(pt.TransactionOccurredWhen) AS UltimaTransaccion,
-    COUNT(*) AS CantidadMovimientos,
-    SUM(pt.Quantity) AS TotalMovimientos
-FROM dbo.ProductosTransacciones AS pt
-WHERE pt.StockItemID = 98;
-
-SELECT
-    pa.StockItemID,
-    pa.StockItemName,
-    pi.QuantityOnHand,
-    pi.LastStocktakeQuantity,
-    pi.LastCostPrice,
-    pi.LastEditedWhen
-FROM dbo.ProductosActuales AS pa
-INNER JOIN dbo.ProductosInventario AS pi
-    ON pa.StockItemID = pi.StockItemID
-WHERE pa.StockItemID = 98; -- EL ID DEL PRODUCTO
-
-SELECT
-    pt.TransactionOccurredWhen,
-    pt.Quantity,
-    pt.InvoiceID,
-    pt.PurchaseOrderID
-FROM dbo.ProductosTransacciones AS pt
-WHERE pt.StockItemID = 98-- EL MISMO ID
-ORDER BY pt.TransactionOccurredWhen DESC;

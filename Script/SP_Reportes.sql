@@ -371,6 +371,88 @@ END
 GO
 
 
+/* =========================================================
+
+   6. MATRIZ RESUMEN DE VENTAS POR CATEGORÍA Y AÑO
+
+   Devuelve el monto total de las ventas agrupadas por
+   categoría de producto y año.
+
+   Utiliza PIVOT para transformar los años en columnas
+   y generar una matriz de ventas por categoría.
+
+   Las columnas correspondientes a los años se generan
+   dinámicamente a partir de los años existentes en las
+   facturas.
+
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Resumen_VentasCategorias
+
+AS
+BEGIN
+
+    SET NOCOUNT ON;
+
+    DECLARE @Columnas NVARCHAR(MAX);
+    DECLARE @SQL NVARCHAR(MAX);
+
+    SELECT @Columnas = STRING_AGG(
+        QUOTENAME(Anio),
+        ','
+    ) WITHIN GROUP (ORDER BY Anio)
+
+    FROM
+    (
+        SELECT DISTINCT YEAR(InvoiceDate) AS Anio
+        FROM dbo.Facturas
+    ) AS Años;
+
+    SET @SQL = '
+    WITH VentasPorCategoria AS
+    (
+        SELECT 
+            YEAR(f.InvoiceDate) AS Anio,
+            g.StockGroupID AS ID_Categoria,
+            g.StockGroupName AS Categoria,
+            SUM(df.ExtendedPrice) AS Monto
+
+        FROM dbo.ProductosActuales AS pa
+        INNER JOIN dbo.ItemGrupos AS ig 
+            ON pa.StockItemID = ig.StockItemID
+        INNER JOIN dbo.GruposInventario AS g 
+            ON ig.StockGroupID = g.StockGroupID
+        INNER JOIN dbo.DetalleFacturas AS df 
+            ON pa.StockItemID = df.StockItemID
+        INNER JOIN dbo.Facturas AS f 
+            ON df.InvoiceID = f.InvoiceID
+
+        GROUP BY 
+            YEAR(f.InvoiceDate),
+            g.StockGroupID,
+            g.StockGroupName
+    )
+
+    SELECT
+        ID_Categoria,
+        Categoria,
+        ' + @Columnas + '
+    FROM VentasPorCategoria
+    PIVOT
+    (
+        SUM(Monto)
+        FOR Anio IN (' + @Columnas + ')
+    ) AS Matriz
+    ORDER BY Categoria;
+    ';
+
+    EXEC sp_executesql @SQL;
+
+END
+GO
+
+
+
 
 CREATE OR ALTER PROCEDURE dbo.SP_Reportes_Opciones
 AS
@@ -403,9 +485,9 @@ SELECT * FROM dbo.CategoriaProveedores;
 
 SELECT * FROM dbo.Facturas;
 
-SELECT * FROM dbo.ClientesActuales;
-
 SELECT * FROM dbo.DetalleFacturas;
+
+SELECT * FROM dbo.ClientesActuales;
 
 SELECT * FROM dbo.ClientesActuales;
 

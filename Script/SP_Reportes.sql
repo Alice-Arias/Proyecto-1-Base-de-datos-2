@@ -699,6 +699,134 @@ END
 GO
 
 
+/* =========================================================
+
+   10. METODO DE ENVIO FAVORITO
+
+   Determina el metodo de envio mas utilizado para cada
+   ciudad de destino, tomando como referencia la cantidad
+   de ventas realizadas.
+
+   Permite filtrar los resultados por año, mes, categoria
+   de cliente, categoria de producto y producto.
+
+   En caso de empate, se muestran todos los metodos de envio
+   que ocupen la primera posicion.
+
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Metodo_Envio_Favorito
+
+    @Anio INT = NULL,
+    @Mes INT = NULL,
+    @CategoriaCliente NVARCHAR(50) = NULL,
+    @CategoriaProducto NVARCHAR(50) = NULL,
+    @Producto NVARCHAR(100) = NULL
+
+AS
+BEGIN
+
+    SET NOCOUNT ON;
+
+    WITH VentasFiltradas AS
+    (
+        SELECT DISTINCT
+            f.InvoiceID,
+            YEAR(f.InvoiceDate) AS Anio,
+            MONTH(f.InvoiceDate) AS Mes,
+            c.CityID AS ID_Ciudad,
+            c.CityName AS Ciudad,
+            f.DeliveryMethodID AS ID_MetodoEnvio,
+            fe.DeliveryMethodName AS Metodo_Envio,
+            tc.CustomerCategoryName AS Categoria_Cliente,
+            g.StockGroupName AS Categoria_Producto,
+            pa.StockItemName AS Producto
+
+        FROM dbo.Facturas AS f
+        INNER JOIN dbo.ClientesActuales AS ca ON f.CustomerID = ca.CustomerID
+        INNER JOIN dbo.TiposCliente AS tc ON ca.CustomerCategoryID = tc.CustomerCategoryID
+        INNER JOIN dbo.FormasEntrega AS fe ON f.DeliveryMethodID = fe.DeliveryMethodID
+        INNER JOIN dbo.Ciudades AS c ON ca.DeliveryCityID = c.CityID
+        INNER JOIN dbo.DetalleFacturas AS df ON f.InvoiceID = df.InvoiceID
+        INNER JOIN dbo.ProductosActuales AS pa ON df.StockItemID = pa.StockItemID
+        INNER JOIN dbo.ItemGrupos AS ig ON pa.StockItemID = ig.StockItemID
+        INNER JOIN dbo.GruposInventario AS g ON ig.StockGroupID = g.StockGroupID
+
+        WHERE (@Anio IS NULL OR YEAR(f.InvoiceDate) = @Anio)
+            AND (@Mes IS NULL OR MONTH(f.InvoiceDate) = @Mes)
+            AND (@CategoriaCliente IS NULL OR tc.CustomerCategoryName LIKE '%' + @CategoriaCliente + '%')
+            AND (@CategoriaProducto IS NULL OR g.StockGroupName LIKE '%' + @CategoriaProducto + '%')
+            AND (@Producto IS NULL OR pa.StockItemName LIKE '%' + @Producto + '%')
+    ),
+
+    VentasPorMetodo AS
+    (
+        SELECT
+            Anio,
+            Mes,
+            ID_Ciudad,
+            Ciudad,
+            ID_MetodoEnvio,
+            Metodo_Envio,
+            COUNT(DISTINCT InvoiceID) AS Cantidad_Ventas
+
+        FROM VentasFiltradas
+
+        GROUP BY Anio, Mes, ID_Ciudad, Ciudad, ID_MetodoEnvio, Metodo_Envio
+    ),
+
+    RankingMetodos AS
+    (
+        SELECT
+            Anio,
+            Mes,
+            ID_Ciudad,
+            Ciudad,
+            ID_MetodoEnvio,
+            Metodo_Envio,
+            Cantidad_Ventas,
+            DENSE_RANK() OVER (PARTITION BY ID_Ciudad ORDER BY Cantidad_Ventas DESC) AS Posicion
+
+        FROM VentasPorMetodo
+    )
+
+    SELECT
+        r.Anio,
+        r.Mes,
+        r.ID_Ciudad,
+        r.Ciudad,
+        r.ID_MetodoEnvio,
+        r.Metodo_Envio,
+        r.Cantidad_Ventas,
+        vf.Categoria_Cliente,
+        vf.Categoria_Producto,
+        vf.Producto
+
+    FROM RankingMetodos AS r
+    INNER JOIN
+    (
+        SELECT DISTINCT
+            Anio,
+            Mes,
+            ID_Ciudad,
+            ID_MetodoEnvio,
+            Categoria_Cliente,
+            Categoria_Producto,
+            Producto
+        FROM VentasFiltradas
+    ) AS vf
+        ON r.Anio = vf.Anio
+        AND r.Mes = vf.Mes
+        AND r.ID_Ciudad = vf.ID_Ciudad
+        AND r.ID_MetodoEnvio = vf.ID_MetodoEnvio
+
+    WHERE r.Posicion = 1
+
+    ORDER BY r.Cantidad_Ventas DESC, r.Ciudad;
+
+END
+GO
+
 
 CREATE OR ALTER PROCEDURE dbo.SP_Reportes_Opciones
 AS

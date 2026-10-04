@@ -45,7 +45,7 @@ BEGIN
         f.InvoiceDate AS Fecha_Factura,
         c.CustomerName AS Nombre_Cliente,
         fe.DeliveryMethodName AS Metodo_Entrega,
-        df.ExtendedPrice AS Monto
+        SUM(df.ExtendedPrice) AS Monto
 
     FROM dbo.Facturas f
     INNER JOIN dbo.ClientesActuales AS c ON f.CustomerID = c.CustomerID
@@ -68,7 +68,7 @@ BEGIN
     HAVING (@MontoInicio IS NULL OR SUM(df.ExtendedPrice) >= @MontoInicio)
             AND (@MontoFin IS NULL OR SUM(df.ExtendedPrice) <= @MontoFin)
 
-    ORDER BY f.InvoiceID ASC;
+    ORDER BY c.CustomerName ASC;
 
 END
 GO
@@ -90,9 +90,10 @@ BEGIN
 
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
-    -- Encabezado
+    -- Encabezado (SIN productos, una sola fila por factura)
     SELECT
         f.InvoiceID,
+        ca.CustomerID,
         ca.CustomerName AS Nombre_Cliente, 
         fe.DeliveryMethodName AS Metodo_Entrega,
         f.CustomerPurchaseOrderNumber AS Numero_Orden,
@@ -109,8 +110,9 @@ BEGIN
 
     WHERE f.InvoiceID = @InvoiceID; 
 
-    -- Detalle
+    -- Detalle (aquí SÍ va StockItemID, una fila por producto)
     SELECT 
+        pa.StockItemID,
         pa.StockItemName AS Producto,
         df.Quantity AS Cantidad,
         df.UnitPrice AS Precio_Unitario,
@@ -125,7 +127,6 @@ BEGIN
 
 END
 GO
-
 
 /* =========================================================
    3. INSERTAR

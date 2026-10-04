@@ -91,6 +91,26 @@ body {
 
 
 /* =========================================================
+   INPUTS NUMÉRICOS: SIN FLECHAS DE SUBIR/BAJAR
+   Regla global (sin prefijo de módulo): afecta a todos los
+   input[type="number"] de toda la aplicación (Clientes,
+   Proveedores, Inventario, Ventas), ya que este CSS se carga
+   una sola vez para toda la app.
+   ========================================================= */
+
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+/* =========================================================
    ESTRUCTURA PRINCIPAL
    ========================================================= */
 
@@ -650,6 +670,7 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 0.4rem;
     height: 38px;
     padding: 0 14px;
     border: 1px solid #cbd5e1;
@@ -1112,7 +1133,18 @@ body {
     background: #ffffff;
 }
 
+/* Calendario nativo (type="date") en tema claro, tanto dentro
+   de .filtro como dentro de los formularios con clase .campo */
+.filtro input[type="date"],
+.campo input[type="date"] {
+    color-scheme: light;
+}
+
 .filtro button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
     padding: 0.6rem 1rem;
     border-radius: 8px;
     border: none;

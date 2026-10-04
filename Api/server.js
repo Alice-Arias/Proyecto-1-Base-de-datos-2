@@ -6,6 +6,7 @@ const cors = require('cors');
 const clientesRoutes = require('./routes/clientes.routes');
 const proveedoresRoutes = require('./routes/proveedores.routes');
 const inventarioRoutes = require('./routes/inventario.routes');
+const ventasRoutes = require('./routes/ventas.routes');
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use('/api/clientes', clientesRoutes);
 app.use('/api/proveedores', proveedoresRoutes);
 app.use('/api/inventarios', inventarioRoutes);
+app.use('/api/ventas', ventasRoutes);
 
 const PORT = process.env.PORT || 4000;
 

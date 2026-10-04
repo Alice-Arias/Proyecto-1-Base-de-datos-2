@@ -6,6 +6,7 @@ import Topbar from './components/Topbar';
 import ClientesPage from './pages/ClientesPage';
 import ProveedoresPage from './pages/ProveedoresPage';
 import InventarioPage from './pages/InventarioPage';
+import VentasPage from './pages/VentasPage';
 
 import './App.css';
 
@@ -28,6 +29,7 @@ function App() {
                     {page === 'clientes' && <ClientesPage />}
                     {page === 'proveedores' && <ProveedoresPage />}
                     {page === 'inventario' && <InventarioPage />}
+                    {page === 'ventas' && <VentasPage />}
                 </div>
             </div>
 

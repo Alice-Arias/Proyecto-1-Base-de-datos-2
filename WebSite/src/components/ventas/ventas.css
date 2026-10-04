@@ -1,0 +1,1261 @@
+/* ============================================================
+   Z-INDEX: EL DETALLE DEL CLIENTE DEBE QUEDAR POR ENCIMA
+   .modal-fondo (usado por ClienteDetalleModal) tiene z-index:50
+   en el CSS global, pero .vta-overlay (el modal de la venta que
+   ya está abierto) tiene z-index:100. Sin este ajuste, el
+   detalle del cliente se abre "atrás" y parece que no pasa nada.
+   ============================================================ */
+
+.modal-fondo {
+    z-index: 150;
+}
+
+
+/* ============================================================
+   QUITAR LAS FLECHAS NATIVAS DE SUBIR/BAJAR
+   Esto es GLOBAL (sin prefijo vf- ni vta-): afecta a todos los
+   inputs numéricos de toda la aplicación, no solo Ventas, ya
+   que este archivo se carga una sola vez y el CSS es en cascada.
+   Se quitan por completo en vez de reemplazarlas, que es lo más
+   limpio y consistente con el resto de los inputs de texto.
+   ============================================================ */
+
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* ============================================================
+   ESTILOS DEL MODAL DE DETALLE DE VENTAS
+   Mismo patrón visual que Proveedores: usa las variables del
+   CSS general (--primary, --green, --border, --shadow-sm, etc.)
+   Todas las clases empiezan con "vta-" para no chocar con las
+   de clientes, proveedores ni inventario.
+   La animación "modalEntrada" viene del CSS general.
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   FONDO Y VENTANA
+   ------------------------------------------------------------ */
+
+.vta-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    overflow-y: auto;
+    background: rgba(15, 30, 60, 0.48);
+}
+
+.vta-modal {
+    position: relative;
+    width: min(900px, 94vw);
+    max-height: 90vh;
+    padding: 1.25rem;
+    overflow-y: auto;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    color: var(--text-dark);
+    box-sizing: border-box;
+    animation: modalEntrada 0.25s ease-out;
+    scrollbar-width: thin;
+    scrollbar-color: #b9c4d1 transparent;
+}
+
+.vta-modal::-webkit-scrollbar {
+    width: 7px;
+}
+
+.vta-modal::-webkit-scrollbar-thumb {
+    background: #b9c4d1;
+    border-radius: 10px;
+}
+
+
+/* ------------------------------------------------------------
+   BOTÓN CERRAR
+   ------------------------------------------------------------ */
+
+.vta-cerrar {
+    position: absolute;
+    top: 1rem;
+    right: 1.2rem;
+    z-index: 5;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+        background-color var(--transition-fast),
+        color var(--transition-fast),
+        border-color var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.vta-cerrar:hover {
+    background: var(--danger-light);
+    border-color: #e7bfc1;
+    color: var(--danger);
+    transform: scale(1.04);
+}
+
+.vta-cerrar:focus-visible {
+    outline: 3px solid var(--primary-light);
+    outline-offset: 2px;
+}
+
+
+/* ------------------------------------------------------------
+   ENCABEZADO: avatar, número de factura y método de entrega
+   ------------------------------------------------------------ */
+
+.vta-encabezado {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0 2.6rem 1rem 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.vta-avatar {
+    flex: 0 0 auto;
+    width: 62px;
+    height: 62px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-light), var(--purple-light, var(--primary-light)));
+    color: var(--primary);
+    font-size: 1.65rem;
+    transition: transform var(--transition-fast, 0.2s ease), box-shadow var(--transition-fast, 0.2s ease);
+    animation: vtaPulso 0.5s ease-out;
+}
+
+.vta-avatar:hover {
+    transform: scale(1.06);
+    box-shadow: 0 6px 16px rgba(35, 55, 80, 0.14);
+}
+
+@keyframes vtaPulso {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.08);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+/* ------------------------------------------------------------
+   ANIMACIÓN DE ENTRADA ESCALONADA
+   El encabezado y cada panel aparecen en secuencia (no todos
+   de golpe), dando una sensación más viva al abrir el modal.
+   ------------------------------------------------------------ */
+
+.vta-animar {
+    animation: vtaEntrada 0.35s ease-out both;
+}
+
+@keyframes vtaEntrada {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vta-animar {
+        animation: none;
+    }
+}
+
+.vta-titulo {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: left;
+}
+
+.vta-titulo h2 {
+    margin: 0 0 0.35rem;
+    color: var(--primary-dark);
+    font-size: 1.45rem;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.vta-titulo p {
+    display: inline-block;
+    margin: 0;
+    padding: 0.15rem 0.9rem;
+    border-radius: 8px;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+
+/* ------------------------------------------------------------
+   TARJETAS CLIENTE / VENDEDOR
+   Mismo patrón que .prov-caja: barra de color arriba, ícono
+   redondo, nombre destacado. El cliente además tiene un botón
+   para ver su detalle real.
+   ------------------------------------------------------------ */
+
+.vta-cajas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.vta-caja {
+    position: relative;
+    overflow: hidden;
+    padding: 1rem 1.1rem 0.9rem;
+    background: var(--card-bg, #ffffff);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-fast, 0.2s ease), transform var(--transition-fast, 0.2s ease);
+}
+
+.vta-caja:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.vta-caja::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--primary);
+    opacity: 0.85;
+}
+
+.vta-caja-verde::before {
+    background: var(--green);
+}
+
+.vta-caja-titulo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}
+
+.vta-caja-ico {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.vta-caja-ico.verde {
+    background: var(--green-light);
+    color: var(--green);
+}
+
+.vta-caja-nombre {
+    display: block;
+    margin: 0 0 0.7rem;
+    color: var(--text-dark);
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+/* Cuando el nombre de la tarjeta es también un enlace clickeable
+   (como el del cliente), se ve como .vta-link-producto pero
+   conservando el tamaño grande de .vta-caja-nombre */
+a.vta-caja-nombre.vta-link-producto {
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.vta-caja-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid #cbdcf5;
+    border-radius: 9px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        transform var(--transition-fast, 0.2s ease),
+        box-shadow var(--transition-fast, 0.2s ease),
+        background-color var(--transition-fast, 0.2s ease);
+}
+
+.vta-caja-btn:hover:not(:disabled) {
+    background: var(--primary);
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 111, 196, 0.20);
+}
+
+.vta-caja-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+
+    .vta-cajas {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ------------------------------------------------------------
+   PANELES
+   ------------------------------------------------------------ */
+
+.vta-panel {
+    padding: 0.9rem 1rem 0.6rem;
+    margin-bottom: 1rem;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    box-sizing: border-box;
+    transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.vta-panel:last-child {
+    margin-bottom: 0;
+}
+
+.vta-panel:hover {
+    border-color: #c7d5e5;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.vta-panel-titulo {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin: 0 0 0.5rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--primary-dark);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+
+/* ------------------------------------------------------------
+   ICONOS
+   ------------------------------------------------------------ */
+
+.vta-ico {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: var(--primary-light);
+    font-size: 0.9rem;
+}
+
+.vta-ico.verde {
+    background: var(--green-light);
+}
+
+
+/* ------------------------------------------------------------
+   FILAS "ETIQUETA / VALOR" (encabezado de la factura)
+   ------------------------------------------------------------ */
+
+.vta-fila {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid #eaeff5;
+}
+
+.vta-fila:last-of-type {
+    border-bottom: none;
+}
+
+.vta-etiqueta {
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    line-height: 1.4;
+}
+
+.vta-valor {
+    color: var(--text-dark);
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.vta-valor a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.vta-valor a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+
+/* ------------------------------------------------------------
+   INSTRUCCIONES DE ENTREGA
+   ------------------------------------------------------------ */
+
+.vta-direccion {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding-top: 0.8rem;
+    margin-top: 0.4rem;
+    border-top: 1px solid #eaeff5;
+}
+
+.vta-direccion strong {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.vta-direccion p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+
+/* ------------------------------------------------------------
+   TABLA DE DETALLE (líneas de la factura)
+   ------------------------------------------------------------ */
+
+.vta-tabla-wrap {
+    overflow-x: auto;
+}
+
+.vta-tabla {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+}
+
+.vta-tabla th {
+    text-align: left;
+    padding: 0.6rem 0.7rem;
+    background: #f9fbfd;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.vta-tabla td {
+    padding: 0.65rem 0.7rem;
+    border-bottom: 1px solid #eaeff5;
+    color: var(--text-dark);
+    font-size: 0.88rem;
+}
+
+.vta-tabla tbody tr:hover td {
+    background: #f7fafd;
+}
+
+.vta-tabla tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* ------------------------------------------------------------
+   ENLACE DEL PRODUCTO (abre el detalle real de Inventario)
+   ------------------------------------------------------------ */
+
+.vta-link-producto {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.vta-link-producto::after {
+    content: "↗";
+    font-size: 0.78em;
+    opacity: 0.65;
+}
+
+.vta-link-producto:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+    transform: translateX(2px);
+}
+
+.vta-tabla-wrap .vta-tabla tbody tr {
+    transition: background-color var(--transition-fast, 0.2s ease);
+    animation: vtaEntrada 0.3s ease-out both;
+}
+
+.vta-tabla-wrap .vta-tabla tbody tr:nth-child(1) { animation-delay: 0.05s; }
+.vta-tabla-wrap .vta-tabla tbody tr:nth-child(2) { animation-delay: 0.10s; }
+.vta-tabla-wrap .vta-tabla tbody tr:nth-child(3) { animation-delay: 0.15s; }
+.vta-tabla-wrap .vta-tabla tbody tr:nth-child(4) { animation-delay: 0.20s; }
+.vta-tabla-wrap .vta-tabla tbody tr:nth-child(n+5) { animation-delay: 0.25s; }
+
+
+/* ============================================================
+   PANTALLAS MEDIANAS
+   ============================================================ */
+
+@media (max-width: 860px) {
+
+    .vta-overlay {
+        padding: 0.75rem;
+    }
+
+    .vta-modal {
+        width: 96vw;
+        padding: 1rem;
+        border-radius: 15px;
+    }
+}
+
+
+/* ============================================================
+   PANTALLAS PEQUEÑAS
+   ============================================================ */
+
+@media (max-width: 600px) {
+
+    .vta-overlay {
+        padding: 0.5rem;
+    }
+
+    .vta-modal {
+        width: 98vw;
+        max-height: 94vh;
+        padding: 0.85rem;
+        border-radius: 12px;
+    }
+
+    .vta-encabezado {
+        gap: 0.7rem;
+        padding-right: 2.6rem;
+    }
+
+    .vta-avatar {
+        width: 48px;
+        height: 48px;
+        font-size: 1.35rem;
+    }
+
+    .vta-titulo h2 {
+        font-size: 1.2rem;
+    }
+
+    .vta-fila {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+
+    .vta-valor {
+        text-align: left;
+    }
+}
+
+
+/* ============================================================
+   MODO OSCURO SUAVE
+   ============================================================ */
+
+.modo-oscuro .vta-overlay {
+    background: rgba(8, 11, 15, 0.74);
+}
+
+.modo-oscuro .vta-modal {
+    background: #292f36;
+    border-color: #414b56;
+    color: #e2e6eb;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.34);
+}
+
+.modo-oscuro .vta-encabezado {
+    border-bottom-color: #414b56;
+}
+
+.modo-oscuro .vta-avatar {
+    background: #343c45;
+    color: #9bbce9;
+}
+
+.modo-oscuro .vta-titulo h2,
+.modo-oscuro .vta-panel-titulo {
+    color: #e2e6eb;
+}
+
+.modo-oscuro .vta-titulo p {
+    background: #303b49;
+    color: #a9c4e8;
+}
+
+.modo-oscuro .vta-cerrar {
+    background: #303842;
+    border-color: #414b56;
+    color: #c2cad3;
+}
+
+.modo-oscuro .vta-cerrar:hover {
+    background: #3a4149;
+    border-color: #5b4044;
+    color: #e78a8a;
+}
+
+.modo-oscuro .vta-caja,
+.modo-oscuro .vta-panel {
+    background: #252b32;
+    border-color: #3b444e;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+}
+
+.modo-oscuro .vta-caja-titulo {
+    color: #aeb6c0;
+}
+
+.modo-oscuro .vta-caja-ico {
+    background: #303b49;
+    color: #a9c4e8;
+}
+
+.modo-oscuro .vta-caja-ico.verde {
+    background: #2b3d34;
+    color: #7fd3a3;
+}
+
+.modo-oscuro .vta-caja-nombre {
+    color: #e2e6eb;
+}
+
+.modo-oscuro .vta-caja-btn {
+    background: #303842;
+    border-color: #414b56;
+    color: #a9c4e8;
+}
+
+.modo-oscuro .vta-caja-btn:hover:not(:disabled) {
+    background: #456da5;
+    color: #ffffff;
+}
+
+.modo-oscuro .vta-panel:hover {
+    border-color: #4a5560;
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.16);
+}
+
+.modo-oscuro .vta-panel-titulo {
+    border-bottom-color: #3b444e;
+}
+
+.modo-oscuro .vta-etiqueta,
+.modo-oscuro .vta-direccion p {
+    color: #aeb6c0;
+}
+
+.modo-oscuro .vta-valor,
+.modo-oscuro .vta-direccion strong {
+    color: #e2e6eb;
+}
+
+.modo-oscuro .vta-valor a,
+.modo-oscuro .vta-link-producto {
+    color: #a9c4e8;
+}
+
+.modo-oscuro .vta-fila,
+.modo-oscuro .vta-direccion {
+    border-color: #3b444e;
+}
+
+.modo-oscuro .vta-ico {
+    background: #303b49;
+}
+
+.modo-oscuro .vta-ico.verde {
+    background: #2b3d34;
+}
+
+.modo-oscuro .vta-tabla th {
+    background: #252b32;
+    color: #aeb6c0;
+    border-bottom-color: #3b444e;
+}
+
+.modo-oscuro .vta-tabla td {
+    color: #e2e6eb;
+    border-bottom-color: #3b444e;
+}
+
+.modo-oscuro .vta-tabla tbody tr:hover td {
+    background: #2d343c;
+}
+/* ============================================================
+   TABLA DE VENTAS
+   Mismo patrón profesional que inv-tabla: columnas fijas via
+   <colgroup>, encabezado con degradé, botón de acción circular.
+   ============================================================ */
+
+.vta-tabla-contenedor {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.vta-tabla {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card-bg);
+    color: var(--text-dark);
+
+    /* "auto" en vez de "fixed": cada columna se ajusta a su
+       contenido real (como el número de factura o "Ver", que
+       son angostos) en vez de repartir el ancho en porcentajes
+       fijos que dejan huecos cuando el texto es corto. */
+    table-layout: auto;
+}
+
+.vta-tabla th {
+    height: 52px;
+    padding: 0.8rem 1rem;
+    background: linear-gradient(180deg, #edf3f9, #e8eef5);
+    color: #46566b;
+    font-size: 0.84rem;
+    font-weight: 650;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 2px solid #d5dfeb;
+    white-space: nowrap;
+}
+
+.vta-tabla td {
+    padding: 0.8rem 1rem;
+    background: #ffffff;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    line-height: 1.45;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border);
+    overflow-wrap: anywhere;
+    transition: background-color var(--transition-fast);
+}
+
+.vta-tabla tbody tr:hover td {
+    background: #f0f6ff;
+}
+
+.vta-tabla tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.vta-tabla .vta-centro {
+    text-align: center;
+}
+
+.vta-numero-factura {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 8px;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.vta-nombre-cliente {
+    display: block;
+    color: var(--text-dark);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.vta-monto {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.vta-accion {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: #ffffff;
+    cursor: pointer;
+    transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+.vta-accion:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.vta-accion:active {
+    transform: translateY(0);
+}
+
+.vta-accion-ver {
+    color: var(--primary);
+}
+
+.vta-accion-ver:hover {
+    background: var(--primary-light);
+    border-color: #bfd2f0;
+}
+
+.vta-vacio {
+    padding: 1.5rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    text-align: center;
+}
+
+
+/* ------------------------------------------------------------
+   CAMPOS DE FECHA (filtro)
+   El input nativo type="date" se deja intacto (sigue abriendo
+   el calendario del navegador y se puede escribir a mano), pero
+   se envuelve en .vf-fecha-wrap para agregarle un ícono visible
+   y que todo el campo sea clickeable, no solo el ícono nativo.
+   ------------------------------------------------------------ */
+
+.vf-fecha-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.vf-fecha-wrap input[type="date"] {
+    padding-left: 2.1rem;
+    cursor: pointer;
+
+    /* Asegura separación pareja entre día/mes/año, evitando
+       que el navegador dibuje espacios irregulares. */
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+
+    /* Fuerza que el popup nativo del calendario (el que abre
+       el navegador al tocar el campo) se dibuje en tema claro,
+       en vez del tema oscuro que toma por defecto en algunos
+       sistemas/navegadores. */
+    color-scheme: light;
+}
+
+.vf-fecha-ico {
+    position: absolute;
+    left: 0.7rem;
+    color: var(--primary);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* El selector nativo del navegador (el ícono de calendario que
+   ya trae el input) se deja funcional pero discreto, ya que
+   ahora el ícono propio es el protagonista visual. */
+.vf-fecha-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   FILTRO DE VENTAS
+   Usa las mismas variables del CSS general (--primary, --border,
+   --text-dark, --text-muted, etc.). Cada campo tiene su label
+   arriba del input, alineados en una grilla pareja — por eso
+   no se desalinean como con inputs sueltos dentro del toolbar.
+   ============================================================ */
+
+.vf-filtro {
+    display: grid;
+
+    /* Columnas explícitas (no auto-fit + span): así las 7
+       columnas siempre caben en una sola fila en pantallas
+       grandes, sin que ninguna quede "huérfana" en una fila
+       aparte dejando un hueco vacío al lado. */
+    grid-template-columns:
+        0.85fr   /* Número de factura */
+        1.5fr    /* Cliente */
+        1.25fr   /* Método de entrega */
+        0.95fr   /* Fecha desde */
+        0.95fr   /* Fecha hasta */
+        0.85fr   /* Monto desde */
+        0.85fr;  /* Monto hasta */
+
+    gap: 0.7rem;
+    align-items: end;
+
+    padding: 1rem 1.2rem;
+
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+}
+
+/* En pantallas medianas, 7 columnas explícitas ya no entran:
+   se pasa a un grid flexible que reparte el espacio en 2-3
+   filas completas, en vez de dejar un campo solo. */
+@media (max-width: 1150px) {
+
+    .vf-filtro {
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    }
+}
+
+.vf-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.vf-campo label {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.vf-campo input,
+.vf-campo select {
+    width: 100%;
+    min-height: 40px;
+
+    padding: 0.55rem 0.75rem;
+
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    background: #ffffff;
+    color: var(--text-dark);
+
+    font-family: inherit;
+    font-size: 0.88rem;
+
+    outline: none;
+
+    box-sizing: border-box;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.vf-campo input::placeholder {
+    color: #9ca3af;
+}
+
+.vf-campo input:hover,
+.vf-campo select:hover {
+    border-color: #b8c9dc;
+}
+
+.vf-campo input:focus,
+.vf-campo select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.vf-campo select {
+    cursor: pointer;
+}
+
+
+/* ------------------------------------------------------------
+   TAMAÑOS RELATIVOS DE CADA CAMPO
+   El cliente ocupa un poco más de espacio por ser texto libre;
+   el resto se reparte parejo gracias al grid.
+   ------------------------------------------------------------ */
+
+.vf-metodo select {
+    font-size: 0.85rem;
+}
+
+/* Por debajo de 1150px el grid vuelve a ser auto-fit (ver
+   arriba), y ahí sí conviene que Cliente ocupe un poco más
+   de espacio al quedar en su propia fila. */
+@media (max-width: 1150px) and (min-width: 651px) {
+
+    .vf-cliente {
+        grid-column: span 2;
+    }
+}
+
+
+/* ------------------------------------------------------------
+   BOTONES
+   Ocupan toda la fila siguiente en pantallas chicas, y se
+   alinean a la derecha en pantallas grandes.
+   ------------------------------------------------------------ */
+
+.vf-acciones {
+    grid-column: 1 / -1;
+
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+
+    margin-top: 0.2rem;
+}
+
+/* Mismo estilo que .prov-btn / .prov-btn-azul de Proveedores */
+
+.vf-filtro .btn-buscar,
+.vf-filtro .btn-restaurar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    padding: 0.55rem 1rem;
+
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+        transform var(--transition-fast, 0.2s ease),
+        box-shadow var(--transition-fast, 0.2s ease),
+        background-color var(--transition-fast, 0.2s ease);
+}
+
+.vf-filtro .btn-buscar:hover,
+.vf-filtro .btn-restaurar:hover {
+    transform: translateY(-1px);
+}
+
+.vf-filtro .btn-buscar:active,
+.vf-filtro .btn-restaurar:active {
+    transform: translateY(0);
+}
+
+/* Los dos botones en el mismo gris neutro (ni blanco, ni celeste,
+   ni azul sólido) — igual que .btn-restaurar en el resto de la app */
+.vf-filtro .btn-restaurar,
+.vf-filtro .btn-buscar {
+    border: 1px solid #cbd5e1;
+    background: #edf2f7;
+    color: #465568;
+}
+
+.vf-filtro .btn-restaurar:hover,
+.vf-filtro .btn-buscar:hover {
+    background: #e2e9f1;
+    border-color: #b5c2d1;
+    color: var(--text-dark);
+    box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.07));
+}
+
+
+/* ============================================================
+   PANTALLAS PEQUEÑAS
+   ============================================================ */
+
+@media (max-width: 650px) {
+
+    .vf-filtro {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+
+    .vf-acciones {
+        flex-direction: column-reverse;
+    }
+
+    .vf-filtro .btn-buscar,
+    .vf-filtro .btn-restaurar {
+        width: 100%;
+    }
+}
+
+
+/* ============================================================
+   MODO OSCURO
+   ============================================================ */
+
+.modo-oscuro .vf-filtro {
+    background: #252b32;
+    border-bottom-color: #3b444e;
+}
+
+.modo-oscuro .vf-campo label {
+    color: #aeb6c0;
+}
+
+.modo-oscuro .vf-campo input,
+.modo-oscuro .vf-campo select {
+    background: #1f242a;
+    border-color: #3b444e;
+    color: #e2e6eb;
+}
+
+.modo-oscuro .vf-campo input::placeholder {
+    color: #7c8793;
+}
+
+.modo-oscuro .vf-filtro .btn-restaurar,
+.modo-oscuro .vf-filtro .btn-buscar {
+    background: #303842;
+    border-color: #414b56;
+    color: #c2cad3;
+}
+
+.modo-oscuro .vf-filtro .btn-restaurar:hover,
+.modo-oscuro .vf-filtro .btn-buscar:hover {
+    background: #3a4149;
+    color: #e2e6eb;
+}
+
+
+/* ============================================================
+   MODO OSCURO — TABLA DE VENTAS
+   ============================================================ */
+
+.modo-oscuro .vta-tabla {
+    background: #292f36;
+    color: #e2e6eb;
+}
+
+.modo-oscuro .vta-tabla th {
+    background: #303842;
+    color: #cbd2da;
+    border-bottom-color: #46515c;
+}
+
+.modo-oscuro .vta-tabla td {
+    background: #292f36;
+    color: #e2e6eb;
+    border-bottom-color: #3b444e;
+}
+
+.modo-oscuro .vta-tabla tbody tr:hover td {
+    background: #303943;
+}
+
+.modo-oscuro .vta-numero-factura {
+    background: #303b49;
+    color: #a9c4e8;
+}
+
+.modo-oscuro .vta-nombre-cliente {
+    color: #e2e6eb;
+}
+
+.modo-oscuro .vta-monto {
+    background: #2b3d34;
+    color: #7fd3a3;
+}
+
+.modo-oscuro .vta-accion {
+    background: #303842;
+    border-color: #414b56;
+}
+
+.modo-oscuro .vta-accion-ver:hover {
+    background: #303b49;
+    border-color: #456da5;
+}
+
+.modo-oscuro .vta-vacio {
+    color: #aeb6c0;
+}

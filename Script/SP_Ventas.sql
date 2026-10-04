@@ -76,7 +76,7 @@ GO
    Recibe el InvoiceID.
    ========================================================= */
 
-CREATE OR ALTER PROCEDURE dbo.SP_Proveedores_Detalle
+CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Detalle
     @InvoiceID INT
 AS
 BEGIN
@@ -122,6 +122,492 @@ END
 GO
 
 
+/* =========================================================
+   3. INSERTAR
+
+   Utiliza una TRANSACCION porque realiza dos operaciones:
+    INSERT de la venta.
+   Si ambas operaciones funcionan:  COMMIT
+   Si ocurre un error: ROLLBACK
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Insertar
+
+    -- Factura
+    @CustomerID INT,
+    @BillToCustomerID INT,
+    @OrderID INT,
+    @DeliveryMethod INT,
+    @ContactPersonID INT,
+    @AccountsPersonID INT,
+    @SalespersonPersonID INT,
+    @PackedByPersonID INT,
+    @InvoiceDate DATE,
+    @CustomerPurchaseOrderNumber NVARCHAR(20),
+    @IsCreditNote BIT,
+    @CreditNoteReason NVARCHAR(MAX),
+    @Comments NVARCHAR(MAX),
+    @DeliveryInstructions NVARCHAR(MAX),
+    @InternalComments NVARCHAR(MAX),
+    @TotalDryItems INT,
+    @TotalChillerItems INT,
+    @DeliveryRun NVARCHAR(5),
+    @RunPosition NVARCHAR(5),
+    @ReturnedDeliveryData NVARCHAR(MAX),
+    @LastEditedBy INT = 1,
+
+    -- DetalleFactura
+    @StockItemID INT,
+    @Description NVARCHAR(100),
+    @PackageTypeID INT,
+    @Quantity INT,
+    @UnitPrice DECIMAL(18,2),
+    @TaxRate DECIMAL(18,2)
+
+AS
+BEGIN
+
+
+    SET NOCOUNT ON;
+    
+    -- =====================================================
+    -- VALIDACIÓN DE CAMPOS OBLIGATORIOS - FACTURA
+    -- =====================================================
+
+    IF @CustomerID IS NULL
+    BEGIN
+        RAISERROR('El CustomerID es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @BillToCustomerID IS NULL
+    BEGIN
+        RAISERROR('El BillToCustomerID es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @DeliveryMethod IS NULL
+    BEGIN
+        RAISERROR('El DeliveryMethodID es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @ContactPersonID IS NULL
+    BEGIN
+        RAISERROR('El ContactPersonID es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @AccountsPersonID IS NULL
+    BEGIN
+        RAISERROR('El AccountsPersonID es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @SalespersonPersonID IS NULL
+    BEGIN
+        RAISERROR('El SalespersonPersonID es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @PackedByPersonID IS NULL
+    BEGIN
+        RAISERROR('El PackedByPersonID es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @InvoiceDate IS NULL
+    BEGIN
+        RAISERROR('La fecha de factura es obligatoria.', 16, 1);
+        RETURN;
+    END
+
+    IF @IsCreditNote IS NULL
+    BEGIN
+        RAISERROR('El indicador de nota de crédito es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @TotalDryItems IS NULL
+    BEGIN
+        RAISERROR('El total de artículos secos es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @TotalChillerItems IS NULL
+    BEGIN
+        RAISERROR('El total de artículos refrigerados es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @LastEditedBy IS NULL
+    BEGIN
+        RAISERROR('El LastEditedBy es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.ClientesActuales
+        WHERE CustomerID = @CustomerID
+    )
+    BEGIN
+        RAISERROR('El CustomerID indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.ClientesActuales
+        WHERE CustomerID = @BillToCustomerID
+    )
+    BEGIN
+        RAISERROR('El BillToCustomerID indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF @OrderID IS NOT NULL
+        AND NOT EXISTS
+        (
+            SELECT 1
+            FROM dbo.Pedidos
+            WHERE OrderID = @OrderID
+        )
+    BEGIN
+        RAISERROR('El OrderID indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.FormasEntrega
+        WHERE DeliveryMethodID = @DeliveryMethod
+    )
+    BEGIN
+        RAISERROR('El DeliveryMethodID indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.Contactos
+        WHERE PersonID = @ContactPersonID
+    )
+    BEGIN
+        RAISERROR('El ContactPersonID indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.Contactos
+        WHERE PersonID = @AccountsPersonID
+    )
+    BEGIN
+        RAISERROR('El AccountsPersonID indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.Contactos
+        WHERE PersonID = @SalespersonPersonID
+    )
+    BEGIN
+        RAISERROR('El SalespersonPersonID indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.Contactos
+        WHERE PersonID = @PackedByPersonID
+    )
+    BEGIN
+        RAISERROR('El PackedByPersonID indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF @CustomerPurchaseOrderNumber IS NOT NULL
+        AND NOT EXISTS
+        (
+            SELECT 1
+            FROM dbo.Pedidos
+            WHERE CustomerPurchaseOrderNumber = @CustomerPurchaseOrderNumber
+        )
+    BEGIN
+        RAISERROR(
+            'El CustomerPurchaseOrderNumber indicado no existe en los pedidos.',
+            16,
+            3
+        );
+        RETURN;
+    END
+
+    IF @StockItemID IS NULL
+    BEGIN
+        RAISERROR('El StockItemID es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @Description IS NULL OR @Description = ''
+    BEGIN
+        RAISERROR('La descripción es obligatoria.', 16, 1);
+        RETURN;
+    END
+
+    IF @PackageTypeID IS NULL
+    BEGIN
+        RAISERROR('El PackageTypeID es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+    IF @Quantity IS NULL
+    BEGIN
+        RAISERROR('La cantidad es obligatoria.', 16, 1);
+        RETURN;
+    END
+
+    IF @TaxRate IS NULL
+    BEGIN
+        RAISERROR('El TaxRate es obligatorio.', 16, 1);
+        RETURN;
+    END
+
+     IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.ProductosActuales
+        WHERE StockItemID = @StockItemID
+    )
+    BEGIN
+        RAISERROR('El StockItemID indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    -- PackageTypeID
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.EmpaquetamientoInventario
+        WHERE PackageTypeID = @PackageTypeID
+    )
+    BEGIN
+        RAISERROR('El PackageTypeID indicado no existe.', 16, 3);
+        RETURN;
+    END
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.ProductosInventario
+        WHERE StockItemID = @StockItemID
+          AND LastCostPrice IS NOT NULL
+    )
+    BEGIN
+        RAISERROR(
+            'El producto no tiene un LastCostPrice disponible para calcular la ganancia.',
+            16,
+            3
+        );
+        RETURN;
+    END
+
+    IF @Quantity <= 0
+    BEGIN
+        RAISERROR('La cantidad debe ser mayor que cero.', 16, 2);
+        RETURN;
+    END
+
+    IF @TaxRate < 0 OR @TaxRate > 100
+    BEGIN
+        RAISERROR('El TaxRate debe estar entre 0 y 100.', 16, 2);
+        RETURN;
+    END
+
+    IF @UnitPrice IS NOT NULL AND @UnitPrice < 0
+    BEGIN
+        RAISERROR('El UnitPrice no puede ser negativo.', 16, 2);
+        RETURN;
+    END
+
+    IF @TotalDryItems < 0
+    BEGIN
+        RAISERROR('El total de artículos secos no puede ser negativo.', 16, 2);
+        RETURN;
+    END
+
+    IF @TotalChillerItems < 0
+    BEGIN
+        RAISERROR('El total de artículos refrigerados no puede ser negativo.', 16, 2);
+        RETURN;
+    END
+
+
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+
+        BEGIN TRANSACTION;
+
+        -- =====================================================
+        -- INSERT PARA FACTURA
+        -- =====================================================
+
+        INSERT INTO dbo.Facturas
+        (
+            CustomerID,
+            BillToCustomerID,
+            OrderID,
+            DeliveryMethodID,
+            ContactPersonID,
+            AccountsPersonID,
+            SalespersonPersonID,
+            PackedByPersonID,
+            InvoiceDate,
+            CustomerPurchaseOrderNumber,
+            IsCreditNote,
+            CreditNoteReason,
+            Comments,
+            DeliveryInstructions,
+            InternalComments,
+            TotalDryItems,
+            TotalChillerItems,
+            DeliveryRun,
+            RunPosition,
+            ReturnedDeliveryData,
+            LastEditedBy
+        )
+        VALUES
+        (
+            @CustomerID,
+            @BillToCustomerID,
+            @OrderID,
+            @DeliveryMethod,
+            @ContactPersonID,
+            @AccountsPersonID,
+            @SalespersonPersonID,
+            @PackedByPersonID,
+            @InvoiceDate,
+            @CustomerPurchaseOrderNumber,
+            @IsCreditNote,
+            @CreditNoteReason,
+            @Comments,
+            @DeliveryInstructions,
+            @InternalComments,
+            @TotalDryItems,
+            @TotalChillerItems,
+            @DeliveryRun,
+            @RunPosition,
+            @ReturnedDeliveryData,
+            @LastEditedBy
+        );
+
+        DECLARE @NuevoInvoiceID INT;
+
+        SET @NuevoInvoiceID = SCOPE_IDENTITY();
+
+
+        -- Se obtiene el costo del producto
+        DECLARE @LastCostPrice DECIMAL(18,2);
+
+        SELECT @LastCostPrice = LastCostPrice
+        FROM dbo.ProductosInventario
+        WHERE StockItemID = @StockItemID;
+
+
+        -- Se calculan los valores derivados
+        DECLARE @TaxAmount DECIMAL(18,2);
+        DECLARE @ExtendedPrice DECIMAL(18,2);
+        DECLARE @LineProfit DECIMAL(18,2);
+
+        IF @UnitPrice IS NULL
+        BEGIN
+            SET @TaxAmount = 0;
+            SET @ExtendedPrice = 0;
+            SET @LineProfit = 0;
+        END
+        ELSE
+        BEGIN
+            SET @TaxAmount =
+                (@Quantity * @UnitPrice) * (@TaxRate / 100);
+
+            SET @ExtendedPrice =
+                (@Quantity * @UnitPrice) + @TaxAmount;
+
+            SET @LineProfit =
+                (@Quantity * @UnitPrice) - (@Quantity * @LastCostPrice);
+        END
+
+        -- =====================================================
+        -- INSERTAR DETALLE DE FACTURA
+        -- =====================================================
+
+        INSERT INTO dbo.DetalleFacturas
+        (
+            InvoiceID,
+            StockItemID,
+            Description,
+            PackageTypeID,
+            Quantity,
+            UnitPrice,
+            TaxRate,
+            TaxAmount,
+            LineProfit,
+            ExtendedPrice,
+            LastEditedBy
+        )
+        VALUES
+        (
+            @NuevoInvoiceID,
+            @StockItemID,
+            @Description,
+            @PackageTypeID,
+            @Quantity,
+            @UnitPrice,
+            @TaxRate,
+            @TaxAmount,
+            @LineProfit,
+            @ExtendedPrice,
+            @LastEditedBy
+        );
+
+         COMMIT TRANSACTION;
+
+
+        -- Retornar el ID generado
+        SELECT @NuevoInvoiceID AS InvoiceID;
+
+    END TRY
+    BEGIN CATCH
+
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        THROW;
+
+    END CATCH;
+
+END
+GO
+
+/* =========================================================
+   4. ACTUALIZAR
+
+   Modifica los datos de una venta existente.
+
+   Utiliza una TRANSACCION para proteger el UPDATE.
+   ========================================================= */
+
+
 
 -- Número de factura, fecha, cliente, método de entrega
 SELECT * FROM Sales.Invoices;
@@ -130,3 +616,10 @@ SELECT * FROM Sales.Invoices;
 SELECT * FROM Sales.InvoiceLines;
 
 SELECT * FROM Application.People;
+
+-- Con el LastCostPrice se calcula el LineProfit
+SELECT * FROM Warehouse.StockItemHoldings;
+
+SELECT * FROM Sales.Orders
+
+SELECT * FROM Purchasing.PurchaseOrderLines

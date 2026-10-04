@@ -13,6 +13,9 @@ GO
 CREATE SYNONYM dbo.DetallesPedido FOR Sales.OrderLines;
 GO
 
+CREATE SYNONYM dbo.Pedidos FOR Sales.Orders;
+GO
+
 CREATE SYNONYM dbo.DetallesFactura FOR Sales.InvoiceLines;
 GO
 

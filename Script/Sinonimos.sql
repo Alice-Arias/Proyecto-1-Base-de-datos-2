@@ -69,6 +69,9 @@ GO
 CREATE SYNONYM dbo.OrdenesCompra FOR Purchasing.PurchaseOrders;
 GO
 
+CREATE SYNONYM dbo.DetalleOrdenCompra FOR Purchasing.PurchaseOrderLines;
+GO
+
 CREATE SYNONYM dbo.ProductosActuales FOR Warehouse.StockItems;
 GO
 

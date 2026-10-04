@@ -22,10 +22,10 @@ import {
 // la decide App.jsx mediante la prop "current".
 
 const items = [
-  { id: 'inicio', label: 'Inicio', icon: Home },
+  //{ id: 'inicio', label: 'Inicio', icon: Home },
   { id: 'clientes', label: 'Clientes', icon: Users },
   { id: 'proveedores', label: 'Proveedores', icon: Truck },
-  { id: 'productos', label: 'Productos', icon: Package },
+  { id: 'inventario', label: 'Inventario', icon: Package },
   { id: 'ventas', label: 'Ventas', icon: ShoppingCart },
   { id: 'reportes', label: 'Reportes', icon: BarChart3 }
 ];

@@ -1,3 +1,4 @@
+
 // ============================================================
 // IMPORTACIONES DE REACT
 // ============================================================
@@ -15,30 +16,26 @@ import { useEffect, useState } from 'react';
 // ============================================================
 
 import {
-  Users,
-  CheckCircle2,
-  Tag,
-  Search,
-  Plus,
-  Sun,
-  Eye,
-  AlertTriangle
+    Users,
+    CheckCircle2,
+    Tag,
+    Search,
+    Plus,
+    Sun,
+    Eye,
+    AlertTriangle
 } from 'lucide-react';
+
 
 // ============================================================
 // COMPONENTES
 // ============================================================
 
 import ClientesTabla from '../components/ClientesTabla';
-
 import ClienteDetalleModal from '../components/ClienteDetalleModal';
-
 import ClienteNuevoModal from '../components/ClienteNuevoModal';
-
 import ClienteEditarModal from '../components/ClienteEditarModal';
-
 import ClienteEliminarModal from '../components/ClienteEliminarModal';
-
 import StatCard from '../components/StatCard';
 
 
@@ -47,12 +44,13 @@ import StatCard from '../components/StatCard';
 // ============================================================
 
 import {
-  listarClientes,
-  obtenerDetalleClientes,
-  insertarCliente,
-  actualizarCliente,
-  eliminarCliente
+    listarClientes,
+    obtenerDetalleClientes,
+    insertarCliente,
+    actualizarCliente,
+    eliminarCliente
 } from '../services/api';
+
 
 // ============================================================
 // CANTIDAD MÁXIMA DE CLIENTES POR PÁGINA

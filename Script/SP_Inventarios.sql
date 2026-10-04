@@ -89,10 +89,11 @@ BEGIN
         pto.StockItemName AS Producto,
         p.SupplierID AS Proveedor_ID,
         p.SupplierName AS Proveedor,
+        ISNULL(NULLIF(LTRIM(RTRIM(c.ColorName)), ''), 'Color sin definir') AS Color,
+        ISNULL(NULLIF(LTRIM(RTRIM(pto.Brand)), ''), 'Marca sin definir') AS Marca,
         e.PackageTypeName AS Unidad_Empaquetamiento,
         em.PackageTypeName AS Empaquetamiento,
         pto.QuantityPerOuter AS Cantidad_Empaquetamiento,
-        pto.Brand AS Marca,
         pto.Size AS Talla,
         ROUND(pto.UnitPrice * (pto.TaxRate / 100.0), 2) AS Impuesto,
         pto.UnitPrice AS Precio_Unitario,
@@ -104,7 +105,7 @@ BEGIN
 
     FROM dbo.ProductosActuales AS pto
     INNER JOIN dbo.ProveedoresActuales AS p ON pto.SupplierID = p.SupplierID
-    INNER JOIN dbo.ColoresProductos AS c ON pto.ColorID = c.ColorID
+    LEFT JOIN dbo.ColoresProductos AS c ON pto.ColorID = c.ColorID
     INNER JOIN dbo.EmpaquetamientoInventario e ON pto.UnitPackageID = e.PackageTypeID
     INNER JOIN dbo.EmpaquetamientoInventario AS em ON pto.OuterPackageID = em.PackageTypeID
     INNER JOIN dbo.ProductosInventario AS pi ON pto.StockItemID = pi.StockItemID

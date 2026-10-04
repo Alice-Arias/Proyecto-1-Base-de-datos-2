@@ -498,3 +498,349 @@ export async function obtenerOpcionesProveedores() {
   return data;
 
 }
+
+// ============================================================
+// INVENTARIO
+// ============================================================
+
+
+// ============================================================
+// OBTENER LISTA DE INVENTARIO
+// ============================================================
+//
+// Permite filtrar por:
+// - Nombre del producto
+// - Grupo
+// - Cantidad mínima disponible
+//
+// GET /api/inventarios
+//
+// El backend ejecutará:
+// SP_Inventarios_Listar
+// ============================================================
+
+export async function listarInventarios(filtros = {}) {
+
+  // Objeto utilizado para construir
+  // los parámetros que se enviarán en la URL.
+  const params = new URLSearchParams();
+
+
+  // ==========================================================
+  // FILTRO POR NOMBRE
+  // ==========================================================
+  //
+  // Si se recibió un nombre de producto,
+  // se agrega a los parámetros.
+
+  if (filtros.nombre) {
+
+    params.append(
+      'nombre',
+      filtros.nombre
+    );
+
+  }
+
+
+  // ==========================================================
+  // FILTRO POR GRUPO
+  // ==========================================================
+  //
+  // Si se recibió un grupo de inventario,
+  // se agrega a los parámetros.
+
+  if (filtros.grupo) {
+
+    params.append(
+      'grupo',
+      filtros.grupo
+    );
+
+  }
+
+
+  // ==========================================================
+  // FILTRO POR CANTIDAD
+  // ==========================================================
+  //
+  // Si se recibió una cantidad mínima,
+  // se agrega a los parámetros.
+
+  if (
+    filtros.cantidad !== undefined &&
+    filtros.cantidad !== ''
+  ) {
+
+    params.append(
+      'cantidad',
+      filtros.cantidad
+    );
+
+  }
+
+
+  // ==========================================================
+  // REALIZAR PETICIÓN AL BACKEND
+  // ==========================================================
+
+  const query = params.toString();
+
+  const res = await fetch(
+    `${API_URL}/inventarios${query ? `?${query}` : ''}`
+  );
+
+
+  // ==========================================================
+  // VALIDAR RESPUESTA
+  // ==========================================================
+
+  if (!res.ok) {
+
+    throw new Error(
+      'Error al obtener inventarios'
+    );
+
+  }
+
+
+  return res.json();
+
+}
+
+
+// ============================================================
+// OBTENER DETALLE DE INVENTARIO
+// ============================================================
+//
+// Acepta un ID o varios IDs.
+//
+// Ejemplo:
+//
+// 5
+// [5, 8, 12]
+//
+// El arreglo se convierte en:
+//
+// "5,8,12"
+//
+// GET /api/inventarios/:id
+//
+// El backend ejecutará:
+// SP_Inventarios_Detalle
+// ============================================================
+
+export async function obtenerDetalleInventarios(ids) {
+
+  // Si se recibe un arreglo de IDs,
+  // se unen utilizando comas.
+  const idsStr = Array.isArray(ids)
+    ? ids.join(',')
+    : String(ids);
+
+
+  const res = await fetch(
+    `${API_URL}/inventarios/${idsStr}`
+  );
+
+
+  if (!res.ok) {
+
+    throw new Error(
+      'Error al obtener el detalle del inventario'
+    );
+
+  }
+
+
+  return res.json();
+
+}
+
+
+// ============================================================
+// INSERTAR PRODUCTO EN INVENTARIO
+// ============================================================
+//
+// Envía los datos del nuevo producto al backend.
+//
+// POST /api/inventarios
+//
+// El backend ejecutará:
+// SP_Inventario_Insertar
+// ============================================================
+
+export async function insertarInventario(inventario) {
+
+  const res = await fetch(
+    `${API_URL}/inventarios`,
+    {
+      method: 'POST',
+
+      headers: {
+        'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify(inventario)
+    }
+  );
+
+
+  // Convertimos la respuesta del backend a JSON.
+  const data = await res.json();
+
+
+  // Si el backend devuelve un error,
+  // conservamos el mensaje enviado por el servidor.
+
+  if (!res.ok) {
+
+    throw new Error(
+      data.error ||
+      'No se pudo crear el producto'
+    );
+
+  }
+
+
+  return data;
+
+}
+
+
+// ============================================================
+// ACTUALIZAR PRODUCTO DE INVENTARIO
+// ============================================================
+//
+// Modifica un producto existente.
+//
+// PUT /api/inventarios/:id
+//
+// El backend ejecutará:
+// SP_Inventario_Actualizar
+// ============================================================
+
+export async function actualizarInventario(
+  id,
+  inventario
+) {
+
+  const res = await fetch(
+    `${API_URL}/inventarios/${id}`,
+    {
+      method: 'PUT',
+
+      headers: {
+        'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify(inventario)
+    }
+  );
+
+
+  // Convertimos la respuesta del backend a JSON.
+  const data = await res.json();
+
+
+  // Si el backend devuelve un error,
+  // mostramos el mensaje enviado por el servidor.
+
+  if (!res.ok) {
+
+    throw new Error(
+      data.error ||
+      'No se pudo actualizar el producto'
+    );
+
+  }
+
+
+  return data;
+
+}
+
+
+// ============================================================
+// ELIMINAR PRODUCTO DE INVENTARIO
+// ============================================================
+//
+// Elimina un producto existente.
+//
+// DELETE /api/inventarios/:id
+//
+// El backend ejecutará:
+// SP_Inventario_Eliminar
+// ============================================================
+
+export async function eliminarInventario(id) {
+
+  const res = await fetch(
+    `${API_URL}/inventarios/${id}`,
+    {
+      method: 'DELETE'
+    }
+  );
+
+
+  // Convertimos la respuesta del backend a JSON.
+  const data = await res.json();
+
+
+  // Si el backend devuelve un error,
+  // conservamos el mensaje enviado por el servidor.
+
+  if (!res.ok) {
+
+    throw new Error(
+      data.error ||
+      'No se pudo eliminar el producto'
+    );
+
+  }
+
+
+  return data;
+
+}
+
+
+// ============================================================
+// OBTENER OPCIONES PARA EL FORMULARIO DE INVENTARIO
+// ============================================================
+//
+// Devuelve:
+//
+// - proveedores
+// - colores
+// - tipos de paquete
+//
+// GET /api/inventarios/opciones
+//
+// El backend ejecutará:
+// SP_Inventario_Opciones
+// ============================================================
+
+export async function obtenerOpcionesInventario() {
+
+  const res = await fetch(
+    `${API_URL}/inventarios/opciones`
+  );
+
+
+  const data = await res.json();
+
+
+  if (!res.ok) {
+
+    throw new Error(
+      data.error ||
+      'No se pudieron obtener las opciones del inventario.'
+    );
+
+  }
+
+
+  return data;
+
+}

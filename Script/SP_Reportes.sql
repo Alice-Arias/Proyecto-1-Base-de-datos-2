@@ -452,6 +452,78 @@ END
 GO
 
 
+/* =========================================================
+
+   7. SEGUIMIENTO DE COMPRAS DE CLIENTES
+
+   Devuelve un resumen de las compras realizadas por cada
+   cliente, agrupadas por año y mes.
+
+   Muestra el monto total comprado, la primera y ultima
+   factura registrada durante el mes, la cantidad total
+   comprada y las cantidades minima y maxima.
+
+   Permite filtrar los resultados por año, mes y categoria
+   de producto mediante entrada libre de texto.
+
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Seguimiento_Compras_Clientes
+
+    @Anio INT = NULL,
+    @Mes INT = NULL,
+    @CategoriaProducto NVARCHAR(50) = NULL
+
+AS 
+BEGIN
+
+    SET NOCOUNT ON;
+
+    SELECT 
+        ca.CustomerID,
+        ca.CustomerName,
+        YEAR(f.InvoiceDate) AS Anio,
+
+        CASE MONTH(f.InvoiceDate)
+            WHEN 1 THEN 'Enero'
+            WHEN 2 THEN 'Febrero'
+            WHEN 3 THEN 'Marzo'
+            WHEN 4 THEN 'Abril'
+            WHEN 5 THEN 'Mayo'
+            WHEN 6 THEN 'Junio'
+            WHEN 7 THEN 'Julio'
+            WHEN 8 THEN 'Agosto'
+            WHEN 9 THEN 'Septiembre'
+            WHEN 10 THEN 'Octubre'
+            WHEN 11 THEN 'Noviembre'
+            WHEN 12 THEN 'Diciembre'
+        END AS Mes,
+
+        SUM(df.ExtendedPrice) AS Monto_Total,
+        MIN(f.InvoiceDate) AS Primera_Factura,
+        MAX(f.InvoiceDate) AS Ultima_Factura,
+        SUM(df.Quantity) AS Cantidad_Total,
+        MIN(df.Quantity) AS Cantidad_Minima,
+        MAX(df.Quantity) AS Cantidad_Maxima
+
+    FROM dbo.ClientesActuales AS ca
+    INNER JOIN dbo.Facturas AS f ON ca.CustomerID = f.CustomerID
+    INNER JOIN dbo.DetalleFacturas AS df ON f.InvoiceID = df.InvoiceID
+    INNER JOIN dbo.ItemGrupos AS ig ON df.StockItemID = IG.StockItemID
+    INNER JOIN dbo.GruposInventario AS g ON ig.StockGroupID = g.StockGroupID
+
+    WHERE (@Anio IS NULL OR YEAR(f.InvoiceDate) = @Anio)
+        AND
+          (@Mes IS NULL OR MONTH(f.InvoiceDate) = @Mes)
+        AND (@CategoriaProducto IS NULL 
+            OR g.StockGroupName LIKE '%' + @CategoriaProducto + '%')
+
+    GROUP BY ca.CustomerID, ca.CustomerName, YEAR(f.InvoiceDate), MONTH(f.InvoiceDate)
+
+    ORDER BY ca.CustomerName, YEAR(f.InvoiceDate), MONTH(f.InvoiceDate);
+
+END 
+GO
 
 
 CREATE OR ALTER PROCEDURE dbo.SP_Reportes_Opciones
@@ -489,11 +561,13 @@ SELECT * FROM dbo.DetalleFacturas;
 
 SELECT * FROM dbo.ClientesActuales;
 
-SELECT * FROM dbo.ClientesActuales;
-
 SELECT * FROM dbo.TiposCliente;
 
 SELECT * FROM dbo.OrdenesCompra;
 
 SELECT TOP 5 *
 FROM dbo.DetalleOrdenCompra;
+
+SELECT * FROM dbo.ItemGrupos;
+
+SELECT * FROM dbo.GruposInventario

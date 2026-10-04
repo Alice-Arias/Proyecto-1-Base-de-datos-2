@@ -175,6 +175,90 @@ BEGIN
 END
 GO
 
+
+/* =========================================================
+
+   2. TOP 5 PRODUCTOS QUE MÁS GENERAN
+
+   Devuelve los montos maximos, minimos y promedio de las
+   compras realizadas por los clientes, agrupados por
+   categoria y cliente.
+
+   Utiliza ROLLUP para mostrar subtotales por categoria
+   y un total general.
+
+   Permite filtrar por categoria y nombre del cliente
+   mediante entrada libre de texto.
+
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Top_GananciaProductos
+
+    @Anio INT = NULL
+
+AS
+BEGIN
+
+    SET NOCOUNT ON;
+
+    WITH GananciaPorProducto AS (
+        SELECT
+            YEAR(f.InvoiceDate) AS Anio,
+            pa.StockItemID,
+            pa.StockItemName AS Producto,
+            SUM(df.LineProfit) AS Ganancia_Total
+
+        FROM dbo.DetalleFacturas AS df
+        INNER JOIN dbo.ProductosActuales AS pa ON df.StockItemID = pa.StockItemID
+        INNER JOIN dbo.Facturas AS f ON df.InvoiceID = f.InvoiceID
+
+        WHERE @Anio IS NULL OR YEAR(f.InvoiceDate) = @Anio
+
+        GROUP BY YEAR(f.InvoiceDate), pa.StockItemID, pa.StockItemName
+    ),
+
+    RankingProductos AS (
+        SELECT
+            Anio,
+            StockItemID,
+            Producto,
+            Ganancia_Total,
+            DENSE_RANK() OVER (PARTITION BY Anio ORDER BY Ganancia_Total DESC) AS Posicion
+
+        FROM GananciaPorProducto
+    )
+
+    SELECT
+        Anio,
+        StockItemID AS ID_Producto,
+        Producto,
+        Ganancia_Total,
+        Posicion
+    FROM RankingProductos
+    WHERE Posicion <= 5
+    ORDER BY Anio, Posicion;
+
+END
+GO
+
+
+CREATE OR ALTER PROCEDURE dbo.SP_Reportes_Opciones
+AS
+BEGIN
+
+    SET NOCOUNT ON;
+
+    -- Nos permite saber los años disponibles en el sistema
+    SELECT DISTINCT
+        YEAR(InvoiceDate) AS Anio
+    FROM dbo.Facturas
+    ORDER BY Anio;
+
+END
+GO
+
+
+-- Select de apoyo para desarrollo
 SELECT * FROM dbo.ProductosActuales;
 
 SELECT * FROM dbo.DetalleOrdenCompra;

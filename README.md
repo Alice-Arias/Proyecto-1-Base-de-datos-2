@@ -168,7 +168,6 @@ La base de datos debe llamarse **`WideWorldImporters`**. Abra SSMS o Azure Data 
 
 Cada script empieza con `USE WideWorldImporters; GO`, así que se ejecuta sobre la base correcta.
 
-> 📝 **[AJUSTAR]** Si la API necesita datos de conexión (servidor, usuario, contraseña, nombre de la base), indique aquí en qué archivo se configuran (por ejemplo `Api/.env` o `Api/db.js`) y qué valores colocar.
 
 ## 5. Ejecución de la API
 

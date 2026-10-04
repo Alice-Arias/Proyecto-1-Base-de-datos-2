@@ -1,8 +1,4 @@
 
-// Importamos los iconos que utilizaremos en la barra superior:
-// Search       icono de búsqueda.
-// Bell         icono de notificaciones.
-// ChevronDown  flecha hacia abajo del usuario.
 
 import {
   Search,
@@ -10,17 +6,6 @@ import {
   ChevronDown
 } from 'lucide-react';
 
-
-
-//Topbar AUN NO SIRVE
-// Este componente crea la barra superior de la aplicación.
-// Contiene:
-// 1. Buscador general.
-// 2. Icono de notificaciones.
-// 3. Cantidad de notificaciones.
-// 4. Usuario que está utilizando el sistema.
-// 5. Flecha para indicar un menú desplegable.
-// ============================================================
 
 function Topbar() {
 

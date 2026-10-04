@@ -1,7 +1,4 @@
 
-// Importamos los iconos que vamos a utilizar en el menú lateral
-// desde la librería lucide-react.
-
 import {
   Home,
   Users,
@@ -12,76 +9,39 @@ import {
   Database
 } from 'lucide-react';
 
-
-// Aquí definimos todas las opciones que aparecerán
-// en el Sidebar.
-// Cada elemento tiene:
-// - label → texto que verá el usuario.
-// - icon  → icono que aparecerá junto al texto.
-// - active → indica cuál opción está seleccionada.
-// En este caso, "Clientes" está activa.
-
 const items = [
-
-  {
-    label: 'Inicio',
-    icon: Home
-  },
-
-  {
-    label: 'Clientes',
-    icon: Users,
-    active: true
-  },
-
-  {
-    label: 'Proveedores',
-    icon: Truck
-  },
-
-  {
-    label: 'Productos',
-    icon: Package
-  },
-
-  {
-    label: 'Ventas',
-    icon: ShoppingCart
-  },
-
-  {
-    label: 'Reportes',
-    icon: BarChart3
-  }
-
+  //{ id: 'inicio', label: 'Inicio', icon: Home },
+  { id: 'clientes', label: 'Clientes', icon: Users },
+  { id: 'proveedores', label: 'Proveedores', icon: Truck },
+  { id: 'inventario', label: 'Inventario', icon: Package },
+  { id: 'ventas', label: 'Ventas', icon: ShoppingCart },
+  { id: 'reportes', label: 'Reportes', icon: BarChart3 }
 ];
-
 
 
 // Sidebar
 // Este componente crea el menú lateral de la aplicación.
-// Contiene:
-// Logo y nombre del proyecto.
-// Opciones de navegación.
+//
+// Recibe dos props desde App.jsx:
+//
+// current:    id de la página que está abierta.
+//             Sirve para marcar la opción activa.
+//
+// onNavigate: función que cambia de página.
+//             Se ejecuta al hacer clic en una opción.
 
-
-function Sidebar() {
+function Sidebar({ current, onNavigate }) {
 
   return (
 
     <aside className="sidebar">
 
-
-      {/* ======================================================
-          LOGO
-          ====================================================== */}
+      {/* LOGO */}
 
       <div className="logo">
 
-        {/* Icono de base de datos */}
         <Database color="#071cff" />
 
-        {/* Nombre del proyecto */}
         <span>
           Sistema BD2
         </span>
@@ -89,64 +49,31 @@ function Sidebar() {
       </div>
 
 
-      {/* ======================================================
-          MENÚ DE NAVEGACIÓN
-          ====================================================== */}
+      {/* MENÚ DE NAVEGACIÓN */}
 
       <nav>
 
         {items.map((item) => (
 
-
           <div
 
-            key={item.label}
+            key={item.id}
 
+            // Tendrá "active" solo si es la página actual.
 
-            // =================================================
-            // CLASE CSS
-            // =================================================
-            // Siempre tendrá:
-            //
-            // nav-item
-            //
-            // Y si "active" es true, también tendrá:
-            //
-            // active
-            //
-            // Por ejemplo, Clientes tendrá:
-            //
-            // className="nav-item active"
-            //
-            // Mientras Inicio tendrá:
-            //
-            // className="nav-item"
-            // =================================================
+            className={`nav-item ${current === item.id ? 'active' : ''}`}
 
-            className={`nav-item ${item.active ? 'active' : ''}`}
+            // Al hacer clic, le avisamos a App.jsx
+            // qué página queremos abrir.
+
+            onClick={() => onNavigate(item.id)}
+
+            style={{ cursor: 'pointer' }}
           >
-
-
-            {/* =================================================
-                ICONO
-                =================================================
-                Cada elemento tiene un icono diferente.
-
-                Por ejemplo:
-
-                Inicio      → Home
-                Clientes    → Users
-                Proveedores → Truck
-                Productos   → Package
-
-                "item.icon" obtiene el icono correspondiente
-                al elemento actual.
-            ================================================= */}
 
             <item.icon size={18} />
 
             {item.label}
-
 
           </div>
 

@@ -32,7 +32,8 @@ CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Listar
     @FechaFin DATE = NULL,
     @Cliente NVARCHAR(100) = NULL,
     @DeliveryMethod NVARCHAR(50) = NULL,
-    @Monto DECIMAL(18,2) = NULL
+    @MontoInicio DECIMAL(18,2) = NULL,
+    @MontoFin DECIMAL(18,2) = NULL
 
 AS
 BEGIN
@@ -64,7 +65,8 @@ BEGIN
         
     GROUP BY f.InvoiceID, f.InvoiceDate, c.CustomerName, fe.DeliveryMethodName
 
-    HAVING (@Monto IS NULL OR SUM(df.ExtendedPrice + df.TaxAmount) = @Monto)
+    HAVING (@MontoInicio IS NULL OR SUM(df.ExtendedPrice) >= @MontoInicio)
+            AND (@MontoFin IS NULL OR SUM(df.ExtendedPrice) <= @MontoFin)
 
     ORDER BY f.InvoiceID ASC;
 
@@ -1058,6 +1060,7 @@ BEGIN
 END
 GO
 
+
 CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Opciones
 AS
 BEGIN
@@ -1122,17 +1125,3 @@ BEGIN
 END;
 GO
 
--- Número de factura, fecha, cliente, método de entrega
-SELECT * FROM Sales.Invoices;
-
--- Monto de factura
-SELECT * FROM Sales.InvoiceLines;
-
-SELECT * FROM Application.People;
-
--- Con el LastCostPrice se calcula el LineProfit
-SELECT * FROM Warehouse.StockItemHoldings;
-
-SELECT * FROM Sales.Orders
-
-SELECT * FROM Purchasing.PurchaseOrderLines

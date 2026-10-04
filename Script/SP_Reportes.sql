@@ -600,6 +600,106 @@ END
 GO
 
 
+/* =========================================================
+
+   9. ROTACION PROMEDIO DE INVENTARIO POR PRODUCTO
+
+   Calcula una estimacion de los dias de rotacion de inventario
+   por producto utilizando el stock actual y el consumo
+   registrado durante el periodo.
+
+   La rotacion se calcula tomando el stock actual como
+   aproximacion del inventario promedio y relacionandolo
+   con la cantidad consumida durante el periodo.
+
+   Permite filtrar por categoria de producto, año y proveedor.
+
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Rotacion_Inventario
+
+    @CategoriaProducto NVARCHAR(50) = NULL,
+    @Anio INT = NULL,
+    @Proveedor NVARCHAR(100) = NULL
+
+AS
+BEGIN
+
+    SET NOCOUNT ON;
+
+    DECLARE @FechaInicio DATETIME2;
+    DECLARE @FechaFin DATETIME2;
+    DECLARE @DiasPeriodo INT;
+
+    IF @Anio IS NOT NULL
+    BEGIN
+        SET @FechaInicio = DATEFROMPARTS(@Anio, 1, 1);
+        SET @FechaFin = DATEFROMPARTS(@Anio + 1, 1, 1);
+    END
+    ELSE
+    BEGIN
+        SELECT
+            @FechaInicio = MIN(TransactionOccurredWhen),
+            @FechaFin = DATEADD(DAY, 1, MAX(TransactionOccurredWhen))
+
+        FROM dbo.ProductosTransacciones;
+    END;
+
+
+    SET @DiasPeriodo = DATEDIFF(DAY, @FechaInicio, @FechaFin);
+
+    WITH Consumo AS
+    (
+        SELECT
+            pt.StockItemID,
+            SUM(ABS(pt.Quantity)) AS Cantidad_Consumida
+
+        FROM dbo.ProductosTransacciones AS pt
+
+        WHERE pt.Quantity < 0
+            AND pt.TransactionOccurredWhen >= @FechaInicio
+            AND pt.TransactionOccurredWhen < @FechaFin
+
+        GROUP BY pt.StockItemID
+    )
+
+
+    SELECT
+        pa.StockItemID AS ID_Producto,
+        pa.StockItemName AS Nombre_Producto,
+        g.StockGroupName AS Categoria_Producto,
+        p.SupplierName AS Proveedor,
+        pi.QuantityOnHand AS Stock_Actual,
+        c.Cantidad_Consumida,
+        CASE
+            WHEN c.Cantidad_Consumida > 0
+            THEN
+                CAST(pi.QuantityOnHand AS DECIMAL(18,4))
+                * @DiasPeriodo
+                / c.Cantidad_Consumida
+
+            ELSE NULL
+        END AS Dias_Rotacion
+
+    FROM dbo.ProductosActuales AS pa
+
+    INNER JOIN dbo.ProductosInventario AS pi ON pa.StockItemID = pi.StockItemID
+    INNER JOIN dbo.ItemGrupos AS ig ON pa.StockItemID = ig.StockItemID
+    INNER JOIN dbo.GruposInventario AS g ON ig.StockGroupID = g.StockGroupID
+    INNER JOIN dbo.ProveedoresActuales AS p ON pa.SupplierID = p.SupplierID
+    INNER JOIN Consumo AS c ON pa.StockItemID = c.StockItemID
+
+    WHERE ( @CategoriaProducto IS NULL OR g.StockGroupName LIKE '%' + @CategoriaProducto + '%')
+        AND
+          (@Proveedor IS NULL OR p.SupplierName LIKE '%' + @Proveedor + '%')
+
+    ORDER BY pa.StockItemName;
+
+END
+GO
+
+
+
 CREATE OR ALTER PROCEDURE dbo.SP_Reportes_Opciones
 AS
 BEGIN
@@ -681,6 +781,8 @@ GO
 -- Select de apoyo para desarrollo
 SELECT * FROM dbo.ProductosActuales;
 
+SELECT * FROM dbo.ProductosInventario;
+
 SELECT * FROM dbo.DetalleOrdenCompra;
 
 SELECT * FROM dbo.OrdenesCompra;
@@ -706,4 +808,104 @@ FROM dbo.DetalleOrdenCompra;
 
 SELECT * FROM dbo.ItemGrupos;
 
-SELECT * FROM dbo.GruposInventario
+SELECT * FROM dbo.GruposInventario;
+
+SELECT * FROM dbo.ProductosTransacciones;
+
+
+SELECT COLUMN_NAME, DATA_TYPE
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'dbo'
+  AND TABLE_NAME = 'ProductosTransacciones'
+ORDER BY ORDINAL_POSITION;
+
+
+SELECT TOP 10
+    StockItemID,
+    TransactionOccurredWhen,
+    Quantity
+FROM dbo.ProductosTransacciones;
+
+SELECT TOP 20
+    pt.StockItemID,
+    pt.TransactionOccurredWhen,
+    pt.Quantity,
+    pt.InvoiceID,
+    pt.PurchaseOrderID
+FROM dbo.ProductosTransacciones AS pt
+ORDER BY
+    pt.StockItemID,
+    pt.TransactionOccurredWhen;
+
+
+    SELECT
+        pa.StockItemID,
+        pa.StockItemName,
+        pi.QuantityOnHand,
+        SUM(pt.Quantity) AS TotalMovimientos,
+        pi.QuantityOnHand - SUM(pt.Quantity) AS InventarioInicialEstimado
+    FROM dbo.ProductosActuales AS pa
+    INNER JOIN dbo.ProductosInventario AS pi
+        ON pa.StockItemID = pi.StockItemID
+    INNER JOIN dbo.ProductosTransacciones AS pt
+        ON pa.StockItemID = pt.StockItemID
+    GROUP BY
+        pa.StockItemID,
+        pa.StockItemName,
+        pi.QuantityOnHand
+    ORDER BY
+        pa.StockItemID;
+
+
+SELECT
+    pi.StockItemID,
+    pi.QuantityOnHand,
+    pi.LastEditedWhen,
+    MAX(pt.TransactionOccurredWhen) AS UltimaTransaccion
+FROM dbo.ProductosInventario AS pi
+INNER JOIN dbo.ProductosTransacciones AS pt
+    ON pi.StockItemID = pt.StockItemID
+GROUP BY
+    pi.StockItemID,
+    pi.QuantityOnHand,
+    pi.LastEditedWhen
+ORDER BY
+    pi.StockItemID;
+
+SELECT
+    pt.TransactionOccurredWhen,
+    pt.Quantity,
+    pt.InvoiceID,
+    pt.PurchaseOrderID
+FROM dbo.ProductosTransacciones AS pt
+WHERE pt.StockItemID = 98 -- AQUÍ EL ID DEL PRODUCTO
+ORDER BY pt.TransactionOccurredWhen;
+
+SELECT
+    MIN(pt.TransactionOccurredWhen) AS PrimeraTransaccion,
+    MAX(pt.TransactionOccurredWhen) AS UltimaTransaccion,
+    COUNT(*) AS CantidadMovimientos,
+    SUM(pt.Quantity) AS TotalMovimientos
+FROM dbo.ProductosTransacciones AS pt
+WHERE pt.StockItemID = 98;
+
+SELECT
+    pa.StockItemID,
+    pa.StockItemName,
+    pi.QuantityOnHand,
+    pi.LastStocktakeQuantity,
+    pi.LastCostPrice,
+    pi.LastEditedWhen
+FROM dbo.ProductosActuales AS pa
+INNER JOIN dbo.ProductosInventario AS pi
+    ON pa.StockItemID = pi.StockItemID
+WHERE pa.StockItemID = 98; -- EL ID DEL PRODUCTO
+
+SELECT
+    pt.TransactionOccurredWhen,
+    pt.Quantity,
+    pt.InvoiceID,
+    pt.PurchaseOrderID
+FROM dbo.ProductosTransacciones AS pt
+WHERE pt.StockItemID = 98-- EL MISMO ID
+ORDER BY pt.TransactionOccurredWhen DESC;

@@ -9,12 +9,12 @@
 //               o en el botón de ver
 // ============================================================
 
-import { Eye } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 
 import './ventas.css';
 
 
-function VentasTabla({ ventas, onVerUna }) {
+function VentasTabla({ ventas, onVerUna, onEditar, onEliminar }) {
 
     const formatearFecha = (fecha) => {
 
@@ -57,7 +57,7 @@ function VentasTabla({ ventas, onVerUna }) {
                         <th>Cliente</th>
                         <th>Método de entrega</th>
                         <th className="vta-centro">Monto</th>
-                        <th className="vta-centro">Ver</th>
+                        <th className="vta-centro">Acciones</th>
                     </tr>
                 </thead>
 
@@ -98,18 +98,40 @@ function VentasTabla({ ventas, onVerUna }) {
                                 </span>
                             </td>
                             <td className="vta-centro">
-                                <button
-                                    type="button"
-                                    className="vta-accion vta-accion-ver"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onVerUna(v.InvoiceID);
-                                    }}
-                                    title="Ver detalle"
-                                    aria-label="Ver detalle"
-                                >
-                                    <Eye size={17} />
-                                </button>
+
+                                <div className="vta-acciones-fila">
+
+                                    <button
+                                        type="button"
+                                        className="vta-accion vta-accion-ver"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onVerUna(v.InvoiceID);
+                                        }}
+                                        title="Ver detalle"
+                                        aria-label="Ver detalle"
+                                    >
+                                        <Eye size={17} />
+                                    </button>
+
+                                    {onEditar && (
+                                        <button
+                                            type="button"
+                                            className="vta-accion vta-accion-editar"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onEditar(v);
+                                            }}
+                                            title="Editar"
+                                            aria-label="Editar"
+                                        >
+                                            <Pencil size={16} />
+                                        </button>
+                                    )}
+
+
+                                </div>
+
                             </td>
                         </tr>
 

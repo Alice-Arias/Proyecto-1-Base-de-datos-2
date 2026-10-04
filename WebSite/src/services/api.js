@@ -593,6 +593,33 @@ export async function actualizarVenta(id, venta) {
 // El backend ejecutará: SP_Ventas_Opciones
 // ============================================================
 
+// ============================================================
+// ELIMINAR VENTA
+// ============================================================
+//
+// DELETE /api/ventas/:id
+//
+// El backend ejecutará: SP_Ventas_Eliminar
+// ============================================================
+
+export async function eliminarVenta(id) {
+
+  const res = await fetch(
+    `${API_URL}/ventas/${id}`,
+    { method: 'DELETE' }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || 'No se pudo eliminar la venta');
+  }
+
+  return data;
+
+}
+
+
 export async function obtenerOpcionesVentas() {
 
   const res = await fetch(`${API_URL}/ventas/opciones`);

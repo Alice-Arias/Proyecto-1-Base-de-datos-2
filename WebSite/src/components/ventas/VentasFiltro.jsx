@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Search, RotateCcw, Calendar } from 'lucide-react';
+import { Search, RotateCcw, Calendar, Plus } from 'lucide-react';
 
 import './ventas.css';
 
@@ -19,7 +19,7 @@ import './ventas.css';
 //                 un objeto con todos los filtros.
 // onRestaurar:    se ejecuta al presionar "Restaurar filtros".
 
-function VentasFiltro({ metodosEntrega = [], onBuscar, onRestaurar }) {
+function VentasFiltro({ metodosEntrega = [], onBuscar, onRestaurar, onNuevo }) {
 
     const [numeroFactura, setNumeroFactura] = useState('');
     const [cliente, setCliente] = useState('');
@@ -185,6 +185,13 @@ function VentasFiltro({ metodosEntrega = [], onBuscar, onRestaurar }) {
                     <RotateCcw size={16} />
                     Restaurar filtros
                 </button>
+
+                {onNuevo && (
+                    <button className="vf-btn-nuevo" onClick={onNuevo}>
+                        <Plus size={16} />
+                        Nueva venta
+                    </button>
+                )}
 
             </div>
 

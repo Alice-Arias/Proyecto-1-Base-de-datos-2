@@ -80,54 +80,89 @@ GO
    Devuelve toda la informacion de una venta.
    Recibe el InvoiceID.
    ========================================================= */
-
+ 
 CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Detalle
     @InvoiceID INT
 AS
 BEGIN
-
+ 
     SET NOCOUNT ON;
-
+ 
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
-
-    -- Encabezado (SIN productos, una sola fila por factura)
+ 
+    -- Encabezado (una sola fila por factura)
     SELECT
         f.InvoiceID,
-        ca.CustomerID,
-        ca.CustomerName AS Nombre_Cliente, 
+ 
+        f.CustomerID,
+        ca.CustomerName AS Nombre_Cliente,
+ 
+        f.BillToCustomerID,
+        bc.CustomerName AS Nombre_Cliente_Facturar,
+ 
+        f.OrderID,
+ 
+        f.DeliveryMethodID,
         fe.DeliveryMethodName AS Metodo_Entrega,
-        f.CustomerPurchaseOrderNumber AS Numero_Orden,
+ 
+        f.ContactPersonID,
         cts.FullName AS Persona_Contacto,
+ 
+        f.AccountsPersonID,
+        acc.FullName AS Persona_Cuentas,
+ 
+        f.SalespersonPersonID,
         ctos.FullName AS Vendedor,
+ 
+        f.PackedByPersonID,
+        pbp.FullName AS Empacado_Por,
+ 
         f.InvoiceDate AS Fecha_Factura,
-        f.DeliveryInstructions AS Intrucciones_Entrega
-
+        f.CustomerPurchaseOrderNumber AS Numero_Orden,
+ 
+        f.IsCreditNote,
+        f.CreditNoteReason,
+        f.Comments,
+        f.DeliveryInstructions AS Intrucciones_Entrega,
+        f.InternalComments,
+        f.TotalDryItems,
+        f.TotalChillerItems,
+        f.DeliveryRun,
+        f.RunPosition,
+        f.ReturnedDeliveryData
+ 
     FROM dbo.Facturas f
     INNER JOIN dbo.ClientesActuales AS ca ON f.CustomerID = ca.CustomerID
+    LEFT JOIN dbo.ClientesActuales AS bc ON f.BillToCustomerID = bc.CustomerID
     INNER JOIN dbo.FormasEntrega AS fe ON f.DeliveryMethodID = fe.DeliveryMethodID
     INNER JOIN dbo.Contactos AS cts ON f.ContactPersonID = cts.PersonID
+    LEFT JOIN dbo.Contactos AS acc ON f.AccountsPersonID = acc.PersonID
     INNER JOIN dbo.Contactos AS ctos ON f.SalespersonPersonID = ctos.PersonID
-
-    WHERE f.InvoiceID = @InvoiceID; 
-
-    -- Detalle (aquí SÍ va StockItemID, una fila por producto)
-    SELECT 
+    LEFT JOIN dbo.Contactos AS pbp ON f.PackedByPersonID = pbp.PersonID
+ 
+    WHERE f.InvoiceID = @InvoiceID;
+ 
+    -- Detalle (líneas de producto). Se agregan Description y
+    -- PackageTypeID, que hacían falta para poder editar.
+    SELECT
         pa.StockItemID,
         pa.StockItemName AS Producto,
+        df.Description,
+        df.PackageTypeID,
         df.Quantity AS Cantidad,
         df.UnitPrice AS Precio_Unitario,
         df.TaxRate AS Impuesto_Aplicado,
         df.TaxAmount AS Impuesto_Monto,
         df.ExtendedPrice AS Total_Linea
-
+ 
     FROM dbo.DetalleFacturas df
     INNER JOIN dbo.ProductosActuales AS pa ON df.StockItemID = pa.StockItemID
-
+ 
     WHERE df.InvoiceID = @InvoiceID;
-
+ 
 END
 GO
-
+ 
 /* =========================================================
    3. INSERTAR
 

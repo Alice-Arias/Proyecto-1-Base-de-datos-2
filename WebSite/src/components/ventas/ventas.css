@@ -894,6 +894,31 @@ a.vta-caja-nombre.vta-link-producto {
     border-color: #bfd2f0;
 }
 
+.vta-accion-editar {
+    color: var(--yellow);
+}
+
+.vta-accion-editar:hover {
+    background: var(--yellow-light);
+    border-color: #e4c98f;
+}
+
+.vta-accion-eliminar {
+    color: var(--danger);
+}
+
+.vta-accion-eliminar:hover {
+    background: var(--danger-light);
+    border-color: #e7bfc1;
+}
+
+.vta-acciones-fila {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
 .vta-vacio {
     padding: 1.5rem 1rem;
     color: var(--text-muted);
@@ -1144,6 +1169,51 @@ a.vta-caja-nombre.vta-link-producto {
     border-color: #b5c2d1;
     color: var(--text-dark);
     box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.07));
+}
+
+/* "Nueva venta" — verde, igual que .toolbar .btn-nuevo de
+   Inventario, pero ubicado junto a Buscar/Restaurar filtros */
+.vf-acciones .vf-btn-nuevo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+
+    padding: 0.55rem 1rem;
+
+    border: none;
+    border-radius: 10px;
+
+    background: linear-gradient(135deg, var(--green), #4eaa78);
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color var(--transition-fast, 0.2s ease),
+        transform var(--transition-fast, 0.2s ease),
+        box-shadow var(--transition-fast, 0.2s ease);
+
+    /* Lo separa del grupo Buscar/Restaurar con un margen extra */
+    margin-left: 0.8rem;
+}
+
+.vf-acciones .vf-btn-nuevo:hover {
+    background: linear-gradient(135deg, var(--green-dark), #3d9566);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 13px rgba(63, 155, 104, 0.22);
+}
+
+@media (max-width: 650px) {
+
+    .vf-acciones .vf-btn-nuevo {
+        margin-left: 0;
+        width: 100%;
+    }
 }
 
 

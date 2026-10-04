@@ -24,6 +24,9 @@ import {
 import VentasFiltro from '../components/ventas/VentasFiltro';
 import VentasTabla from '../components/ventas/VentasTabla';
 import VentaDetalleModal from '../components/ventas/VentaDetalleModal';
+import VentaNuevoModal from '../components/ventas/VentaNuevoModal';
+import VentaEditarModal from '../components/ventas/VentaEditarModal';
+import VentaEliminarModal from '../components/ventas/VentaEliminarModal';
 import StatCard from '../components/StatCard';
 
 
@@ -38,74 +41,30 @@ import {
 } from '../services/api';
 
 
-// ============================================================
-// CANTIDAD MÁXIMA DE VENTAS POR PÁGINA
-// ============================================================
-
 const POR_PAGINA = 10;
 
 
-// ============================================================
-// VentasPage
-//
-// Página para gestionar (consultar) las ventas registradas.
-//
-// - Los filtros viven dentro de VentasFiltro (acumulativos
-//   entre sí: número de factura, rango de fechas, cliente
-//   en texto libre, método de entrega, rango de monto).
-// - Tabla de resultados, ordenada por defecto alfabéticamente
-//   por nombre de cliente.
-// - Al hacer click en una fila se abre el detalle completo
-//   de esa venta (encabezado + líneas) en un modal aparte.
-// ============================================================
-
 function VentasPage() {
 
-    // ============================================================
-    // VENTAS
-    // ============================================================
-
     const [ventas, setVentas] = useState([]);
-
-    // ============================================================
-    // OPCIONES PARA EL FILTRO (métodos de entrega)
-    // ============================================================
-
     const [metodosEntrega, setMetodosEntrega] = useState([]);
 
-    // ============================================================
-    // MODAL DE DETALLE
-    // ============================================================
-
-    // null = modal cerrado. { encabezado, lineas } = modal abierto.
+    // Modal de detalle (solo lectura)
     const [ventaDetalle, setVentaDetalle] = useState(null);
 
-    // ============================================================
-    // ESTADO DE CARGA
-    // ============================================================
+    // Modal de nueva venta
+    const [mostrarNuevo, setMostrarNuevo] = useState(false);
+
+    // Venta a editar (null = modal cerrado)
+    const [ventaEditar, setVentaEditar] = useState(null);
+
+    // Venta a eliminar (null = modal cerrado)
+    const [ventaEliminar, setVentaEliminar] = useState(null);
 
     const [cargando, setCargando] = useState(false);
-
-    // ============================================================
-    // PAGINACIÓN
-    // ============================================================
-
     const [pagina, setPagina] = useState(1);
-
-    // ============================================================
-    // MENSAJES
-    // ============================================================
-
     const [mensaje, setMensaje] = useState(null);
 
-
-    // ============================================================
-    // ordenarPorCliente
-    //
-    // Ordena alfabéticamente por Nombre_Cliente. Se usa como
-    // orden por defecto (además de que ya corregimos el SP
-    // para que ordene así directamente).
-    // ============================================================
 
     const ordenarPorCliente = (lista) => {
 
@@ -120,14 +79,6 @@ function VentasPage() {
     };
 
 
-    // ============================================================
-    // cargarVentas
-    //
-    // Consulta la API con los filtros recibidos desde VentasFiltro.
-    // Sin argumentos, trae todo (se usa para restaurar filtros
-    // y en la carga inicial).
-    // ============================================================
-
     const cargarVentas = async (filtros = {}) => {
 
         setCargando(true);
@@ -136,7 +87,6 @@ function VentasPage() {
         try {
 
             const datos = await listarVentas(filtros);
-
             setVentas(ordenarPorCliente(datos));
 
         } catch (err) {
@@ -156,13 +106,7 @@ function VentasPage() {
     };
 
 
-    // ============================================================
-    // CARGA INICIAL
-    // ============================================================
-
-    useEffect(() => {
-
-        cargarVentas();
+    const cargarMetodosEntrega = () => {
 
         obtenerOpcionesVentas()
             .then((data) => {
@@ -171,22 +115,22 @@ function VentasPage() {
             .catch((err) => {
                 console.error(err);
             });
+    };
+
+
+    useEffect(() => {
+
+        cargarVentas();
+        cargarMetodosEntrega();
 
     }, []);
 
-
-    // ============================================================
-    // verDetalle
-    //
-    // Pide al backend el encabezado + líneas de una venta.
-    // ============================================================
 
     const verDetalle = async (invoiceId) => {
 
         try {
 
             const detalle = await obtenerDetalleVenta(invoiceId);
-
             setVentaDetalle(detalle);
 
         } catch (err) {
@@ -203,8 +147,58 @@ function VentasPage() {
 
 
     // ============================================================
-    // ESTADÍSTICAS RÁPIDAS
+    // VENTA CREADA
     // ============================================================
+
+    const ventaCreada = async () => {
+
+        setMostrarNuevo(false);
+
+        await cargarVentas();
+
+        setMensaje({
+            tipo: 'exito',
+            titulo: 'Venta creada',
+            mensaje: 'La venta se creó correctamente.'
+        });
+    };
+
+
+    // ============================================================
+    // VENTA ACTUALIZADA
+    // ============================================================
+
+    const ventaActualizada = async () => {
+
+        setVentaEditar(null);
+
+        await cargarVentas();
+
+        setMensaje({
+            tipo: 'exito',
+            titulo: 'Venta actualizada',
+            mensaje: 'La venta se actualizó correctamente.'
+        });
+    };
+
+
+    // ============================================================
+    // VENTA ELIMINADA
+    // ============================================================
+
+    const ventaEliminada = async () => {
+
+        setVentaEliminar(null);
+
+        await cargarVentas();
+
+        setMensaje({
+            tipo: 'exito',
+            titulo: 'Venta eliminada',
+            mensaje: 'La venta se eliminó correctamente.'
+        });
+    };
+
 
     const totalVentas = ventas.length;
 
@@ -218,10 +212,6 @@ function VentasPage() {
     ).size;
 
 
-    // ============================================================
-    // PAGINACIÓN
-    // ============================================================
-
     const totalPaginas = Math.max(
         1,
         Math.ceil(ventas.length / POR_PAGINA)
@@ -232,10 +222,6 @@ function VentasPage() {
         pagina * POR_PAGINA
     );
 
-
-    // ============================================================
-    // NÚMEROS DE PÁGINA DINÁMICOS
-    // ============================================================
 
     const numerosPagina = (() => {
 
@@ -270,10 +256,6 @@ function VentasPage() {
     })();
 
 
-    // ============================================================
-    // FECHA Y HORA
-    // ============================================================
-
     const ahora = new Date();
 
     const fechaTexto = ahora.toLocaleDateString('es-CR', {
@@ -290,17 +272,9 @@ function VentasPage() {
     });
 
 
-    // ============================================================
-    // INTERFAZ
-    // ============================================================
-
     return (
 
         <div>
-
-            {/* ====================================================
-                ENCABEZADO
-            ==================================================== */}
 
             <div className="page-header">
 
@@ -313,7 +287,7 @@ function VentasPage() {
                     <div>
                         <h1>Ventas</h1>
                         <p>
-                            Consulta las ventas registradas en
+                            Gestiona las ventas registradas en
                             Wide World Importers.
                         </p>
                     </div>
@@ -332,10 +306,6 @@ function VentasPage() {
 
             </div>
 
-
-            {/* ====================================================
-                ESTADÍSTICAS
-            ==================================================== */}
 
             <div className="stats-row">
 
@@ -366,21 +336,14 @@ function VentasPage() {
             </div>
 
 
-            {/* ====================================================
-                TABLA + FILTROS
-            ==================================================== */}
-
             <div className="table-card">
 
                 <VentasFiltro
                     metodosEntrega={metodosEntrega}
                     onBuscar={cargarVentas}
                     onRestaurar={() => cargarVentas()}
+                    onNuevo={() => setMostrarNuevo(true)}
                 />
-
-                {/* ==================================================
-                    CARGANDO / TABLA
-                ================================================== */}
 
                 {cargando ? (
 
@@ -395,9 +358,9 @@ function VentasPage() {
                         <VentasTabla
                             ventas={ventasPagina}
                             onVerUna={verDetalle}
+                            onEditar={(v) => setVentaEditar(v)}
+                            onEliminar={(v) => setVentaEliminar(v)}
                         />
-
-                        {/* PAGINACIÓN */}
 
                         <div className="paginacion">
 
@@ -458,19 +421,49 @@ function VentasPage() {
             </div>
 
 
-            {/* ====================================================
-                MODAL DE DETALLE
-            ==================================================== */}
-
+            {/* Detalle de solo lectura */}
             <VentaDetalleModal
                 venta={ventaDetalle}
                 onCerrar={() => setVentaDetalle(null)}
             />
 
 
-            {/* ====================================================
-                MENSAJE
-            ==================================================== */}
+            {/* Nueva venta */}
+            {mostrarNuevo && (
+
+                <VentaNuevoModal
+                    onCerrar={() => setMostrarNuevo(false)}
+                    onVentaCreada={ventaCreada}
+                    onMostrarMensaje={(m) => setMensaje(m)}
+                />
+
+            )}
+
+
+            {/* Editar venta */}
+            {ventaEditar && (
+
+                <VentaEditarModal
+                    venta={ventaEditar}
+                    onCerrar={() => setVentaEditar(null)}
+                    onVentaActualizada={ventaActualizada}
+                    onMostrarMensaje={(m) => setMensaje(m)}
+                />
+
+            )}
+
+
+            {/* Eliminar venta */}
+            {ventaEliminar && (
+
+                <VentaEliminarModal
+                    venta={ventaEliminar}
+                    onCerrar={() => setVentaEliminar(null)}
+                    onEliminado={ventaEliminada}
+                />
+
+            )}
+
 
             {mensaje && (
 

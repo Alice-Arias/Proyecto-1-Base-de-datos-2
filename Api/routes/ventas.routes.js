@@ -448,4 +448,47 @@ router.put('/:id', async (req, res) => {
 });
 
 
+
+// =========================================================
+// 5. ELIMINAR VENTA
+//
+// DELETE /api/ventas/:id
+// =========================================================
+
+router.delete('/:id', async (req, res) => {
+
+    try {
+
+        const pool = await poolPromise;
+
+        const request = pool.request();
+
+        request.input(
+            'InvoiceID',
+            sql.Int,
+            req.params.id
+        );
+
+        const result = await request.execute(
+            'SP_Ventas_Eliminar'
+        );
+
+        res.json({
+            mensaje: 'Venta eliminada correctamente',
+            venta: result.recordset[0]
+        });
+
+    } catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+            error: err.message
+        });
+
+    }
+
+});
+
+
 module.exports = router;

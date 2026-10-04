@@ -1,19 +1,3 @@
-// ============================================================
-// MODAL PARA ELIMINAR INVENTARIO
-// ============================================================
-//
-// Estados:
-//
-//   'confirmar'  -> pregunta si desea eliminar.
-//   'eliminando' -> mismo modal, con los botones bloqueados.
-//   'exito'      -> el producto se eliminó.
-//   'error'      -> el SP no lo permitió, por ejemplo, porque
-//                   el producto tiene inventario, transacciones,
-//                   pedidos o facturas relacionadas.
-//
-// Usa las mismas clases de CSS que el modal de eliminar clientes
-// y proveedores.
-// ============================================================
 
 import {
     Trash2,
@@ -93,10 +77,6 @@ function InventarioEliminarModal({
     };
 
 
-    // ========================================================
-    // CERRAR DESPUÉS DE UN ÉXITO
-    // ========================================================
-
     const cerrarConExito = async () => {
 
         if (onEliminado) {
@@ -110,10 +90,7 @@ function InventarioEliminarModal({
     };
 
 
-    // ========================================================
-    // ABRIR EL DETALLE COMPLETO
-    // ========================================================
-
+ 
     const abrirDetalle = async () => {
 
         setCargandoDetalle(true);
@@ -147,9 +124,6 @@ function InventarioEliminarModal({
     };
 
 
-    // ========================================================
-    // ESTADO: CONFIRMAR / ELIMINANDO
-    // ========================================================
 
     if (
         estado === 'confirmar' ||
@@ -187,7 +161,7 @@ function InventarioEliminarModal({
                         </p>
 
 
-                        {/* Producto + botón para ver detalle */}
+                       
 
                         <div className="confirmacion-cliente-tarjeta">
 
@@ -285,9 +259,6 @@ function InventarioEliminarModal({
     }
 
 
-    // ========================================================
-    // ESTADO: ÉXITO
-    // ========================================================
 
     if (estado === 'exito') {
 
@@ -343,17 +314,7 @@ function InventarioEliminarModal({
     }
 
 
-    // ========================================================
-    // ESTADO: ERROR
-    // ========================================================
-    //
-    // Aquí aparece el mensaje que devuelve el SP.
-    //
-    // Por ejemplo:
-    // "No se puede eliminar: el producto tiene
-    //  movimientos de inventario."
-    // ========================================================
-
+ 
     return (
 
         <div

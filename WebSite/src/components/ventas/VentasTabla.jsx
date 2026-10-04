@@ -1,13 +1,3 @@
-// ============================================================
-// TABLA DE VENTAS
-// ============================================================
-//
-// Props:
-//   ventas    : lista de ventas a mostrar (ya paginada/ordenada
-//               por el componente padre)
-//   onVerUna  : recibe el InvoiceID al hacer click en una fila
-//               o en el botón de ver
-// ============================================================
 
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 

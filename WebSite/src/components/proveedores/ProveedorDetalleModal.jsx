@@ -1,20 +1,9 @@
 
-// ============================================================
-// MODAL CON EL DETALLE DE UNO O VARIOS PROVEEDORES
-// ============================================================
-
 import { useEffect, useState } from 'react';
 
-// Estilos propios del módulo de proveedores.
-// (Archivo: components/proveedores/proveedores.css)
+
 import './proveedores.css';
 
-
-// ============================================================
-// FILA "ETIQUETA ...... VALOR"
-//
-// Pequeño componente para no repetir el mismo bloque 9 veces.
-// ============================================================
 
 function Fila({ etiqueta, children }) {
     return (

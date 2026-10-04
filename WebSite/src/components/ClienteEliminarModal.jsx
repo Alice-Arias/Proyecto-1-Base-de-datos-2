@@ -1,16 +1,3 @@
-// ============================================================
-// MODAL PARA ELIMINAR CLIENTE
-// ============================================================
-//
-// Estados:
-//   'confirmar'  -> usa .modal-confirmacion (ya existe en tu CSS)
-//   'eliminando' -> mismo contenedor, botón en estado "cargando"
-//   'exito'      -> usa .mensaje-modal.exito (ya existe en tu CSS)
-//   'error'      -> usa .mensaje-modal.error (ya existe en tu CSS)
-//
-// El botón de ojo abre ClienteDetalleModal, que espera un
-// ARRAY de clientes (prop `clientes`), no un objeto suelto.
-// ============================================================
 
 import {
     Trash2,

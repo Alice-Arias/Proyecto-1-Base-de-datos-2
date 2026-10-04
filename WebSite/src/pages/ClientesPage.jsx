@@ -1,13 +1,4 @@
 
-// ============================================================
-// IMPORTACIONES DE REACT
-// ============================================================
-//
-// useEffect → permite ejecutar código cuando el componente
-// se carga o cuando cambian ciertas dependencias.
-//
-// useState → permite guardar información que puede cambiar.
-
 import { useEffect, useState } from 'react';
 
 

@@ -1,5 +1,3 @@
-// Importamos los iconos que vamos a utilizar en el menú lateral
-// desde la librería lucide-react.
 
 import {
   Home,
@@ -10,16 +8,6 @@ import {
   BarChart3,
   Database
 } from 'lucide-react';
-
-
-// Opciones que aparecerán en el Sidebar.
-// Cada elemento tiene:
-// - id    → identificador de la página (lo usa App.jsx).
-// - label → texto que verá el usuario.
-// - icon  → icono que aparecerá junto al texto.
-//
-// Ya NO hay "active: true" fijo. Ahora la opción activa
-// la decide App.jsx mediante la prop "current".
 
 const items = [
   //{ id: 'inicio', label: 'Inicio', icon: Home },

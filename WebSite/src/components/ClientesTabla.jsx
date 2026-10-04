@@ -1,41 +1,5 @@
-// ============================================================
-// ICONOS
-// ============================================================
-
-// Importamos tres iconos de la librería lucide-react:
-//
-// Eye     → icono para ver los detalles.
-// Pencil  → icono para editar.
-// Trash2  → icono para eliminar.
 
 import { Eye, Pencil, Trash2 } from 'lucide-react';
-
-
-// ============================================================
-// TABLA DE CLIENTES
-// ============================================================
-
-// Este componente muestra los clientes dentro de una tabla.
-//
-// Recibe seis datos/funciones desde el componente padre:
-//
-// clientes:
-// Lista de clientes que se mostrarán.
-//
-// seleccionados:
-// Lista con los CustomerID de los clientes seleccionados.
-//
-// onToggleSeleccion:
-// Función que selecciona o deselecciona un cliente.
-//
-// onVerUno:
-// Función que permite ver los detalles de un cliente.
-//
-// onEditar:
-// Función que permite editar un cliente.
-//
-// onEliminar:
-// Función que permite eliminar un cliente.
 
 function ClientesTabla({
   clientes,
@@ -110,11 +74,6 @@ function ClientesTabla({
               <input
                 type="checkbox"
 
-                // Determina si el checkbox aparece marcado.
-                //
-                // includes() pregunta:
-                // "¿El CustomerID de este cliente está dentro
-                // de la lista de seleccionados?"
 
                 checked={seleccionados.includes(c.CustomerID)}
 

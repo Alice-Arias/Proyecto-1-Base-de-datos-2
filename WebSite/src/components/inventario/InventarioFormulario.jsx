@@ -1,23 +1,3 @@
-// ============================================================
-// FORMULARIO DE INVENTARIO (compartido)
-// ============================================================
-//
-// Lo usan InventarioNuevoModal y InventarioEditarModal, así los
-// campos se escriben una sola vez.
-//
-// Props:
-//
-//   formulario          → valores actuales de los campos.
-//   onCambiar           → función que actualiza un campo.
-//   opciones            → listas de los select
-//                         (proveedores, colores, tiposPaquete).
-//   cargandoOpciones    → true mientras llegan las listas.
-//   idInventario        → si se envía, muestra el ID (solo al editar).
-//   resaltar            → true para resaltar el campo que se está editando.
-//
-// Usa las mismas clases de CSS que los formularios existentes
-// (cd-panel, form-grid, campo, campo-completo, campo-editando).
-// ============================================================
 
 import { useState } from 'react';
 

@@ -4,21 +4,6 @@ import { Search, RotateCcw, Calendar, Plus } from 'lucide-react';
 import './ventas.css';
 
 
-// Este componente permite:
-// 1. Escribir un número de factura.
-// 2. Escribir el nombre de un cliente (texto libre, parcial).
-// 3. Elegir un método de entrega.
-// 4. Elegir un rango de fechas (desde / hasta).
-// 5. Elegir un rango de monto (desde / hasta).
-// 6. Buscar ventas con esos filtros (acumulativos entre sí).
-// 7. Restaurar todos los filtros.
-//
-// Recibe desde el componente padre:
-// metodosEntrega: lista de métodos de entrega para el select.
-// onBuscar:       se ejecuta al presionar "Buscar", recibe
-//                 un objeto con todos los filtros.
-// onRestaurar:    se ejecuta al presionar "Restaurar filtros".
-
 function VentasFiltro({ metodosEntrega = [], onBuscar, onRestaurar, onNuevo }) {
 
     const [numeroFactura, setNumeroFactura] = useState('');
@@ -28,10 +13,6 @@ function VentasFiltro({ metodosEntrega = [], onBuscar, onRestaurar, onNuevo }) {
     const [fechaFin, setFechaFin] = useState('');
     const [montoInicio, setMontoInicio] = useState('');
     const [montoFin, setMontoFin] = useState('');
-
-    // Referencias para forzar la apertura del calendario nativo
-    // al hacer click en cualquier parte del campo, no solo en
-    // el pequeño ícono que dibuja el navegador.
     const refFechaInicio = useRef(null);
     const refFechaFin = useRef(null);
 
@@ -42,10 +23,6 @@ function VentasFiltro({ metodosEntrega = [], onBuscar, onRestaurar, onNuevo }) {
             ref.current?.focus();
         }
     };
-
-
-    // buscar
-    // Toma todos los filtros y los envía al componente padre.
 
     const buscar = () => {
         onBuscar({

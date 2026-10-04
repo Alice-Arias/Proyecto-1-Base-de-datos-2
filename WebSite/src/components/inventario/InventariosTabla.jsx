@@ -9,19 +9,6 @@
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 
 
-// ============================================================
-// TABLA DE INVENTARIO
-// ============================================================
-//
-// Recibe seis datos/funciones desde el componente padre:
-//
-// inventarios:       lista de productos que se mostrarán.
-// seleccionados:     lista de StockItemID seleccionados.
-// onToggleSeleccion: selecciona o deselecciona un producto.
-// onVerUno:          ver los detalles de un producto.
-// onEditar:          editar un producto.
-// onEliminar:        eliminar un producto.
-
 function InventariosTabla({
   inventarios,
   seleccionados,

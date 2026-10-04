@@ -1,17 +1,3 @@
-// ============================================================
-// UTILIDADES COMPARTIDAS POR LOS MODALES DE VENTAS
-//
-// FORMULARIO_VACIO        → valores iniciales del formulario.
-// formularioDesdeDetalle  → convierte una línea del detalle.
-// formulariosDesdeDetalle → convierte TODAS las líneas.
-// validarVenta            → revisa los datos.
-// armarDatos              → prepara el JSON para la API.
-//
-// IMPORTANTE:
-// - VentaNuevoModal trabaja con una sola línea.
-// - VentaEditarModal puede trabajar con varias líneas.
-// - Las líneas de edición vienen directamente de SP_Ventas_Detalle.
-// ============================================================
 
 
 // ------------------------------------------------------------
@@ -53,12 +39,6 @@ export const FORMULARIO_VACIO = {
 };
 
 
-// ------------------------------------------------------------
-// DETALLE DE UNA LÍNEA → FORMULARIO
-//
-// Se utiliza para VentaNuevoModal y también para obtener
-// los datos generales de la primera línea cuando se edita.
-// ------------------------------------------------------------
 
 export function formularioDesdeDetalle(encabezado, primeraLinea) {
 
@@ -185,18 +165,6 @@ export function formularioDesdeDetalle(encabezado, primeraLinea) {
 }
 
 
-// ------------------------------------------------------------
-// DETALLE COMPLETO → FORMULARIOS DE TODAS LAS LÍNEAS
-//
-// Se utiliza para VentaEditarModal.
-//
-// IMPORTANTE:
-// Cada formulario corresponde a una línea REAL que devuelve
-// SP_Ventas_Detalle.
-//
-// No se crean productos.
-// No se inventan StockItemID.
-// ------------------------------------------------------------
 
 export function formulariosDesdeDetalle(encabezado, lineas) {
 

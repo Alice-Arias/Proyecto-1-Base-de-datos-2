@@ -5,22 +5,6 @@ const router = express.Router();
 const { sql, poolPromise } = require('../db');
 
 
-// =========================================================
-// 0. OPCIONES PARA FORMULARIOS DE VENTAS
-//
-// GET /api/ventas/opciones
-//
-// Devuelve, en este orden (según SP_Ventas_Opciones):
-// 1. Clientes
-// 2. Métodos de entrega
-// 3. Contactos generales
-// 4. Vendedores
-// 5. Pedidos
-// 6. Productos
-// 7. Tipos de paquete
-//
-// IMPORTANTE: esta ruta debe ir ANTES de '/:id'.
-// =========================================================
 
 router.get('/opciones', async (req, res) => {
 
@@ -55,19 +39,6 @@ router.get('/opciones', async (req, res) => {
 });
 
 
-// =========================================================
-// 1. LISTAR VENTAS
-//
-// GET /api/ventas
-// GET /api/ventas?cliente=ABC
-// GET /api/ventas?fechaInicio=2024-01-01&fechaFin=2024-12-31
-// GET /api/ventas?montoInicio=100&montoFin=5000
-// GET /api/ventas?metodoEntrega=Delivery%20Van
-// GET /api/ventas?numeroFactura=123
-//
-// Todos los filtros son acumulativos (AND entre sí), y
-// el SP ya maneja que cada uno sea opcional.
-// =========================================================
 
 router.get('/', async (req, res) => {
 
@@ -154,18 +125,6 @@ router.get('/', async (req, res) => {
 });
 
 
-// =========================================================
-// 2. DETALLE DE UNA VENTA
-//
-// GET /api/ventas/123
-//
-// SP_Ventas_Detalle devuelve DOS resultados:
-//   recordsets[0] -> encabezado de la factura (1 fila)
-//   recordsets[1] -> líneas del detalle (varias filas)
-//
-// A diferencia de clientes/inventarios, este SP solo acepta
-// UN InvoiceID a la vez (no una lista separada por comas).
-// =========================================================
 
 router.get('/:id', async (req, res) => {
 
@@ -213,14 +172,6 @@ router.get('/:id', async (req, res) => {
 });
 
 
-// =========================================================
-// 3. INSERTAR VENTA
-//
-// POST /api/ventas
-//
-// SP_Ventas_Insertar crea la factura Y su primera línea de
-// detalle en una sola llamada (el SP está diseñado así).
-// =========================================================
 
 router.post('/', async (req, res) => {
 
@@ -330,12 +281,6 @@ router.post('/', async (req, res) => {
 
 });
 
-
-// =========================================================
-// 4. ACTUALIZAR VENTA
-//
-// PUT /api/ventas/:id
-// =========================================================
 
 router.put('/:id', async (req, res) => {
 
@@ -449,11 +394,6 @@ router.put('/:id', async (req, res) => {
 
 
 
-// =========================================================
-// 5. ELIMINAR VENTA
-//
-// DELETE /api/ventas/:id
-// =========================================================
 
 router.delete('/:id', async (req, res) => {
 

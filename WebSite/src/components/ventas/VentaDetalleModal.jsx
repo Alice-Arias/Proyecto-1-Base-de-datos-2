@@ -1,27 +1,9 @@
-// ============================================================
-// MODAL DE DETALLE DE UNA VENTA
-// ============================================================
-//
-// Props:
-//   venta     : { encabezado, lineas } — null = modal cerrado
-//   onCerrar  : cierra el modal
-//
-// Al hacer clic en el nombre del CLIENTE, se pide su detalle
-// real a la API de Clientes y se abre encima (ClienteDetalleModal).
-// Al hacer clic en el nombre de un PRODUCTO, pasa lo mismo pero
-// con el detalle real de Inventario (InventarioDetalleModal).
-//
-// IMPORTANTE: ajustá la ruta de importación de ClienteDetalleModal
-// más abajo según donde esté ese archivo en tu proyecto.
-// ============================================================
 
 import { useState } from 'react';
 import { User, Truck, Loader2 } from 'lucide-react';
 
 import InventarioDetalleModal from '../inventario/InventarioDetalleModal';
 
-// Ajustá esta ruta si tu ClienteDetalleModal vive en otra carpeta
-// (por ejemplo '../clientes/ClienteDetalleModal').
 import ClienteDetalleModal from '../ClienteDetalleModal';
 
 import {
@@ -362,28 +344,14 @@ function VentaDetalleModal({ venta, onCerrar }) {
 
             </div>
 
-            {/* ================================================
-                DETALLE REAL DEL PRODUCTO (reutiliza el modal
-                que ya existe en el módulo de Inventario)
-            ================================================ */}
-
             <InventarioDetalleModal
                 inventarios={productoDetalle}
                 onCerrar={() => setProductoDetalle(null)}
             />
 
-            {/* ================================================
-                DETALLE REAL DEL CLIENTE (reutiliza el modal
-                que ya existe en el módulo de Clientes)
-            ================================================ */}
 
             {clienteDetalle && (
 
-                // Envoltorio con z-index muy alto, puesto directo acá
-                // (sin depender de que ventas.css tenga el ajuste de
-                // z-index aplicado): esto garantiza que el detalle del
-                // cliente quede SIEMPRE por encima del modal de la venta,
-                // sin importar el orden en que se carguen los estilos.
                 <div style={{ position: 'fixed', inset: 0, zIndex: 999 }}>
 
                     <ClienteDetalleModal

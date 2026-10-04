@@ -9,19 +9,6 @@
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 
 
-// ============================================================
-// TABLA DE PROVEEDORES
-// ============================================================
-
-// Recibe desde el componente padre (ProveedoresPage):
-//
-// proveedores:        lista de proveedores que se mostrarán.
-// seleccionados:      lista con los SupplierID marcados.
-// onToggleSeleccion:  selecciona o deselecciona un proveedor.
-// onVerUno:           muestra el detalle de un proveedor.
-// onEditar:           abre el modal para editar.
-// onEliminar:         abre el modal para eliminar.
-
 function ProveedoresTabla({
   proveedores,
   seleccionados,

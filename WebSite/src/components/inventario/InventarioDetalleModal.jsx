@@ -6,14 +6,9 @@ import { useEffect, useState } from 'react';
 import './inventario.css';
 
 
-// Devuelve "-" cuando el valor no existe (pero respeta el 0)
 const valorOGuion = (valor) =>
     valor != null && valor !== '' ? valor : '-';
 
-
-// ============================================================
-// FILA "ETIQUETA - VALOR" (precios)
-// ============================================================
 
 function Fila({ etiqueta, children }) {
     return (
@@ -24,11 +19,6 @@ function Fila({ etiqueta, children }) {
     );
 }
 
-
-// ============================================================
-// PAR "ETIQUETA ARRIBA - VALOR ABAJO" (información general)
-// ============================================================
-
 function Par({ etiqueta, children }) {
     return (
         <div className="inv-par">
@@ -38,10 +28,6 @@ function Par({ etiqueta, children }) {
     );
 }
 
-
-// ============================================================
-// DATO CLAVE (disponible, ubicación, peso)
-// ============================================================
 
 function Dato({ color, icono, etiqueta, children }) {
     return (
@@ -57,10 +43,6 @@ function Dato({ color, icono, etiqueta, children }) {
 }
 
 
-// ============================================================
-// MODAL PRINCIPAL
-// ============================================================
-
 function InventarioDetalleModal({
     inventarios,
     onCerrar,
@@ -74,7 +56,6 @@ function InventarioDetalleModal({
         setIndiceActual(0);
     }, [inventarios]);
 
-    // Cerrar con la tecla Escape
     useEffect(() => {
         const alPresionar = (e) => {
             if (e.key === 'Escape') onCerrar();
@@ -172,9 +153,6 @@ function InventarioDetalleModal({
 }
 
 
-// ============================================================
-// TARJETA DEL PRODUCTO
-// ============================================================
 
 function TarjetaInventario({
     inventario: p,
@@ -186,9 +164,6 @@ function TarjetaInventario({
 
         <section className="inv-tarjeta">
 
-            {/* ================================================
-                ENCABEZADO: icono, nombre, código y botones
-            ================================================ */}
 
             <header className="inv-encabezado">
 
@@ -230,10 +205,6 @@ function TarjetaInventario({
             </header>
 
 
-            {/* ================================================
-                DATOS CLAVE
-            ================================================ */}
-
             <div className="inv-stats">
 
                 <Dato color="verde" icono="📦" etiqueta="Cantidad disponible">
@@ -250,10 +221,6 @@ function TarjetaInventario({
 
             </div>
 
-
-            {/* ================================================
-                INFORMACIÓN GENERAL Y PRECIOS
-            ================================================ */}
 
             <div className="inv-paneles">
 

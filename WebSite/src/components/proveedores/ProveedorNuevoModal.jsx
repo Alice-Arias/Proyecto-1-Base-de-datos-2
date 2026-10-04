@@ -6,14 +6,13 @@ import { X, Truck, Save, Loader2 } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
 
-// Funciones de la API (este archivo está en components/proveedores/,
-// por eso se sube dos niveles hasta src/).
+
 import {
     insertarProveedor,
     obtenerOpcionesProveedores
 } from '../../services/api';
 
-// Formulario compartido con el modal de editar.
+
 import ProveedorFormulario from './ProveedorFormulario';
 
 import {
@@ -47,12 +46,7 @@ function ProveedorNuevoModal({
     const [guardando, setGuardando] = useState(false);
 
 
-    // ========================================================
-    // CARGAR LAS LISTAS DE LOS SELECT
-    //
-    // Se ejecuta una sola vez, al abrir el modal.
-    // ========================================================
-
+ 
     useEffect(() => {
 
         const cargarOpciones = async () => {
@@ -89,13 +83,9 @@ function ProveedorNuevoModal({
 
         cargarOpciones();
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     }, []);
 
-
-    // ========================================================
-    // CAMBIAR UN CAMPO
-    // ========================================================
 
     const cambiarCampo = (e) => {
 
@@ -108,10 +98,6 @@ function ProveedorNuevoModal({
 
     };
 
-
-    // ========================================================
-    // GUARDAR PROVEEDOR
-    // ========================================================
 
     const guardarProveedor = async (e) => {
 

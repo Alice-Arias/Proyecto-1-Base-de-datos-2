@@ -1,16 +1,3 @@
-/* =========================================================
-   ESTILOS DEL MÓDULO DE INVENTARIO
-   Usa las variables y el estilo del CSS general
-   (:root con --primary, --green, --border, --shadow-sm, etc.)
-   Prefijo "inv-" para no chocar con Clientes y Proveedores.
-   El filtro usa las clases existentes:
-   .filtro  .btn-buscar  .btn-restaurar
-   ========================================================= */
-
-
-/* =========================================================
-   FILTRO
-   ========================================================= */
 
 .filtro {
     align-items: center;
@@ -102,10 +89,6 @@
 }
 
 
-/* =========================================================
-   TABLA (misma apariencia que .tabla-clientes)
-   ========================================================= */
-
 .inv-tabla-contenedor {
     width: 100%;
     overflow-x: auto;
@@ -119,9 +102,7 @@
     border-spacing: 0;
     background: var(--card-bg);
     color: var(--text-dark);
-
-    /* "fixed" respeta el <colgroup>: encabezado y filas alineados */
-    table-layout: fixed;
+ table-layout: fixed;
 }
 
 .inv-tabla th {
@@ -156,12 +137,11 @@
     border-bottom: none;
 }
 
-/* Columnas centradas (encabezado y celdas por igual) */
+
 .inv-tabla .inv-centro {
     text-align: center;
 }
 
-/* Casilla de selección */
 .inv-tabla input[type="checkbox"] {
     appearance: none;
     -webkit-appearance: none;
@@ -202,7 +182,7 @@
     transform: rotate(45deg);
 }
 
-/* Nombre completo: baja de línea en vez de cortarse */
+
 .inv-nombre-producto {
     display: block;
     color: var(--text-dark);
@@ -304,11 +284,6 @@
 }
 
 
-/* =========================================================
-   MODAL: FONDO Y CAJA
-   Compacto para que no haga falta bajar
-   ========================================================= */
-
 .inv-overlay {
     position: fixed;
     inset: 0;
@@ -384,9 +359,6 @@
 }
 
 
-/* =========================================================
-   ENCABEZADO
-   ========================================================= */
 
 .inv-encabezado {
     display: flex;
@@ -476,9 +448,6 @@
 }
 
 
-/* =========================================================
-   DATOS CLAVE (mismo estilo de las .stat-card)
-   ========================================================= */
 
 .inv-stats {
     display: grid;
@@ -553,9 +522,6 @@
 .inv-stat-morado .inv-stat-valor { color: var(--purple-dark); }
 
 
-/* =========================================================
-   PANELES
-   ========================================================= */
 
 .inv-paneles {
     display: grid;
@@ -607,7 +573,7 @@
     background: var(--yellow-light);
 }
 
-/* Información general: dos columnas */
+
 .inv-pares {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -636,7 +602,7 @@
     overflow-wrap: anywhere;
 }
 
-/* Precios: etiqueta a la izquierda, valor a la derecha */
+
 .inv-fila {
     display: flex;
     align-items: baseline;
@@ -664,10 +630,6 @@
     overflow-wrap: anywhere;
 }
 
-
-/* =========================================================
-   CONTROLES DEL CARRUSEL
-   ========================================================= */
 
 .inv-controles {
     display: flex;
@@ -721,10 +683,6 @@
     transform: scale(0.92);
 }
 
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
 
 @media (max-width: 800px) {
 
@@ -809,10 +767,6 @@
     }
 }
 
-
-/* =========================================================
-   MODO OSCURO SUAVE
-   ========================================================= */
 
 .modo-oscuro .filtro select {
     background: #303842;

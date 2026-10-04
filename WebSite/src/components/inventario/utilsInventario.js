@@ -1,17 +1,3 @@
-// ============================================================
-// UTILIDADES COMPARTIDAS POR LOS MODALES DE INVENTARIO
-//
-// Nuevo y Editar usan exactamente el mismo formulario, así que
-// las partes repetidas viven aquí:
-//
-//    FORMULARIO_VACIO      → valores iniciales del formulario.
-//    formularioDesdeDetalle → convierte lo que devuelve
-//                            SP_Inventarios_Detalle en formulario.
-//    validarInventario     → revisa los datos antes de enviarlos.
-//    armarDatos            → prepara el JSON que se envía a la API.
-//
-// ============================================================
-
 
 // ------------------------------------------------------------
 // VALORES INICIALES

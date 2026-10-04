@@ -1,9 +1,4 @@
 
-// ============================================================
-// MODAL PARA EDITAR UN CLIENTE
-// ============================================================
-
-// Iconos utilizados en el formulario.
 import {
     X,
     Pencil,

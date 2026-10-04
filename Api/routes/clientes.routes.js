@@ -5,15 +5,6 @@ const router = express.Router();
 const { sql, poolPromise } = require('../db');
 
 
-// =========================================================
-// 0. OPCIONES PARA EL FORMULARIO
-// GET /api/clientes/opciones
-//
-// IMPORTANTE: esta ruta debe ir ANTES de '/:id',
-// porque si no, Express la intercepta como si "opciones"
-// fuera un CustomerID.
-// =========================================================
-
 router.get('/opciones', async (req, res) => {
 
     try {
@@ -23,10 +14,6 @@ router.get('/opciones', async (req, res) => {
         const result = await pool.request().execute(
             'SP_Clientes_Opciones'
         );
-
-        // SP_Clientes_Opciones devuelve 6 SELECTs distintos,
-        // por eso usamos result.recordsets (plural),
-        // no result.recordset (singular).
 
         res.json({
             categorias: result.recordsets[0],
@@ -48,12 +35,6 @@ router.get('/opciones', async (req, res) => {
 
 });
 
-
-// =========================================================
-// 1. LISTAR CLIENTES
-// GET /api/clientes
-// GET /api/clientes?nombre=ABC&categoria=Minorista
-// =========================================================
 
 router.get('/', async (req, res) => {
 
@@ -105,12 +86,6 @@ router.get('/', async (req, res) => {
 });
 
 
-// =========================================================
-// 2. DETALLE DE UNO O VARIOS CLIENTES
-// GET /api/clientes/1
-// GET /api/clientes/1,2,3
-// =========================================================
-
 router.get('/:id', async (req, res) => {
 
     try {
@@ -150,11 +125,6 @@ router.get('/:id', async (req, res) => {
 
 });
 
-
-// =========================================================
-// 3. INSERTAR CLIENTE
-// POST /api/clientes
-// =========================================================
 
 router.post('/', async (req, res) => {
 
@@ -327,11 +297,6 @@ router.post('/', async (req, res) => {
 
 });
 
-
-// =========================================================
-// 4. ACTUALIZAR CLIENTE
-// PUT /api/clientes/:id
-// =========================================================
 
 router.put('/:id', async (req, res) => {
 
@@ -510,11 +475,6 @@ router.put('/:id', async (req, res) => {
 
 });
 
-
-// =========================================================
-// 5. ELIMINAR CLIENTE
-// DELETE /api/clientes/:id
-// =========================================================
 
 router.delete('/:id', async (req, res) => {
 

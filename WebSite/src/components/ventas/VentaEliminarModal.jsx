@@ -1,10 +1,3 @@
-// ============================================================
-// MODAL PARA ELIMINAR VENTA
-// ============================================================
-//
-// Estados: 'confirmar' | 'eliminando' | 'exito' | 'error'
-// Mismo patrón que ProveedorEliminarModal / ClienteEliminarModal.
-// ============================================================
 
 import {
     Trash2,
@@ -185,8 +178,6 @@ function VentaEliminarModal({
 
                 {verDetalle && detalleCompleto && (
 
-                    // Mismo truco de z-index alto que usamos en
-                    // VentaDetalleModal, para que no quede tapado.
                     <div style={{ position: 'fixed', inset: 0, zIndex: 999 }}>
 
                         <VentaDetalleModal

@@ -91,17 +91,10 @@ function ProveedorEditarModal({
 
         cargarOpciones();
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, []);
 
 
-    // ========================================================
-    // CARGAR LOS DATOS COMPLETOS DEL PROVEEDOR
-    //
-    // La lista solo trae nombre, categoría y método de entrega.
-    // Para editar necesitamos todo, así que se pide el detalle
-    // con el SupplierID y se llena el formulario.
-    // ========================================================
 
     const supplierID = proveedor?.SupplierID;
 
@@ -172,7 +165,7 @@ function ProveedorEditarModal({
             cancelado = true;
         };
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [supplierID]);
 
 

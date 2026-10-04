@@ -1,16 +1,6 @@
 import { useState } from 'react';
 
 
-// Este componente permite:
-// 1. Escribir el nombre de un proveedor.
-// 2. Escribir una categoría.
-// 3. Escribir un método de entrega.
-// 4. Buscar proveedores con esos filtros.
-// 5. Restaurar todos los filtros.
-//
-// Recibe dos funciones desde el componente padre:
-// onBuscar:    se ejecuta cuando presionamos "Buscar".
-// onRestaurar: se ejecuta cuando presionamos "Restaurar filtros".
 
 function ProveedoresFiltro({ onBuscar, onRestaurar }) {
 

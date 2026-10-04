@@ -134,7 +134,7 @@ No necesita saber usar Git. Solo siga estos pasos:
 
 1. Abra el enlace del repositorio en su navegador:
 
-   **`[PEGAR AQUÍ EL LINK DEL REPOSITORIO]`**
+   **`[https://github.com/Alice-Arias/Proyecto-1-Base-de-datos-2.git]`**
 
 2. Cerca de la parte superior derecha encontrará un botón verde que dice **`<> Code`**. Haga clic en él.
 3. En el menú que se abre, haga clic en **`Download ZIP`**.

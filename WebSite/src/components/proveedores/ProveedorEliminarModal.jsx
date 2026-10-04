@@ -1,17 +1,3 @@
-// ============================================================
-// MODAL PARA ELIMINAR PROVEEDOR
-// ============================================================
-//
-// Estados:
-//   'confirmar'  -> pregunta si desea eliminar.
-//   'eliminando' -> mismo modal, con los botones bloqueados.
-//   'exito'      -> el proveedor se eliminó.
-//   'error'      -> el SP no lo permitió (por ejemplo, porque
-//                   tiene órdenes de compra o transacciones)
-//                   y se muestra el mensaje que devolvió.
-//
-// Usa las mismas clases de CSS que el modal de eliminar clientes.
-// ============================================================
 
 import {
     Trash2,
@@ -276,12 +262,6 @@ function ProveedorEliminarModal({
     }
 
 
-    // ========================================================
-    // ESTADO: ERROR
-    //
-    // Aquí aparece, por ejemplo: "No se puede eliminar: el
-    // proveedor tiene ordenes de compra."
-    // ========================================================
 
     return (
 

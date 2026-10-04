@@ -1,17 +1,3 @@
-// ============================================================
-// MODAL PARA CREAR UN NUEVO PRODUCTO DE INVENTARIO
-// ============================================================
-//
-// Este componente permite registrar un nuevo producto
-// utilizando el procedimiento:
-// SP_Inventario_Insertar
-//
-// Las opciones de proveedores, colores y tipos de
-// empaquetamiento se cargan desde la base de datos.
-
-// ============================================================
-// ICONOS
-// ============================================================
 
 import {
     X,
@@ -23,9 +9,6 @@ import {
 } from 'lucide-react';
 
 
-// ============================================================
-// HOOKS DE REACT
-// ============================================================
 
 import {
     useEffect,
@@ -33,23 +16,12 @@ import {
 } from 'react';
 
 
-// ============================================================
-// FUNCIONES DE LA API
-// ============================================================
-//
-// IMPORTANTE:
-// Este componente está dentro de components/inventario/.
-// Por eso necesitamos subir dos niveles para llegar a services.
 
 import {
     insertarInventario,
     obtenerOpcionesInventario
 } from '../../services/api';
 
-
-// ============================================================
-// COMPONENTE
-// ============================================================
 
 function InventarioNuevoModal({
     onCerrar,

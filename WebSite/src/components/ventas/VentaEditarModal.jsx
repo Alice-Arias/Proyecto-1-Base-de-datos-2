@@ -1,16 +1,3 @@
-// ============================================================
-// MODAL PARA EDITAR UNA VENTA
-// ============================================================
-//
-// IMPORTANTE:
-// SP_Ventas_Actualizar edita UNA sola línea de producto por
-// llamada. Por eso, si una factura tiene varios productos,
-// se actualiza cada línea por separado.
-//
-// Los productos que aparecen son exactamente los que devuelve
-// SP_Ventas_Detalle. No se inventan productos ni StockItemID.
-//
-// ============================================================
 
 import { X, Pencil, Save, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -45,20 +32,6 @@ function VentaEditarModal({
 
     const [formulario, setFormulario] = useState(FORMULARIO_VACIO);
 
-    // ========================================================
-    // LÍNEAS DE PRODUCTOS DE LA FACTURA
-    // ========================================================
-    //
-    // Cada posición representa un producto diferente de la
-    // factura.
-    //
-    // Ejemplo:
-    //
-    // lineas[0] -> Producto 1
-    // lineas[1] -> Producto 2
-    // lineas[2] -> Producto 3
-    //
-    // ========================================================
 
     const [lineas, setLineas] = useState([]);
 
@@ -121,7 +94,6 @@ function VentaEditarModal({
 
         cargarOpciones();
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
 
@@ -183,18 +155,7 @@ function VentaEditarModal({
 
                 if (!cancelado) {
 
-                    // --------------------------------------------
-                    // FORMULARIO GENERAL DE LA FACTURA
-                    // --------------------------------------------
-                    //
-                    // Se utiliza para los campos del encabezado.
-                    //
-                    // Tomamos la primera línea solamente para
-                    // completar los datos iniciales del formulario.
-                    // Las demás líneas se almacenan en "lineas".
-                    //
-                    // --------------------------------------------
-
+ 
                     setFormulario(
                         formularioDesdeDetalle(
                             data.encabezado,
@@ -260,7 +221,7 @@ function VentaEditarModal({
 
         };
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+       
     }, [invoiceID]);
 
 
@@ -280,19 +241,6 @@ function VentaEditarModal({
     };
 
 
-    // ========================================================
-    // CAMBIAR UN CAMPO DE UNA LÍNEA DE PRODUCTO
-    // ========================================================
-    //
-    // "indice" indica cuál producto se está modificando.
-    //
-    // Ejemplo:
-    //
-    // indice 0 -> primera línea
-    // indice 1 -> segunda línea
-    // indice 2 -> tercera línea
-    //
-    // ========================================================
 
     const cambiarCampoLinea = (indice, e) => {
 

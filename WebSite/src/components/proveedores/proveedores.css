@@ -1,12 +1,3 @@
-/* ============================================================
-   ESTILOS DEL MÓDULO DE PROVEEDORES
-   Mismo estilo que Inventario: usa las variables del CSS general
-   (--primary, --green, --border, --shadow-sm, etc.).
-   Todas las clases empiezan con "prov-" para no chocar con
-   las de clientes ni con las globales.
-   La animación "modalEntrada" viene del CSS general.
-   ============================================================ */
-
 
 /* ------------------------------------------------------------
    FONDO Y VENTANA (compacta, para no tener que bajar)
@@ -211,11 +202,6 @@
     box-shadow: 0 4px 12px rgba(59, 111, 196, 0.20);
 }
 
-
-/* ------------------------------------------------------------
-   CONTACTOS (cajas con barra de color arriba, como las tarjetas
-   de datos clave de Inventario)
-   ------------------------------------------------------------ */
 
 .prov-cajas {
     display: grid;

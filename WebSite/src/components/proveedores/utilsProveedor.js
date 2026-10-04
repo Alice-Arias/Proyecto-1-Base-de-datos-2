@@ -1,16 +1,3 @@
-// ============================================================
-// UTILIDADES COMPARTIDAS POR LOS MODALES DE PROVEEDORES
-//
-// Nuevo y Editar usan exactamente el mismo formulario, así que
-// las partes repetidas viven aquí:
-//
-//   FORMULARIO_VACIO         → valores iniciales del formulario.
-//   formularioDesdeDetalle   → convierte lo que devuelve
-//                              SP_Proveedores_Detalle en formulario.
-//   validarProveedor         → revisa los datos (mismas reglas
-//                              que los SP).
-//   armarDatos               → prepara el JSON que se envía a la API.
-// ============================================================
 
 
 // ------------------------------------------------------------

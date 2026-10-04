@@ -1,24 +1,9 @@
-/* ============================================================
-   Z-INDEX: EL DETALLE DEL CLIENTE DEBE QUEDAR POR ENCIMA
-   .modal-fondo (usado por ClienteDetalleModal) tiene z-index:50
-   en el CSS global, pero .vta-overlay (el modal de la venta que
-   ya está abierto) tiene z-index:100. Sin este ajuste, el
-   detalle del cliente se abre "atrás" y parece que no pasa nada.
-   ============================================================ */
 
 .modal-fondo {
     z-index: 150;
 }
 
 
-/* ============================================================
-   QUITAR LAS FLECHAS NATIVAS DE SUBIR/BAJAR
-   Esto es GLOBAL (sin prefijo vf- ni vta-): afecta a todos los
-   inputs numéricos de toda la aplicación, no solo Ventas, ya
-   que este archivo se carga una sola vez y el CSS es en cascada.
-   Se quitan por completo en vez de reemplazarlas, que es lo más
-   limpio y consistente con el resto de los inputs de texto.
-   ============================================================ */
 
 input[type="number"] {
     -moz-appearance: textfield;
@@ -30,15 +15,6 @@ input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
-
-/* ============================================================
-   ESTILOS DEL MODAL DE DETALLE DE VENTAS
-   Mismo patrón visual que Proveedores: usa las variables del
-   CSS general (--primary, --green, --border, --shadow-sm, etc.)
-   Todas las clases empiezan con "vta-" para no chocar con las
-   de clientes, proveedores ni inventario.
-   La animación "modalEntrada" viene del CSS general.
-   ============================================================ */
 
 
 /* ------------------------------------------------------------
@@ -125,9 +101,6 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 
-/* ------------------------------------------------------------
-   ENCABEZADO: avatar, número de factura y método de entrega
-   ------------------------------------------------------------ */
 
 .vta-encabezado {
     display: flex;
@@ -172,11 +145,6 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 
-/* ------------------------------------------------------------
-   ANIMACIÓN DE ENTRADA ESCALONADA
-   El encabezado y cada panel aparecen en secuencia (no todos
-   de golpe), dando una sensación más viva al abrir el modal.
-   ------------------------------------------------------------ */
 
 .vta-animar {
     animation: vtaEntrada 0.35s ease-out both;
@@ -225,13 +193,6 @@ input[type="number"]::-webkit-inner-spin-button {
     font-weight: 600;
 }
 
-
-/* ------------------------------------------------------------
-   TARJETAS CLIENTE / VENDEDOR
-   Mismo patrón que .prov-caja: barra de color arriba, ícono
-   redondo, nombre destacado. El cliente además tiene un botón
-   para ver su detalle real.
-   ------------------------------------------------------------ */
 
 .vta-cajas {
     display: grid;
@@ -307,9 +268,7 @@ input[type="number"]::-webkit-inner-spin-button {
     overflow-wrap: anywhere;
 }
 
-/* Cuando el nombre de la tarjeta es también un enlace clickeable
-   (como el del cliente), se ve como .vta-link-producto pero
-   conservando el tamaño grande de .vta-caja-nombre */
+
 a.vta-caja-nombre.vta-link-producto {
     font-size: 1.1rem;
     font-weight: 700;
@@ -414,9 +373,6 @@ a.vta-caja-nombre.vta-link-producto {
 }
 
 
-/* ------------------------------------------------------------
-   FILAS "ETIQUETA / VALOR" (encabezado de la factura)
-   ------------------------------------------------------------ */
 
 .vta-fila {
     display: flex;
@@ -761,11 +717,6 @@ a.vta-caja-nombre.vta-link-producto {
 .modo-oscuro .vta-tabla tbody tr:hover td {
     background: #2d343c;
 }
-/* ============================================================
-   TABLA DE VENTAS
-   Mismo patrón profesional que inv-tabla: columnas fijas via
-   <colgroup>, encabezado con degradé, botón de acción circular.
-   ============================================================ */
 
 .vta-tabla-contenedor {
     width: 100%;
@@ -781,10 +732,6 @@ a.vta-caja-nombre.vta-link-producto {
     background: var(--card-bg);
     color: var(--text-dark);
 
-    /* "auto" en vez de "fixed": cada columna se ajusta a su
-       contenido real (como el número de factura o "Ver", que
-       son angostos) en vez de repartir el ancho en porcentajes
-       fijos que dejan huecos cuando el texto es corto. */
     table-layout: auto;
 }
 
@@ -927,19 +874,6 @@ a.vta-caja-nombre.vta-link-producto {
 }
 
 
-/* ------------------------------------------------------------
-   CAMPOS DE FECHA (filtro)
-
-   Mantiene exactamente los mismos colores, bordes, fondo,
-   texto y estados de los demás campos del filtro.
-
-   Antes de seleccionar:
-   📅 Fecha inicio
-   📅 Fecha fin
-
-   Después de seleccionar:
-   📅 04/10/2026
-   ------------------------------------------------------------ */
 .vf-fecha-wrap {
     position: relative;
     display: flex;
@@ -959,12 +893,11 @@ a.vta-caja-nombre.vta-link-producto {
         border-color 0.2s ease,
         box-shadow 0.2s ease;
 }
-/* Igual que los demás campos al pasar el mouse */
+
 .vf-fecha-wrap:hover {
     border-color: #b8c9dc;
 }
 
-/* Igual que los demás campos al recibir el foco */
 .vf-fecha-wrap:focus-within {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px var(--primary-light);
@@ -996,13 +929,6 @@ a.vta-caja-nombre.vta-link-producto {
     white-space: nowrap;
     pointer-events: none;
 }
-
-/* ------------------------------------------------------------
-   INPUT DATE REAL
-
-   Se mantiene funcionando para abrir el calendario nativo,
-   pero se hace transparente para que NO aparezca dd/mm/aaaa.
-   ------------------------------------------------------------ */
 
 .vf-input-fecha {
     position: absolute;
@@ -1060,21 +986,11 @@ a.vta-caja-nombre.vta-link-producto {
 
 
 
-/* ============================================================
-   FILTRO DE VENTAS
-   Usa las mismas variables del CSS general (--primary, --border,
-   --text-dark, --text-muted, etc.). Cada campo tiene su label
-   arriba del input, alineados en una grilla pareja — por eso
-   no se desalinean como con inputs sueltos dentro del toolbar.
-   ============================================================ */
 
 .vf-filtro {
     display: grid;
 
-    /* Columnas explícitas (no auto-fit + span): así las 7
-       columnas siempre caben en una sola fila en pantallas
-       grandes, sin que ninguna quede "huérfana" en una fila
-       aparte dejando un hueco vacío al lado. */
+
     grid-template-columns:
         0.85fr   /* Número de factura */
         1.5fr    /* Cliente */
@@ -1093,9 +1009,6 @@ a.vta-caja-nombre.vta-link-producto {
     border-bottom: 1px solid var(--border);
 }
 
-/* En pantallas medianas, 7 columnas explícitas ya no entran:
-   se pasa a un grid flexible que reparte el espacio en 2-3
-   filas completas, en vez de dejar un campo solo. */
 @media (max-width: 1150px) {
 
     .vf-filtro {
@@ -1161,20 +1074,10 @@ a.vta-caja-nombre.vta-link-producto {
     cursor: pointer;
 }
 
-
-/* ------------------------------------------------------------
-   TAMAÑOS RELATIVOS DE CADA CAMPO
-   El cliente ocupa un poco más de espacio por ser texto libre;
-   el resto se reparte parejo gracias al grid.
-   ------------------------------------------------------------ */
-
 .vf-metodo select {
     font-size: 0.85rem;
 }
 
-/* Por debajo de 1150px el grid vuelve a ser auto-fit (ver
-   arriba), y ahí sí conviene que Cliente ocupe un poco más
-   de espacio al quedar en su propia fila. */
 @media (max-width: 1150px) and (min-width: 651px) {
 
     .vf-cliente {
@@ -1183,11 +1086,6 @@ a.vta-caja-nombre.vta-link-producto {
 }
 
 
-/* ------------------------------------------------------------
-   BOTONES
-   Ocupan toda la fila siguiente en pantallas chicas, y se
-   alinean a la derecha en pantallas grandes.
-   ------------------------------------------------------------ */
 
 .vf-acciones {
     grid-column: 1 / -1;
@@ -1199,7 +1097,6 @@ a.vta-caja-nombre.vta-link-producto {
     margin-top: 0.2rem;
 }
 
-/* Mismo estilo que .prov-btn / .prov-btn-azul de Proveedores */
 
 .vf-filtro .btn-buscar,
 .vf-filtro .btn-restaurar {
@@ -1235,8 +1132,6 @@ a.vta-caja-nombre.vta-link-producto {
     transform: translateY(0);
 }
 
-/* Los dos botones en el mismo gris neutro (ni blanco, ni celeste,
-   ni azul sólido) — igual que .btn-restaurar en el resto de la app */
 .vf-filtro .btn-restaurar,
 .vf-filtro .btn-buscar {
     border: 1px solid #cbd5e1;
@@ -1252,8 +1147,7 @@ a.vta-caja-nombre.vta-link-producto {
     box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.07));
 }
 
-/* "Nueva venta" — verde, igual que .toolbar .btn-nuevo de
-   Inventario, pero ubicado junto a Buscar/Restaurar filtros */
+
 .vf-acciones .vf-btn-nuevo {
     display: inline-flex;
     align-items: center;
@@ -1279,7 +1173,7 @@ a.vta-caja-nombre.vta-link-producto {
         transform var(--transition-fast, 0.2s ease),
         box-shadow var(--transition-fast, 0.2s ease);
 
-    /* Lo separa del grupo Buscar/Restaurar con un margen extra */
+
     margin-left: 0.8rem;
 }
 

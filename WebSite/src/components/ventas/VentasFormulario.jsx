@@ -1,32 +1,3 @@
-// ============================================================
-// FORMULARIO DE VENTA (compartido)
-//
-// Lo usan VentaNuevoModal y VentaEditarModal.
-//
-// VentaNuevoModal:
-//   - Trabaja con una sola línea de producto.
-//
-// VentaEditarModal:
-//   - Puede recibir varias líneas.
-//   - Muestra todas las líneas reales de la factura.
-//
-// Props:
-//
-//   formulario        → valores actuales de los datos generales
-//                       y, en modo nuevo, de una línea.
-//
-//   onCambiar        → función que actualiza un campo general.
-//
-//   opciones         → listas obtenidas de SP_Ventas_Opciones.
-//
-//   cargandoOpciones → true mientras llegan las listas.
-//
-//   idVenta          → InvoiceID cuando se está editando.
-//
-//   lineas           → líneas reales de la factura al editar.
-//
-//   onCambiarLinea   → modifica un campo de una línea específica.
-// ============================================================
 
 import {
     FileText,
@@ -92,10 +63,9 @@ function VentasFormulario({
 
         <div
             className={
-                `campo${
-                    completo
-                        ? ' campo-completo'
-                        : ''
+                `campo${completo
+                    ? ' campo-completo'
+                    : ''
                 }`
             }
         >
@@ -298,10 +268,9 @@ function VentasFormulario({
 
             <div
                 className={
-                    `campo${
-                        completo
-                            ? ' campo-completo'
-                            : ''
+                    `campo${completo
+                        ? ' campo-completo'
+                        : ''
                     }`
                 }
             >
@@ -786,12 +755,6 @@ function VentasFormulario({
 
             ) : (
 
-                // =================================================
-                // MODO NUEVO
-                //
-                // VentaNuevoModal no envía "lineas", por lo que
-                // conserva el formulario original de una línea.
-                // =================================================
 
                 <div className="cd-panel">
 

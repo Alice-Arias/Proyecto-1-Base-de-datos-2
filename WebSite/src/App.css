@@ -90,13 +90,6 @@ body {
 }
 
 
-/* =========================================================
-   INPUTS NUMÉRICOS: SIN FLECHAS DE SUBIR/BAJAR
-   Regla global (sin prefijo de módulo): afecta a todos los
-   input[type="number"] de toda la aplicación (Clientes,
-   Proveedores, Inventario, Ventas), ya que este CSS se carga
-   una sola vez para toda la app.
-   ========================================================= */
 
 input[type="number"] {
     -moz-appearance: textfield;
@@ -872,10 +865,6 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 
-/* TEXTO DE LA TABLA
-   Los textos largos bajan de línea en vez de cortarse con "…"
-   (igual que en Inventario) */
-
 .tabla-clientes td:not(:first-child):not(:last-child) {
     white-space: normal;
     overflow: visible;
@@ -946,9 +935,6 @@ input[type="number"]::-webkit-inner-spin-button {
     transform: rotate(45deg);
 }
 
-
-/* ACCIONES: ver / editar / eliminar como botones con borde
-   (funciona con los íconos actuales, sin tocar el JSX) */
 
 .acciones-cel {
     display: flex;

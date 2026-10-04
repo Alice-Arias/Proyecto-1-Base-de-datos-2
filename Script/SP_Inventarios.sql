@@ -39,7 +39,7 @@ BEGIN
     SELECT
         pto.StockItemID,
         pto.StockItemName AS Producto,
-        STRING_AGG(g.StockGroupName, ', ') -- Agrupa los grupos en una sola fila
+        STRING_AGG(g.StockGroupName, ', ') 
             WITHIN GROUP (ORDER BY g.StockGroupName) 
             AS Grupo,
         pi.QuantityOnHand AS Cantidad_Inventario

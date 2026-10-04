@@ -14,7 +14,7 @@ import { useState } from 'react';
 
 function ClientesFiltro({ onBuscar, onRestaurar }) {
 
-  //variables de estado
+
   const [nombre, setNombre] = useState('');
   const [categoria, setCategoria] = useState('');
   const [metodoEntrega, setMetodoEntrega] = useState('');

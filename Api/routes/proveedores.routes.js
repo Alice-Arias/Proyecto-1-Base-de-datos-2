@@ -5,16 +5,6 @@ const router = express.Router();
 const { sql, poolPromise } = require('../db');
 
 
-// =========================================================
-// FUNCIONES AUXILIARES
-// =========================================================
-
-// Agrega al request los parametros que comparten
-// SP_Proveedores_Insertar y SP_Proveedores_Actualizar.
-// Asi no repetimos 25 request.input() en dos rutas.
-//
-// Nota: @UbicacionEntrega (GEOGRAPHY) no se envia desde la API;
-// el SP lo recibe como NULL por defecto.
 
 function agregarParametros(request, body) {
 
@@ -52,18 +42,6 @@ function agregarParametros(request, body) {
 }
 
 
-// Los SP lanzan errores con RAISERROR(mensaje, 16, <estado>).
-// Ese "estado" llega en err.state y nos dice que tipo de error es:
-//
-//   1 = dato obligatorio / formato malo   -> 400
-//   2 = valor fuera de rango              -> 400
-//   3 = registro relacionado no existe    -> 400
-//   4 = duplicado                         -> 409
-//   5 = el proveedor no existe            -> 404
-//   6 = tiene registros relacionados      -> 409
-//
-// Asi el frontend recibe un codigo HTTP correcto en vez de
-// un 500 para todo.
 
 function responderError(res, err) {
 
@@ -86,13 +64,6 @@ function responderError(res, err) {
 }
 
 
-// =========================================================
-// 0. OPCIONES PARA EL FORMULARIO
-// GET /api/proveedores/opciones
-//
-// IMPORTANTE: esta ruta debe ir ANTES de '/:id'.
-// =========================================================
-
 router.get('/opciones', async (req, res) => {
 
     try {
@@ -102,9 +73,6 @@ router.get('/opciones', async (req, res) => {
         const result = await pool.request().execute(
             'SP_Proveedores_Opciones'
         );
-
-        // SP_Proveedores_Opciones devuelve 4 SELECTs:
-        // categorias, contactos, metodos de entrega y ciudades.
 
         res.json({
             categorias: result.recordsets[0],
@@ -125,11 +93,6 @@ router.get('/opciones', async (req, res) => {
 });
 
 
-// =========================================================
-// 1. LISTAR PROVEEDORES
-// GET /api/proveedores
-// GET /api/proveedores?nombre=ABC&categoria=Servicios
-// =========================================================
 
 router.get('/', async (req, res) => {
 
@@ -162,12 +125,6 @@ router.get('/', async (req, res) => {
 
 });
 
-
-// =========================================================
-// 2. DETALLE DE UNO O VARIOS PROVEEDORES
-// GET /api/proveedores/1
-// GET /api/proveedores/1,2,3
-// =========================================================
 
 router.get('/:id', async (req, res) => {
 
@@ -209,11 +166,6 @@ router.get('/:id', async (req, res) => {
 });
 
 
-// =========================================================
-// 3. INSERTAR PROVEEDOR
-// POST /api/proveedores
-// =========================================================
-
 router.post('/', async (req, res) => {
 
     try {
@@ -241,10 +193,6 @@ router.post('/', async (req, res) => {
 });
 
 
-// =========================================================
-// 4. ACTUALIZAR PROVEEDOR
-// PUT /api/proveedores/:id
-// =========================================================
 
 router.put('/:id', async (req, res) => {
 
@@ -274,11 +222,6 @@ router.put('/:id', async (req, res) => {
 
 });
 
-
-// =========================================================
-// 5. ELIMINAR PROVEEDOR
-// DELETE /api/proveedores/:id
-// =========================================================
 
 router.delete('/:id', async (req, res) => {
 

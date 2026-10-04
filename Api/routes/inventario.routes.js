@@ -4,19 +4,6 @@ const router = express.Router();
 
 const { sql, poolPromise } = require('../db');
 
-// =========================================================
-// 0. OPCIONES PARA EL FORMULARIO
-//
-// GET /api/inventarios/opciones
-//
-// Devuelve:
-// 1. Proveedores
-// 2. Colores
-// 3. Tipos de paquete
-//
-// Esta ruta debe ir ANTES de '/:id'.
-// =========================================================
-
 router.get('/opciones', async (req, res) => {
 
     try {
@@ -48,19 +35,6 @@ router.get('/opciones', async (req, res) => {
     }
 
 });
-
-// =========================================================
-// 1. LISTAR INVENTARIOS
-//
-// GET /api/inventarios
-//
-// GET /api/inventarios?nombre=chocolate
-//
-// GET /api/inventarios?grupo=Beverages
-//
-// GET /api/inventarios?cantidad=10
-//
-// =========================================================
 
 router.get('/', async (req, res) => {
 
@@ -114,15 +88,6 @@ router.get('/', async (req, res) => {
 
 });
 
-// =========================================================
-// 2. DETALLE DE UNO O VARIOS PRODUCTOS
-//
-// GET /api/inventarios/1
-//
-// GET /api/inventarios/1,2,3
-//
-// =========================================================
-
 router.get('/:id', async (req, res) => {
 
     try {
@@ -162,13 +127,6 @@ router.get('/:id', async (req, res) => {
     }
 
 });
-
-// =========================================================
-// 3. INSERTAR INVENTARIO
-//
-// POST /api/inventarios
-//
-// =========================================================
 
 router.post('/', async (req, res) => {
 
@@ -347,12 +305,6 @@ router.post('/', async (req, res) => {
 
 });
 
-// =========================================================
-// 4. ACTUALIZAR INVENTARIO
-//
-// PUT /api/inventarios/:id
-//
-// =========================================================
 
 router.put('/:id', async (req, res) => {
 
@@ -536,13 +488,6 @@ router.put('/:id', async (req, res) => {
     }
 
 });
-
-// =========================================================
-// 5. ELIMINAR INVENTARIO
-//
-// DELETE /api/inventarios/:id
-//
-// =========================================================
 
 router.delete('/:id', async (req, res) => {
 

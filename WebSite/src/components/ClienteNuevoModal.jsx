@@ -3,7 +3,7 @@
 // MODAL PARA CREAR UN NUEVO CLIENTE
 // ============================================================
 
-// Iconos utilizados en el formulario.
+
 import {
     X,
     UserPlus,
@@ -16,10 +16,10 @@ import {
     Loader2
 } from 'lucide-react';
 
-// Hooks de React.
+
 import { useEffect, useState } from 'react';
 
-// Funciones de la API.
+
 import {
     insertarCliente,
     obtenerOpcionesClientes

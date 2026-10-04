@@ -1,6 +1,3 @@
-// ============================================================
-// MODAL PARA EDITAR UN PRODUCTO DE INVENTARIO
-// ============================================================
 
 import {
     X,
@@ -36,9 +33,6 @@ function InventarioEditarModal({
 
 }) {
 
-    // ========================================================
-    // ESTADO
-    // ========================================================
 
     const [formulario, setFormulario] = useState(
         FORMULARIO_VACIO
@@ -50,20 +44,17 @@ function InventarioEditarModal({
         tiposPaquete: []
     });
 
-    // true mientras llegan las listas de los select.
+
     const [cargandoOpciones, setCargandoOpciones] =
         useState(true);
 
-    // true mientras llegan los datos completos del producto.
+
     const [cargandoInventario, setCargandoInventario] =
         useState(true);
 
     const [guardando, setGuardando] = useState(false);
 
 
-    // ========================================================
-    // CARGAR LAS LISTAS DE LOS SELECT
-    // ========================================================
 
     useEffect(() => {
 
@@ -116,18 +107,9 @@ function InventarioEditarModal({
 
         cargarOpciones();
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-
     }, []);
 
 
-    // ========================================================
-    // CARGAR LOS DATOS COMPLETOS DEL PRODUCTO
-    //
-    // La lista solo trae nombre, grupo y cantidad.
-    // Para editar necesitamos toda la información del producto,
-    // por eso se solicita el detalle usando StockItemID.
-    // ========================================================
 
     const stockItemID =
         inventario?.StockItemID;
@@ -144,9 +126,7 @@ function InventarioEditarModal({
         }
 
 
-        // Evita actualizar el estado si el modal se cerró
-        // antes de que llegara la respuesta.
-
+ 
         let cancelado = false;
 
 
@@ -163,7 +143,6 @@ function InventarioEditarModal({
                     );
 
 
-                // El backend devuelve un arreglo.
                 const detalle =
                     Array.isArray(data)
                         ? data[0]
@@ -212,7 +191,7 @@ function InventarioEditarModal({
                     }
 
 
-                    // Sin datos no se puede editar.
+  
                     onCerrar();
 
                 }
@@ -240,14 +219,9 @@ function InventarioEditarModal({
         };
 
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+  
 
     }, [stockItemID]);
-
-
-    // ========================================================
-    // CAMBIAR UN CAMPO
-    // ========================================================
 
     const cambiarCampo = (e) => {
 
@@ -273,9 +247,6 @@ function InventarioEditarModal({
     };
 
 
-    // ========================================================
-    // GUARDAR CAMBIOS
-    // ========================================================
 
     const guardarCambios = async (e) => {
 
@@ -356,10 +327,7 @@ function InventarioEditarModal({
     };
 
 
-    // ========================================================
-    // CASOS ESPECIALES
-    // ========================================================
-
+  
     if (!inventario) {
 
         return null;
@@ -405,10 +373,7 @@ function InventarioEditarModal({
     }
 
 
-    // ========================================================
-    // RENDERIZADO
-    // ========================================================
-
+ 
     return (
 
         <div
@@ -423,10 +388,7 @@ function InventarioEditarModal({
                 }
             >
 
-                {/* ==================================================
-                    ENCABEZADO
-                ================================================== */}
-
+        
                 <header className="cd-encabezado">
 
                     <div className="cd-avatar">
@@ -467,10 +429,7 @@ function InventarioEditarModal({
                 </header>
 
 
-                {/* ==================================================
-                    FORMULARIO
-                ================================================== */}
-
+              
                 <form onSubmit={guardarCambios}>
 
                     <InventarioFormulario
@@ -494,10 +453,7 @@ function InventarioEditarModal({
                     />
 
 
-                    {/* ==================================================
-                        BOTONES
-                    ================================================== */}
-
+                   
                     <div className="modal-footer">
 
                         <button

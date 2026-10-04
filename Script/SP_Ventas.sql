@@ -1,30 +1,63 @@
 USE WideWorldImporters;
+
 GO
 
-/* 
-   MODULO PROVEEDORES
-       SP_Proveedores_Listar
-       SP_Proveedores_Detalle
-       SP_Proveedores_Insertar
-       SP_Proveedores_Actualizar
-       SP_Proveedores_Eliminar
-   TIPOS DE ERROR
-       1 = falta un dato obligatorio o el formato es malo
-       2 = valor fuera de rango
-       3 = un registro relacionado no existe
-       4 = duplicado (ya existe un proveedor con ese nombre)
-       5 = el proveedor no existe
-       6 = el proveedor tiene registros relacionados (no se puede borrar)
- */
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: Módulo de ventas - Procedimientos almacenados
+*
+* DESCRIPCION: Contiene los procedimientos almacenados utilizados para listar,
+*              consultar, insertar y actualizar ventas o facturas.
+*
+* ENTRADA: Datos de factura, cliente, entrega, contacto y detalle de producto,
+*          según el procedimiento ejecutado.
+*
+* SALIDA: Información de ventas, detalles de facturas, identificadores generados
+*         o actualizados y mensajes de error.
+*
+* RESTRICCIONES: Los registros relacionados deben existir y los valores deben
+*                cumplir las validaciones establecidas.
+*
+* OBJETIVO: Centralizar las operaciones del módulo de ventas mediante
+*           procedimientos almacenados.
+*
+* TIPOS DE ERROR:
+*   1 = falta un dato obligatorio o el formato es malo
+*   2 = valor fuera de rango
+*   3 = un registro relacionado no existe
+*   4 = duplicado
+*   5 = el registro no existe
+*   6 = el registro tiene registros relacionados
+*
+*-----------------------------------------------------------------------------------------*/
 
 
-/* =========================================================
-   1. LISTAR
-
-   Devuelve la lista de ventas para la tabla principal.
-   Permite filtrar por nombre, categoria y metodo de entrega.
-   Los resultados se ordenan por nombre de la A - Z.
-   ========================================================= */
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: SP_Ventas_Listar
+*
+* DESCRIPCION: Devuelve la lista de ventas para la tabla principal.
+*              Permite aplicar filtros por número de factura, fecha,
+*              cliente, método de entrega y monto.
+*
+* ENTRADA:
+*   @NumeroFactura   Número de factura.
+*   @FechaInicio     Fecha inicial del filtro.
+*   @FechaFin        Fecha final del filtro.
+*   @Cliente         Nombre o parte del nombre del cliente.
+*   @DeliveryMethod  Método de entrega.
+*   @MontoInicio     Monto mínimo.
+*   @MontoFin        Monto máximo.
+*
+* SALIDA: Número de factura, fecha, cliente, método de entrega y monto total.
+*
+* RESTRICCIONES: Los filtros son opcionales. Los registros relacionados
+*                deben existir para que la venta sea mostrada.
+*
+* OBJETIVO: Obtener las ventas que cumplen con los filtros seleccionados
+*           para mostrarlas en la tabla principal.
+*
+*-----------------------------------------------------------------------------------------*/
 
 CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Listar
     @NumeroFactura INT = NULL,
@@ -34,10 +67,8 @@ CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Listar
     @DeliveryMethod NVARCHAR(50) = NULL,
     @MontoInicio DECIMAL(18,2) = NULL,
     @MontoFin DECIMAL(18,2) = NULL
-
 AS
 BEGIN
-
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
     SELECT 
@@ -46,12 +77,13 @@ BEGIN
         c.CustomerName AS Nombre_Cliente,
         fe.DeliveryMethodName AS Metodo_Entrega,
         SUM(df.ExtendedPrice) AS Monto
-
     FROM dbo.Facturas f
-    INNER JOIN dbo.ClientesActuales AS c ON f.CustomerID = c.CustomerID
-    INNER JOIN dbo.FormasEntrega AS fe ON f.DeliveryMethodID = fe.DeliveryMethodID
-    INNER JOIN dbo.DetalleFacturas AS df ON f.InvoiceID = df.InvoiceID
-
+    INNER JOIN dbo.ClientesActuales AS c 
+        ON f.CustomerID = c.CustomerID
+    INNER JOIN dbo.FormasEntrega AS fe 
+        ON f.DeliveryMethodID = fe.DeliveryMethodID
+    INNER JOIN dbo.DetalleFacturas AS df 
+        ON f.InvoiceID = df.InvoiceID
     WHERE
         (@NumeroFactura IS NULL OR f.InvoiceID = @NumeroFactura)
         AND
@@ -62,64 +94,70 @@ BEGIN
         (@Cliente IS NULL OR c.CustomerName LIKE '%' + @Cliente + '%')
         AND
         (@DeliveryMethod IS NULL OR fe.DeliveryMethodName LIKE '%' + @DeliveryMethod + '%')
-        
-    GROUP BY f.InvoiceID, f.InvoiceDate, c.CustomerName, fe.DeliveryMethodName
-
-    HAVING (@MontoInicio IS NULL OR SUM(df.ExtendedPrice) >= @MontoInicio)
-            AND (@MontoFin IS NULL OR SUM(df.ExtendedPrice) <= @MontoFin)
-
+    GROUP BY 
+        f.InvoiceID,
+        f.InvoiceDate,
+        c.CustomerName,
+        fe.DeliveryMethodName
+    HAVING 
+        (@MontoInicio IS NULL OR SUM(df.ExtendedPrice) >= @MontoInicio)
+        AND 
+        (@MontoFin IS NULL OR SUM(df.ExtendedPrice) <= @MontoFin)
     ORDER BY c.CustomerName ASC;
-
 END
 GO
 
 
-/* =========================================================
-   2. DETALLE
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: SP_Ventas_Detalle
+*
+* DESCRIPCION: Devuelve toda la información de una venta mediante su InvoiceID.
+*              El procedimiento devuelve el encabezado de la factura y sus
+*              líneas de productos.
+*
+* ENTRADA:
+*   @InvoiceID  Identificador de la factura.
+*
+* SALIDA:
+*   Encabezado de la factura con información del cliente, entrega, contactos
+*   y datos generales.
+*   Detalle con productos, cantidades, precios, impuestos y totales.
+*
+* RESTRICCIONES: El InvoiceID debe corresponder a una factura existente.
+*
+* OBJETIVO: Obtener toda la información necesaria para consultar o editar
+*           una venta.
+*
+*-----------------------------------------------------------------------------------------*/
 
-   Devuelve toda la informacion de una venta.
-   Recibe el InvoiceID.
-   ========================================================= */
- 
 CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Detalle
     @InvoiceID INT
 AS
 BEGIN
- 
     SET NOCOUNT ON;
- 
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
- 
-    -- Encabezado (una sola fila por factura)
+
+    /* Encabezado de la factura. */
     SELECT
         f.InvoiceID,
- 
         f.CustomerID,
         ca.CustomerName AS Nombre_Cliente,
- 
         f.BillToCustomerID,
         bc.CustomerName AS Nombre_Cliente_Facturar,
- 
         f.OrderID,
- 
         f.DeliveryMethodID,
         fe.DeliveryMethodName AS Metodo_Entrega,
- 
         f.ContactPersonID,
         cts.FullName AS Persona_Contacto,
- 
         f.AccountsPersonID,
         acc.FullName AS Persona_Cuentas,
- 
         f.SalespersonPersonID,
         ctos.FullName AS Vendedor,
- 
         f.PackedByPersonID,
         pbp.FullName AS Empacado_Por,
- 
         f.InvoiceDate AS Fecha_Factura,
         f.CustomerPurchaseOrderNumber AS Numero_Orden,
- 
         f.IsCreditNote,
         f.CreditNoteReason,
         f.Comments,
@@ -130,20 +168,24 @@ BEGIN
         f.DeliveryRun,
         f.RunPosition,
         f.ReturnedDeliveryData
- 
     FROM dbo.Facturas f
-    INNER JOIN dbo.ClientesActuales AS ca ON f.CustomerID = ca.CustomerID
-    LEFT JOIN dbo.ClientesActuales AS bc ON f.BillToCustomerID = bc.CustomerID
-    INNER JOIN dbo.FormasEntrega AS fe ON f.DeliveryMethodID = fe.DeliveryMethodID
-    INNER JOIN dbo.Contactos AS cts ON f.ContactPersonID = cts.PersonID
-    LEFT JOIN dbo.Contactos AS acc ON f.AccountsPersonID = acc.PersonID
-    INNER JOIN dbo.Contactos AS ctos ON f.SalespersonPersonID = ctos.PersonID
-    LEFT JOIN dbo.Contactos AS pbp ON f.PackedByPersonID = pbp.PersonID
- 
+    INNER JOIN dbo.ClientesActuales AS ca 
+        ON f.CustomerID = ca.CustomerID
+    LEFT JOIN dbo.ClientesActuales AS bc 
+        ON f.BillToCustomerID = bc.CustomerID
+    INNER JOIN dbo.FormasEntrega AS fe 
+        ON f.DeliveryMethodID = fe.DeliveryMethodID
+    INNER JOIN dbo.Contactos AS cts 
+        ON f.ContactPersonID = cts.PersonID
+    LEFT JOIN dbo.Contactos AS acc 
+        ON f.AccountsPersonID = acc.PersonID
+    INNER JOIN dbo.Contactos AS ctos 
+        ON f.SalespersonPersonID = ctos.PersonID
+    LEFT JOIN dbo.Contactos AS pbp 
+        ON f.PackedByPersonID = pbp.PersonID
     WHERE f.InvoiceID = @InvoiceID;
- 
-    -- Detalle (líneas de producto). Se agregan Description y
-    -- PackageTypeID, que hacían falta para poder editar.
+
+    /* Detalle de productos de la factura. */
     SELECT
         pa.StockItemID,
         pa.StockItemName AS Producto,
@@ -154,27 +196,39 @@ BEGIN
         df.TaxRate AS Impuesto_Aplicado,
         df.TaxAmount AS Impuesto_Monto,
         df.ExtendedPrice AS Total_Linea
- 
     FROM dbo.DetalleFacturas df
-    INNER JOIN dbo.ProductosActuales AS pa ON df.StockItemID = pa.StockItemID
- 
+    INNER JOIN dbo.ProductosActuales AS pa 
+        ON df.StockItemID = pa.StockItemID
     WHERE df.InvoiceID = @InvoiceID;
- 
 END
 GO
- 
-/* =========================================================
-   3. INSERTAR
 
-   Utiliza una TRANSACCION porque realiza dos operaciones:
-    INSERT de la venta.
-   Si ambas operaciones funcionan:  COMMIT
-   Si ocurre un error: ROLLBACK
-   ========================================================= */
+
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: SP_Ventas_Insertar
+*
+* DESCRIPCION: Inserta una nueva factura y su detalle de producto.
+*              Valida los datos obligatorios, registros relacionados y rangos
+*              antes de realizar las operaciones.
+*
+* ENTRADA:
+*   Datos de la factura, cliente, entrega, contactos y producto.
+*
+* SALIDA: InvoiceID generado para la nueva factura.
+*
+* RESTRICCIONES: Los clientes, contactos, métodos de entrega, productos,
+*                pedidos y tipos de paquete relacionados deben existir.
+*                La cantidad y los porcentajes deben cumplir los rangos definidos.
+*
+* OBJETIVO: Registrar una venta completa mediante una factura y una línea
+*           de detalle dentro de una misma transacción.
+*
+*-----------------------------------------------------------------------------------------*/
 
 CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Insertar
 
-    -- Factura
+    /* Datos de la factura. */
     @CustomerID INT,
     @BillToCustomerID INT,
     @OrderID INT,
@@ -197,7 +251,7 @@ CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Insertar
     @ReturnedDeliveryData NVARCHAR(MAX),
     @LastEditedBy INT = 1,
 
-    -- DetalleFactura
+    /* Datos del detalle de factura. */
     @StockItemID INT,
     @Description NVARCHAR(100),
     @PackageTypeID INT,
@@ -208,12 +262,11 @@ CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Insertar
 AS
 BEGIN
 
-
     SET NOCOUNT ON;
-    
-    -- =====================================================
-    -- VALIDACIÓN DE CAMPOS OBLIGATORIOS - FACTURA
-    -- =====================================================
+
+    /* =====================================================*
+       VALIDACIÓN DE CAMPOS OBLIGATORIOS - FACTURA
+       ===================================================== */
 
     IF @CustomerID IS NULL
     BEGIN
@@ -287,6 +340,7 @@ BEGIN
         RETURN;
     END
 
+    /* Validar existencia de clientes. */
     IF NOT EXISTS
     (
         SELECT 1
@@ -309,6 +363,7 @@ BEGIN
         RETURN;
     END
 
+    /* Validar pedido relacionado. */
     IF @OrderID IS NOT NULL
         AND NOT EXISTS
         (
@@ -321,6 +376,7 @@ BEGIN
         RETURN;
     END
 
+    /* Validar método de entrega. */
     IF NOT EXISTS
     (
         SELECT 1
@@ -332,6 +388,7 @@ BEGIN
         RETURN;
     END
 
+    /* Validar contactos. */
     IF NOT EXISTS
     (
         SELECT 1
@@ -376,6 +433,7 @@ BEGIN
         RETURN;
     END
 
+    /* Validar número de orden de compra. */
     IF @CustomerPurchaseOrderNumber IS NOT NULL
         AND NOT EXISTS
         (
@@ -392,6 +450,7 @@ BEGIN
         RETURN;
     END
 
+    /* Validar datos del detalle. */
     IF @StockItemID IS NULL
     BEGIN
         RAISERROR('El StockItemID es obligatorio.', 16, 1);
@@ -422,7 +481,8 @@ BEGIN
         RETURN;
     END
 
-     IF NOT EXISTS
+    /* Validar producto. */
+    IF NOT EXISTS
     (
         SELECT 1
         FROM dbo.ProductosActuales
@@ -433,7 +493,7 @@ BEGIN
         RETURN;
     END
 
-    -- PackageTypeID
+    /* Validar tipo de paquete. */
     IF NOT EXISTS
     (
         SELECT 1
@@ -445,6 +505,7 @@ BEGIN
         RETURN;
     END
 
+    /* Validar costo del producto. */
     IF NOT EXISTS
     (
         SELECT 1
@@ -461,6 +522,7 @@ BEGIN
         RETURN;
     END
 
+    /* Validar rangos numéricos. */
     IF @Quantity <= 0
     BEGIN
         RAISERROR('La cantidad debe ser mayor que cero.', 16, 2);
@@ -491,17 +553,15 @@ BEGIN
         RETURN;
     END
 
-
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     SET XACT_ABORT ON;
 
     BEGIN TRY
-
         BEGIN TRANSACTION;
 
-        -- =====================================================
-        -- INSERT PARA FACTURA
-        -- =====================================================
+        /* =====================================================*
+           INSERTAR FACTURA
+           ===================================================== */
 
         INSERT INTO dbo.Facturas
         (
@@ -553,19 +613,16 @@ BEGIN
         );
 
         DECLARE @NuevoInvoiceID INT;
-
         SET @NuevoInvoiceID = SCOPE_IDENTITY();
 
-
-        -- Se obtiene el costo del producto
+        /* Obtener el costo del producto. */
         DECLARE @LastCostPrice DECIMAL(18,2);
 
         SELECT @LastCostPrice = LastCostPrice
         FROM dbo.ProductosInventario
         WHERE StockItemID = @StockItemID;
 
-
-        -- Se calculan los valores derivados
+        /* Calcular los valores derivados del detalle. */
         DECLARE @TaxAmount DECIMAL(18,2);
         DECLARE @ExtendedPrice DECIMAL(18,2);
         DECLARE @LineProfit DECIMAL(18,2);
@@ -588,9 +645,9 @@ BEGIN
                 (@Quantity * @UnitPrice) - (@Quantity * @LastCostPrice);
         END
 
-        -- =====================================================
-        -- INSERTAR DETALLE DE FACTURA
-        -- =====================================================
+        /* =====================================================*
+           INSERTAR DETALLE DE FACTURA
+           ===================================================== */
 
         INSERT INTO dbo.DetalleFacturas
         (
@@ -621,39 +678,50 @@ BEGIN
             @LastEditedBy
         );
 
-         COMMIT TRANSACTION;
+        COMMIT TRANSACTION;
 
-
-        -- Retornar el ID generado
+        /* Retornar el ID generado. */
         SELECT @NuevoInvoiceID AS InvoiceID;
 
     END TRY
     BEGIN CATCH
-
+        /* Deshacer la transacción si ocurre un error. */
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
 
         THROW;
-
     END CATCH;
-
 END
 GO
 
-/* =========================================================
-   4. ACTUALIZAR
 
-   Modifica los datos de una venta existente.
-
-   Utiliza una TRANSACCION para proteger el UPDATE.
-   ========================================================= */
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: SP_Ventas_Actualizar
+*
+* DESCRIPCION: Modifica una factura existente y su línea de detalle.
+*              Recalcula los valores derivados del detalle.
+*
+* ENTRADA:
+*   @InvoiceID  Identificador de la factura.
+*   Datos actualizados de la factura y del producto.
+*
+* SALIDA: InvoiceID y StockItemID actualizados.
+*
+* RESTRICCIONES: La factura, producto y registros relacionados deben existir.
+*                Los valores obligatorios y rangos deben ser válidos.
+*
+* OBJETIVO: Actualizar una venta completa manteniendo la factura y su detalle
+*           dentro de una misma transacción.
+*
+*-----------------------------------------------------------------------------------------*/
 
 CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Actualizar
 
-    -- Se usa para identificar en ambas tablas
+    /* Se utiliza para identificar la factura. */
     @InvoiceID INT,
 
-    -- Factura
+    /* Datos de la factura. */
     @CustomerID INT,
     @BillToCustomerID INT,
     @OrderID INT,
@@ -676,7 +744,7 @@ CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Actualizar
     @ReturnedDeliveryData NVARCHAR(MAX),
     @LastEditedBy INT = 1,
 
-    -- DetalleFactura
+    /* Datos del detalle de factura. */
     @StockItemID INT,
     @Description NVARCHAR(100),
     @PackageTypeID INT,
@@ -688,7 +756,6 @@ AS
 BEGIN
 
     SET NOCOUNT ON;
-
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     SET XACT_ABORT ON;
 
@@ -697,7 +764,6 @@ BEGIN
         RAISERROR('El InvoiceID es obligatorio.', 16, 1);
         RETURN;
     END
-
 
     IF NOT EXISTS
     (
@@ -715,7 +781,6 @@ BEGIN
         RAISERROR('El StockItemID es obligatorio.', 16, 1);
         RETURN;
     END
-
 
     IF NOT EXISTS
     (
@@ -805,6 +870,7 @@ BEGIN
         RETURN;
     END
 
+    /* Validar existencia de clientes. */
     IF NOT EXISTS
     (
         SELECT 1
@@ -815,7 +881,6 @@ BEGIN
         RAISERROR('El CustomerID indicado no existe.', 16, 3);
         RETURN;
     END
-
 
     IF NOT EXISTS
     (
@@ -828,7 +893,7 @@ BEGIN
         RETURN;
     END
 
-
+    /* Validar pedido. */
     IF @OrderID IS NOT NULL
         AND NOT EXISTS
         (
@@ -841,7 +906,7 @@ BEGIN
         RETURN;
     END
 
-
+    /* Validar método de entrega. */
     IF NOT EXISTS
     (
         SELECT 1
@@ -853,7 +918,7 @@ BEGIN
         RETURN;
     END
 
-
+    /* Validar contactos. */
     IF NOT EXISTS
     (
         SELECT 1
@@ -864,7 +929,6 @@ BEGIN
         RAISERROR('El ContactPersonID indicado no existe.', 16, 3);
         RETURN;
     END
-
 
     IF NOT EXISTS
     (
@@ -877,7 +941,6 @@ BEGIN
         RETURN;
     END
 
-
     IF NOT EXISTS
     (
         SELECT 1
@@ -888,7 +951,6 @@ BEGIN
         RAISERROR('El SalespersonPersonID indicado no existe.', 16, 3);
         RETURN;
     END
-
 
     IF NOT EXISTS
     (
@@ -901,7 +963,7 @@ BEGIN
         RETURN;
     END
 
-
+    /* Validar número de orden de compra. */
     IF @CustomerPurchaseOrderNumber IS NOT NULL
         AND NOT EXISTS
         (
@@ -918,12 +980,12 @@ BEGIN
         RETURN;
     END
 
+    /* Validar detalle. */
     IF @Description IS NULL OR @Description = ''
     BEGIN
         RAISERROR('La descripción es obligatoria.', 16, 1);
         RETURN;
     END
-
 
     IF @PackageTypeID IS NULL
     BEGIN
@@ -931,13 +993,11 @@ BEGIN
         RETURN;
     END
 
-
     IF @Quantity IS NULL
     BEGIN
         RAISERROR('La cantidad es obligatoria.', 16, 1);
         RETURN;
     END
-
 
     IF @TaxRate IS NULL
     BEGIN
@@ -945,7 +1005,7 @@ BEGIN
         RETURN;
     END
 
-
+    /* Validar producto. */
     IF NOT EXISTS
     (
         SELECT 1
@@ -957,7 +1017,7 @@ BEGIN
         RETURN;
     END
 
-
+    /* Validar tipo de paquete. */
     IF NOT EXISTS
     (
         SELECT 1
@@ -969,7 +1029,7 @@ BEGIN
         RETURN;
     END
 
-
+    /* Validar costo del producto. */
     IF NOT EXISTS
     (
         SELECT 1
@@ -986,15 +1046,12 @@ BEGIN
         RETURN;
     END
 
-
     BEGIN TRY
-
         BEGIN TRANSACTION;
 
-
-        -- =================================================
-        -- ACTUALIZAR FACTURA
-        -- =================================================
+        /* =================================================*
+           ACTUALIZAR FACTURA
+           ================================================= */
 
         UPDATE dbo.Facturas
         SET
@@ -1019,22 +1076,19 @@ BEGIN
             RunPosition = @RunPosition,
             ReturnedDeliveryData = @ReturnedDeliveryData,
             LastEditedBy = @LastEditedBy
-
         WHERE InvoiceID = @InvoiceID;
 
-
-        -- OBTENER COSTO DEL PRODUCTO
+        /* Obtener el costo del producto. */
         DECLARE @LastCostPrice DECIMAL(18,2);
 
         SELECT @LastCostPrice = LastCostPrice
         FROM dbo.ProductosInventario
         WHERE StockItemID = @StockItemID;
- 
-        -- CALCULAR VALORES DERIVADOS
+
+        /* Calcular los valores derivados. */
         DECLARE @TaxAmount DECIMAL(18,2);
         DECLARE @ExtendedPrice DECIMAL(18,2);
         DECLARE @LineProfit DECIMAL(18,2);
-
 
         IF @UnitPrice IS NULL
         BEGIN
@@ -1054,10 +1108,9 @@ BEGIN
                 @ExtendedPrice - (@Quantity * @LastCostPrice);
         END
 
-
-        -- =================================================
-        -- ACTUALIZAR DETALLE DE FACTURA
-        -- =================================================
+        /* =================================================*
+           ACTUALIZAR DETALLE DE FACTURA
+           ================================================= */
 
         UPDATE dbo.DetalleFacturas
         SET
@@ -1073,52 +1126,69 @@ BEGIN
         WHERE InvoiceID = @InvoiceID
           AND StockItemID = @StockItemID;
 
-
         COMMIT TRANSACTION;
 
-
-        -- Retornar los identificadores actualizados
+        /* Retornar los identificadores actualizados. */
         SELECT
             @InvoiceID AS InvoiceID,
             @StockItemID AS StockItemID;
 
-
     END TRY
     BEGIN CATCH
-
+        /* Deshacer la transacción si ocurre un error. */
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
 
         THROW;
-
     END CATCH;
-
 END
 GO
 
+
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: SP_Ventas_Opciones
+*
+* DESCRIPCION: Obtiene los datos necesarios para llenar los campos de selección
+*              utilizados en el módulo de ventas.
+*
+* ENTRADA: No recibe parámetros.
+*
+* SALIDA:
+*   1. Clientes.
+*   2. Métodos de entrega.
+*   3. Contactos generales.
+*   4. Vendedores.
+*   5. Pedidos.
+*   6. Productos.
+*   7. Tipos de paquete.
+*
+* RESTRICCIONES: Los datos deben existir en las tablas correspondientes.
+*
+* OBJETIVO: Proporcionar las opciones disponibles para crear o editar una venta.
+*
+*-----------------------------------------------------------------------------------------*/
 
 CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Opciones
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- 1. Clientes
+    /* 1. Clientes. */
     SELECT
         CustomerID AS ID,
         CustomerName AS Nombre
     FROM dbo.ClientesActuales
     ORDER BY CustomerName;
 
-
-    -- 2. Métodos de entrega
+    /* 2. Métodos de entrega. */
     SELECT
         DeliveryMethodID AS ID,
         DeliveryMethodName AS Nombre
     FROM dbo.FormasEntrega
     ORDER BY DeliveryMethodName;
 
-
-    -- 3. Contactos generales
+    /* 3. Contactos generales. */
     SELECT
         PersonID AS ID,
         FullName AS Nombre
@@ -1126,7 +1196,7 @@ BEGIN
     WHERE IsSalesperson = 0
     ORDER BY FullName;
 
-    -- 4. Vendedores
+    /* 4. Vendedores. */
     SELECT
         PersonID AS ID,
         FullName AS Nombre
@@ -1134,30 +1204,25 @@ BEGIN
     WHERE IsSalesperson = 1
     ORDER BY FullName;
 
-
-    -- 5. Pedidos
+    /* 5. Pedidos. */
     SELECT
         OrderID AS ID,
         CustomerPurchaseOrderNumber AS Numero_Orden
     FROM dbo.Pedidos
     ORDER BY OrderID;
 
-
-    -- 6. Productos
+    /* 6. Productos. */
     SELECT
         StockItemID AS ID,
         StockItemName AS Nombre
     FROM dbo.ProductosActuales
     ORDER BY StockItemName;
 
-
-    -- 7. Tipos de paquete
+    /* 7. Tipos de paquete. */
     SELECT
         PackageTypeID AS ID,
         PackageTypeName AS Nombre
     FROM dbo.EmpaquetamientoInventario
     ORDER BY PackageTypeName;
-
 END;
 GO
-

@@ -1,64 +1,53 @@
-
 /* ============================================================
    ESTILOS DEL MÓDULO DE PROVEEDORES
+   Mismo estilo que Inventario: usa las variables del CSS general
+   (--primary, --green, --border, --shadow-sm, etc.).
    Todas las clases empiezan con "prov-" para no chocar con
-   las de clientes ni con las globales de App.css.
+   las de clientes ni con las globales.
+   La animación "modalEntrada" viene del CSS general.
    ============================================================ */
 
 
 /* ------------------------------------------------------------
-   VARIABLES
-   ------------------------------------------------------------ */
-
-.prov-overlay {
-    --prov-texto: #1f2a5c;
-    --prov-titulo: #0f1f5c;
-    --prov-suave: #6b7694;
-    --prov-borde: #e3eafb;
-    --prov-fondo: #fbfcff;
-    --prov-azul: #2563eb;
-    --prov-azul-claro: #e3edff;
-    --prov-verde-claro: #d7f5e0;
-    --prov-verde: #166534;
-    --prov-ambar: #d97706;
-    --prov-ambar-fondo: #fff6e8;
-    --prov-ambar-borde: #fde7c3;
-}
-
-
-/* ------------------------------------------------------------
-   FONDO OSCURO Y VENTANA
+   FONDO Y VENTANA (compacta, para no tener que bajar)
    ------------------------------------------------------------ */
 
 .prov-overlay {
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: 100;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    padding: 32px 16px;
+    padding: 1rem;
     overflow-y: auto;
-    background: rgba(15, 23, 42, 0.55);
-
-    /* Animación suave del fondo */
-    animation: prov-fondo-aparecer 0.25s ease-out;
+    background: rgba(15, 30, 60, 0.48);
 }
 
 .prov-modal {
     position: relative;
-    width: 100%;
-    max-width: 1040px;
-    margin: auto;
-    padding: 32px 28px 28px;
-    background: var(--prov-fondo);
+    width: min(900px, 94vw);
+    max-height: 90vh;
+    padding: 1.25rem;
+    overflow-y: auto;
+    background: #f8fafc;
+    border: 1px solid var(--border);
     border-radius: 20px;
-    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
-    color: var(--prov-texto);
+    box-shadow: var(--shadow-lg);
+    color: var(--text-dark);
     box-sizing: border-box;
+    animation: modalEntrada 0.25s ease-out;
+    scrollbar-width: thin;
+    scrollbar-color: #b9c4d1 transparent;
+}
 
-    /* Entrada suave del modal */
-    animation: prov-modal-entrada 0.35s ease-out;
+.prov-modal::-webkit-scrollbar {
+    width: 7px;
+}
+
+.prov-modal::-webkit-scrollbar-thumb {
+    background: #b9c4d1;
+    border-radius: 10px;
 }
 
 
@@ -68,38 +57,45 @@
 
 .prov-cerrar {
     position: absolute;
-    top: 18px;
-    right: 22px;
-    z-index: 2;
-    width: 36px;
-    height: 36px;
-    border: none;
-    border-radius: 50%;
-    background: transparent;
-    color: var(--prov-titulo);
-    font-size: 22px;
+    top: 1rem;
+    right: 1.2rem;
+    z-index: 5;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--text-muted);
+    font-size: 1rem;
     line-height: 1;
     cursor: pointer;
-
     transition:
-        background 0.2s ease,
-        transform 0.2s ease,
-        color 0.2s ease;
+        background-color var(--transition-fast),
+        color var(--transition-fast),
+        border-color var(--transition-fast),
+        transform var(--transition-fast);
 }
 
 .prov-cerrar:hover {
-    background: var(--prov-azul-claro);
-    color: var(--prov-azul);
-    transform: rotate(90deg) scale(1.08);
+    background: var(--danger-light);
+    border-color: #e7bfc1;
+    color: var(--danger);
+    transform: scale(1.04);
 }
 
-.prov-cerrar:active {
-    transform: rotate(90deg) scale(0.92);
+.prov-cerrar:focus-visible,
+.prov-btn:focus-visible,
+.prov-control:focus-visible {
+    outline: 3px solid var(--primary-light);
+    outline-offset: 2px;
 }
 
 
 /* ------------------------------------------------------------
-   CARRUSEL
+   TARJETA / CARRUSEL
    ------------------------------------------------------------ */
 
 .prov-carrusel {
@@ -109,131 +105,59 @@
 .prov-tarjeta {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 0.9rem;
     min-width: 0;
-
-    /* Entrada suave de la tarjeta */
-    animation: prov-tarjeta-entrada 0.4s ease-out;
 }
 
 
 /* ------------------------------------------------------------
-   CONTROLES INFERIORES
-   ------------------------------------------------------------ */
-
-.prov-controles {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 22px;
-    padding: 14px 0 4px;
-
-    animation: prov-controles-aparecer 0.5s ease-out;
-}
-
-.prov-contador {
-    min-width: 75px;
-    padding: 6px 12px;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 700;
-    color: #2A4590;
-    background: #f4f7fc;
-    border: 1px solid #dbe3f2;
-    border-radius: 20px;
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.prov-contador:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(42, 69, 144, 0.12);
-}
-
-.prov-control {
-    width: 38px;
-    height: 38px;
-    border: 2px solid #2A4590;
-    border-radius: 50%;
-    background: #2A4590;
-    color: #ffffff;
-    font-size: 17px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 10px rgba(42, 69, 144, 0.20);
-
-    transition:
-        transform 0.2s ease,
-        background 0.2s ease,
-        color 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.prov-control:hover {
-    background: #ffffff;
-    color: #2A4590;
-    transform: translateY(-3px) scale(1.08);
-    box-shadow: 0 7px 16px rgba(42, 69, 144, 0.28);
-}
-
-.prov-control:active {
-    transform: scale(0.92);
-}
-
-
-/* ------------------------------------------------------------
-   ENCABEZADO
+   ENCABEZADO: avatar, nombre y subtítulo alineados a la izquierda
    ------------------------------------------------------------ */
 
 .prov-encabezado {
-    display: grid;
-    grid-template-columns: 64px 1fr 64px;
+    display: flex;
     align-items: center;
-    gap: 16px;
-
-    animation: prov-entrada-arriba 0.4s ease-out;
+    gap: 0.9rem;
+    padding: 0 2.6rem 1rem 0;
+    border-bottom: 1px solid var(--border);
 }
 
 .prov-avatar {
-    width: 64px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    flex: 0 0 auto;
+    width: 62px;
+    height: 62px;
+    display: grid;
+    place-items: center;
     border-radius: 50%;
-    background: var(--prov-azul-claro);
-    font-size: 30px;
-
-    transition:
-        transform 0.25s ease,
-        box-shadow 0.25s ease;
-}
-
-.prov-avatar:hover {
-    transform: translateY(-3px) rotate(-3deg);
-    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.16);
+    background: linear-gradient(135deg, var(--primary-light), var(--purple-light));
+    color: var(--primary);
+    font-size: 1.65rem;
 }
 
 .prov-titulo {
-    text-align: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: left;
 }
 
 .prov-titulo h2 {
-    margin: 0 0 4px;
-    font-size: 28px;
+    margin: 0 0 0.35rem;
+    color: var(--primary-dark);
+    font-size: 1.45rem;
     font-weight: 700;
-    color: var(--prov-titulo);
+    line-height: 1.25;
+    overflow-wrap: anywhere;
 }
 
 .prov-titulo p {
+    display: inline-block;
     margin: 0;
-    font-size: 16px;
-    color: var(--prov-suave);
+    padding: 0.15rem 0.9rem;
+    border-radius: 8px;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-size: 0.88rem;
+    font-weight: 600;
 }
 
 
@@ -245,103 +169,117 @@
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-
-    animation: prov-entrada-derecha 0.4s ease-out;
 }
 
 .prov-btn {
-    padding: 8px 16px;
-    border: 1px solid var(--prov-borde);
-    border-radius: 8px;
-    background: #fff;
-    color: var(--prov-titulo);
-    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0.55rem 1rem;
+    border: 1px solid #cbdcf5;
+    border-radius: 10px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    white-space: nowrap;
     cursor: pointer;
-
     transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        background 0.2s ease,
-        border-color 0.2s ease;
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        background-color var(--transition-fast);
 }
 
 .prov-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 12px rgba(15, 31, 92, 0.12);
-    border-color: #cbd8ef;
+    transform: translateY(-1px);
 }
 
 .prov-btn:active {
-    transform: translateY(0) scale(0.97);
+    transform: translateY(0);
 }
 
 .prov-btn-azul {
-    background: var(--prov-azul);
-    border-color: var(--prov-azul);
-    color: #fff;
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+    font-weight: 600;
 }
 
 .prov-btn-azul:hover {
-    background: #1d4ed8;
-    border-color: #1d4ed8;
+    background: var(--primary-dark);
+    box-shadow: 0 4px 12px rgba(59, 111, 196, 0.20);
 }
 
 
 /* ------------------------------------------------------------
-   CONTACTOS
+   CONTACTOS (cajas con barra de color arriba, como las tarjetas
+   de datos clave de Inventario)
    ------------------------------------------------------------ */
 
 .prov-cajas {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
     align-items: stretch;
 }
 
 .prov-caja {
-    padding: 18px 20px;
-    background: #fff;
-    border: 1px solid var(--prov-borde);
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+    padding: 1rem 1.1rem 0.85rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: 14px;
+    box-shadow: var(--shadow-sm);
     box-sizing: border-box;
-
-    transition:
-        transform 0.25s ease,
-        box-shadow 0.25s ease,
-        border-color 0.25s ease;
-
-    animation: prov-contenido-aparecer 0.45s ease-out;
 }
 
-.prov-caja:hover {
-    transform: translateY(-3px);
-    border-color: #cdd9ef;
-    box-shadow: 0 8px 20px rgba(15, 31, 92, 0.08);
+.prov-caja::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--primary);
+    opacity: 0.85;
+}
+
+.prov-caja:nth-child(2)::before {
+    background: var(--green);
 }
 
 .prov-caja-ambar {
-    background: var(--prov-ambar-fondo);
-    border-color: var(--prov-ambar-borde);
+    background: #fcf8ef;
+    border-color: #eadfc9;
+}
+
+.prov-caja-ambar::before {
+    background: var(--yellow);
 }
 
 .prov-caja-titulo {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-    font-size: 16px;
-    color: var(--prov-suave);
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+    color: var(--text-muted);
+    font-size: 0.88rem;
 }
 
 .prov-caja-titulo.ambar {
-    color: var(--prov-ambar);
+    color: var(--yellow-dark);
 }
 
 .prov-caja-nombre {
     margin: 0;
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--prov-titulo);
+    color: var(--text-dark);
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
 }
 
 
@@ -351,8 +289,8 @@
 
 .prov-pares {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
 }
 
 .prov-par {
@@ -360,25 +298,18 @@
     flex-direction: column;
     gap: 2px;
     min-width: 0;
-
-    transition: transform 0.2s ease;
-}
-
-.prov-par:hover {
-    transform: translateX(3px);
 }
 
 .prov-par span {
-    font-size: 13px;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    color: var(--prov-suave);
+    color: var(--text-muted);
+    font-size: 0.8rem;
 }
 
 .prov-par strong {
-    font-size: 16px;
+    color: var(--text-dark);
+    font-size: 0.9rem;
     font-weight: 600;
-    color: var(--prov-titulo);
+    line-height: 1.4;
     overflow-wrap: anywhere;
 }
 
@@ -394,76 +325,63 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
-    font-size: 16px;
-    background: var(--prov-azul-claro);
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.prov-ico:hover {
-    transform: scale(1.08);
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+    border-radius: 9px;
+    background: var(--primary-light);
+    font-size: 0.9rem;
 }
 
 .prov-ico.verde {
-    background: #e6f6ec;
+    background: var(--green-light);
 }
 
 .prov-ico.ambar {
-    background: #ffe9c7;
+    background: var(--yellow-light);
 }
 
 
 /* ------------------------------------------------------------
-   COLUMNAS
+   COLUMNAS Y PANELES
    ------------------------------------------------------------ */
 
 .prov-columnas {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
     align-items: start;
 }
 
 .prov-derecha {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 0.75rem;
     min-width: 0;
 }
 
 .prov-panel {
-    padding: 20px 22px;
-    background: #fff;
-    border: 1px solid var(--prov-borde);
-    border-radius: 14px;
+    padding: 0.9rem 1rem 0.6rem;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
     box-sizing: border-box;
-
-    transition:
-        transform 0.25s ease,
-        box-shadow 0.25s ease,
-        border-color 0.25s ease;
-
-    animation: prov-contenido-aparecer 0.5s ease-out;
+    transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .prov-panel:hover {
-    transform: translateY(-2px);
-    border-color: #d0dbed;
-    box-shadow: 0 8px 22px rgba(15, 31, 92, 0.07);
+    border-color: #c7d5e5;
+    box-shadow: var(--shadow-md);
 }
 
 .prov-panel-titulo {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin: 0 0 14px;
-    font-size: 18px;
+    gap: 0.7rem;
+    margin: 0 0 0.5rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--primary-dark);
+    font-size: 0.95rem;
     font-weight: 700;
-    color: var(--prov-titulo);
 }
 
 
@@ -472,52 +390,40 @@
    ------------------------------------------------------------ */
 
 .prov-fila {
-    display: grid;
-    grid-template-columns: 45% 1fr;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 0;
-    border-bottom: 1px solid var(--prov-borde);
-
-    transition:
-        background 0.2s ease,
-        padding-left 0.2s ease,
-        padding-right 0.2s ease;
-}
-
-.prov-fila:hover {
-    background: #fafcff;
-    padding-left: 5px;
-    padding-right: 5px;
-    border-radius: 6px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid #eaeff5;
 }
 
 .prov-fila:last-child {
     border-bottom: none;
-    padding-bottom: 0;
 }
 
 .prov-etiqueta {
-    font-size: 15px;
-    color: var(--prov-suave);
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    line-height: 1.4;
 }
 
 .prov-valor {
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--prov-titulo);
+    color: var(--text-dark);
+    font-size: 0.92rem;
+    font-weight: 600;
     text-align: right;
     overflow-wrap: anywhere;
 }
 
 .prov-valor a {
-    color: var(--prov-azul);
+    color: var(--primary);
     text-decoration: none;
-    transition: color 0.2s ease;
+    transition: color var(--transition-fast);
 }
 
 .prov-valor a:hover {
-    color: #1d4ed8;
+    color: var(--primary-dark);
     text-decoration: underline;
 }
 
@@ -531,9 +437,7 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
-    gap: 8px;
-
-    animation: prov-chips-aparecer 0.45s ease-out;
+    gap: 0.4rem;
 }
 
 .prov-chip {
@@ -541,32 +445,21 @@
     align-items: center;
     justify-content: center;
     margin: 0;
-    padding: 5px 11px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
     white-space: nowrap;
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        filter 0.2s ease;
-}
-
-.prov-chip:hover {
-    transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 5px 10px rgba(15, 31, 92, 0.12);
-    filter: brightness(1.02);
 }
 
 .prov-chip-verde {
-    background: var(--prov-verde-claro);
-    color: var(--prov-verde);
+    background: var(--green-light);
+    color: var(--green-dark);
 }
 
 .prov-chip-azul {
-    background: var(--prov-azul-claro);
-    color: var(--prov-azul);
+    background: var(--primary-light);
+    color: var(--primary-dark);
 }
 
 
@@ -577,34 +470,27 @@
 .prov-direccion {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    padding: 10px 0;
-
-    transition:
-        transform 0.2s ease,
-        padding-left 0.2s ease;
-}
-
-.prov-direccion:hover {
-    transform: translateX(3px);
-    padding-left: 3px;
+    gap: 0.7rem;
+    padding: 0.6rem 0;
 }
 
 .prov-direccion + .prov-direccion {
-    border-top: 1px solid var(--prov-borde);
+    border-top: 1px solid #eaeff5;
 }
 
 .prov-direccion strong {
     display: block;
     margin-bottom: 2px;
-    font-size: 16px;
-    color: var(--prov-titulo);
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    font-weight: 600;
 }
 
 .prov-direccion p {
     margin: 0;
-    font-size: 15px;
-    color: var(--prov-suave);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.4;
     overflow-wrap: anywhere;
 }
 
@@ -616,273 +502,66 @@
 .prov-mapa {
     display: block;
     width: 100%;
-    height: 260px;
+    height: 180px;
     border: 0;
-    border-radius: 12px;
-
-    transition:
-        transform 0.25s ease,
-        box-shadow 0.25s ease;
-}
-
-.prov-mapa:hover {
-    transform: scale(1.005);
-    box-shadow: 0 8px 18px rgba(15, 31, 92, 0.10);
-}
-
-
-/* ------------------------------------------------------------
-   MODAL COMPACTO
-   ------------------------------------------------------------ */
-
-.prov-overlay {
-    padding: 14px;
-    align-items: center;
-}
-
-.prov-modal {
-    width: min(1040px, 96vw);
-    max-height: 92vh;
-    padding: 24px 22px 20px;
-    overflow-y: auto;
-    box-sizing: border-box;
-}
-
-
-/* ------------------------------------------------------------
-   ENCABEZADO COMPACTO
-   ------------------------------------------------------------ */
-
-.prov-encabezado {
-    grid-template-columns: 52px 1fr 52px;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.prov-avatar {
-    width: 52px;
-    height: 52px;
-    font-size: 25px;
-}
-
-.prov-titulo h2 {
-    margin-bottom: 3px;
-    font-size: 27px;
-}
-
-.prov-titulo p {
-    font-size: 15px;
-}
-
-
-/* ------------------------------------------------------------
-   TARJETA
-   ------------------------------------------------------------ */
-
-.prov-tarjeta {
-    gap: 12px;
-}
-
-
-/* ------------------------------------------------------------
-   CAJAS
-   ------------------------------------------------------------ */
-
-.prov-cajas {
-    gap: 12px;
-}
-
-.prov-caja {
-    padding: 14px 16px;
-    border-radius: 12px;
-}
-
-.prov-caja-titulo {
-    gap: 8px;
-    margin-bottom: 9px;
-    font-size: 15px;
-}
-
-.prov-caja-nombre {
-    font-size: 19px;
-}
-
-.prov-pares {
-    gap: 12px;
-}
-
-.prov-par span {
-    font-size: 12px;
-}
-
-.prov-par strong {
-    font-size: 15px;
-}
-
-
-/* ------------------------------------------------------------
-   ICONOS
-   ------------------------------------------------------------ */
-
-.prov-ico {
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
-    font-size: 15px;
-}
-
-
-/* ------------------------------------------------------------
-   COLUMNAS Y PANELES
-   ------------------------------------------------------------ */
-
-.prov-columnas {
-    gap: 12px;
-}
-
-.prov-derecha {
-    gap: 12px;
-}
-
-.prov-panel {
-    padding: 15px 17px;
-    border-radius: 12px;
-}
-
-.prov-panel-titulo {
-    gap: 8px;
-    margin-bottom: 9px;
-    font-size: 17px;
-}
-
-
-/* ------------------------------------------------------------
-   FILAS DE INFORMACIÓN
-   ------------------------------------------------------------ */
-
-.prov-fila {
-    gap: 9px;
-    padding: 8px 0;
-}
-
-.prov-etiqueta {
-    font-size: 14px;
-}
-
-.prov-valor {
-    font-size: 15px;
-}
-
-
-/* ------------------------------------------------------------
-   DIRECCIONES
-   ------------------------------------------------------------ */
-
-.prov-direccion {
-    gap: 10px;
-    padding: 8px 0;
-}
-
-.prov-direccion strong {
-    margin-bottom: 2px;
-    font-size: 15px;
-}
-
-.prov-direccion p {
-    font-size: 14px;
-}
-
-
-/* ------------------------------------------------------------
-   MAPA
-   ------------------------------------------------------------ */
-
-.prov-mapa {
-    height: 200px;
     border-radius: 10px;
 }
 
 
 /* ------------------------------------------------------------
-   CHIPS
-   ------------------------------------------------------------ */
-
-.prov-chip {
-    margin-left: 0;
-    padding: 4px 10px;
-    font-size: 13px;
-}
-
-
-/* ------------------------------------------------------------
-   BOTONES
-   ------------------------------------------------------------ */
-
-.prov-btn {
-    padding: 8px 13px;
-    font-size: 14px;
-}
-
-.prov-acciones {
-    gap: 8px;
-}
-
-
-/* ------------------------------------------------------------
-   CONTROLES INFERIORES
+   CONTROLES DEL CARRUSEL
    ------------------------------------------------------------ */
 
 .prov-controles {
-    gap: 14px;
-    padding: 9px 0 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    padding: 14px 0 4px;
 }
 
 .prov-contador {
-    min-width: 68px;
-    padding: 6px 10px;
-    font-size: 13px;
+    min-width: 75px;
+    padding: 6px 12px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    background: var(--primary-light);
+    border: 1px solid #d2dfef;
+    border-radius: 20px;
 }
 
 .prov-control {
-    width: 34px;
-    height: 34px;
-    font-size: 15px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    background: var(--primary);
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(42, 69, 144, 0.15);
+    transition:
+        transform var(--transition-normal),
+        background-color var(--transition-normal),
+        color var(--transition-normal),
+        box-shadow var(--transition-normal);
 }
 
-
-/* ------------------------------------------------------------
-   CERRAR
-   ------------------------------------------------------------ */
-
-.prov-cerrar {
-    top: 12px;
-    right: 14px;
-    width: 34px;
-    height: 34px;
-    font-size: 20px;
+.prov-control:hover {
+    background: #ffffff;
+    color: var(--primary);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 7px 16px rgba(42, 69, 144, 0.20);
 }
 
-
-/* ------------------------------------------------------------
-   SCROLLBAR DEL MODAL
-   ------------------------------------------------------------ */
-
-.prov-modal {
-    scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
-}
-
-.prov-modal::-webkit-scrollbar {
-    width: 6px;
-}
-
-.prov-modal::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.prov-modal::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
+.prov-control:active {
+    transform: scale(0.92);
 }
 
 
@@ -893,73 +572,18 @@
 @media (max-width: 860px) {
 
     .prov-cajas,
-    .prov-pares,
     .prov-columnas {
         grid-template-columns: 1fr;
     }
 
     .prov-overlay {
-        padding: 10px;
+        padding: 0.75rem;
     }
 
     .prov-modal {
         width: 96vw;
-        max-height: 92vh;
-        padding: 20px 14px 17px;
-    }
-
-    .prov-encabezado {
-        grid-template-columns: 46px 1fr 46px;
-    }
-
-    .prov-avatar {
-        width: 46px;
-        height: 46px;
-        font-size: 22px;
-    }
-
-    .prov-titulo h2 {
-        font-size: 24px;
-    }
-
-    .prov-titulo p {
-        font-size: 14px;
-    }
-
-    .prov-caja-nombre {
-        font-size: 18px;
-    }
-
-    .prov-par span {
-        font-size: 12px;
-    }
-
-    .prov-par strong {
-        font-size: 15px;
-    }
-
-    .prov-panel-titulo {
-        font-size: 17px;
-    }
-
-    .prov-etiqueta {
-        font-size: 14px;
-    }
-
-    .prov-valor {
-        font-size: 15px;
-    }
-
-    .prov-direccion strong {
-        font-size: 15px;
-    }
-
-    .prov-direccion p {
-        font-size: 14px;
-    }
-
-    .prov-mapa {
-        height: 185px;
+        padding: 1rem;
+        border-radius: 15px;
     }
 }
 
@@ -971,244 +595,203 @@
 @media (max-width: 600px) {
 
     .prov-overlay {
-        padding: 6px;
+        padding: 0.5rem;
     }
 
     .prov-modal {
         width: 98vw;
         max-height: 94vh;
-        padding: 18px 10px 14px;
-        border-radius: 14px;
+        padding: 0.85rem;
+        border-radius: 12px;
     }
 
     .prov-encabezado {
-        grid-template-columns: 40px 1fr 40px;
-        gap: 7px;
+        gap: 0.7rem;
+        padding-right: 2.6rem;
     }
 
     .prov-avatar {
-        width: 40px;
-        height: 40px;
-        font-size: 19px;
+        width: 48px;
+        height: 48px;
+        font-size: 1.35rem;
     }
 
     .prov-titulo h2 {
-        font-size: 21px;
+        font-size: 1.2rem;
     }
 
-    .prov-titulo p {
-        font-size: 13px;
+    .prov-pares {
+        grid-template-columns: 1fr;
     }
 
-    .prov-caja,
-    .prov-panel {
-        padding: 11px 11px;
-    }
-
-    .prov-caja-titulo {
-        font-size: 14px;
-    }
-
-    .prov-caja-nombre {
-        font-size: 17px;
-    }
-
-    .prov-par span {
-        font-size: 11px;
-    }
-
-    .prov-par strong {
-        font-size: 14px;
-    }
-
-    .prov-panel-titulo {
-        font-size: 16px;
+    .prov-caja {
+        padding: 0.9rem 1rem 0.75rem;
     }
 
     .prov-fila {
-        grid-template-columns: 42% 1fr;
-        padding: 7px 0;
-    }
-
-    .prov-etiqueta {
-        font-size: 13px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
     }
 
     .prov-valor {
-        font-size: 14px;
+        text-align: left;
     }
 
-    .prov-direccion strong {
-        font-size: 14px;
-    }
-
-    .prov-direccion p {
-        font-size: 13px;
+    .prov-metodos {
+        justify-content: flex-start;
     }
 
     .prov-mapa {
-        height: 165px;
+        height: 160px;
     }
 
-    .prov-controles {
-        gap: 10px;
-    }
-
-    .prov-control {
-        width: 30px;
-        height: 30px;
-        font-size: 14px;
-    }
-
-    .prov-contador {
-        min-width: 60px;
-        padding: 5px 8px;
-        font-size: 12px;
-    }
-
-    .prov-btn {
-        padding: 7px 11px;
-        font-size: 13px;
-    }
-
-    .prov-chip {
-        font-size: 12px;
+    .prov-acciones .prov-btn {
+        flex: 1;
     }
 }
 
 
 /* ============================================================
-   ANIMACIONES
+   MODO OSCURO SUAVE
    ============================================================ */
 
-/* Aparición del fondo */
-@keyframes prov-fondo-aparecer {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+.modo-oscuro .prov-overlay {
+    background: rgba(8, 11, 15, 0.74);
 }
 
-
-/* Entrada del modal */
-@keyframes prov-modal-entrada {
-    from {
-        opacity: 0;
-        transform: translateY(16px) scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+.modo-oscuro .prov-modal {
+    background: #292f36;
+    border-color: #414b56;
+    color: #e2e6eb;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.34);
 }
 
-
-/* Entrada de la tarjeta */
-@keyframes prov-tarjeta-entrada {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.modo-oscuro .prov-encabezado {
+    border-bottom-color: #414b56;
 }
 
-
-/* Entrada desde arriba */
-@keyframes prov-entrada-arriba {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.modo-oscuro .prov-avatar {
+    background: #343c45;
+    color: #9bbce9;
 }
 
-
-/* Entrada desde la derecha */
-@keyframes prov-entrada-derecha {
-    from {
-        opacity: 0;
-        transform: translateX(8px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+.modo-oscuro .prov-titulo h2,
+.modo-oscuro .prov-panel-titulo {
+    color: #e2e6eb;
 }
 
-
-/* Aparición general del contenido */
-@keyframes prov-contenido-aparecer {
-    from {
-        opacity: 0;
-        transform: translateY(7px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.modo-oscuro .prov-titulo p {
+    background: #303b49;
+    color: #a9c4e8;
 }
 
-
-/* Aparición de los chips */
-@keyframes prov-chips-aparecer {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.modo-oscuro .prov-cerrar {
+    background: #303842;
+    border-color: #414b56;
+    color: #c2cad3;
 }
 
+.modo-oscuro .prov-cerrar:hover {
+    background: #3a4149;
+    border-color: #5b4044;
+    color: #e78a8a;
+}
 
-/* ============================================================
-   ACCESIBILIDAD
-   Reduce las animaciones si el usuario tiene activada
-   la opción del sistema para reducir movimiento.
-   ============================================================ */
+.modo-oscuro .prov-btn {
+    background: #303842;
+    border-color: #414b56;
+    color: #a9c4e8;
+}
 
-@media (prefers-reduced-motion: reduce) {
+.modo-oscuro .prov-btn-azul {
+    background: #456da5;
+    border-color: #456da5;
+    color: #ffffff;
+}
 
-    .prov-overlay,
-    .prov-modal,
-    .prov-tarjeta,
-    .prov-controles,
-    .prov-encabezado,
-    .prov-acciones,
-    .prov-caja,
-    .prov-panel,
-    .prov-metodos {
-        animation: none;
-    }
+.modo-oscuro .prov-caja,
+.modo-oscuro .prov-panel {
+    background: #252b32;
+    border-color: #3b444e;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+}
 
-    .prov-cerrar,
-    .prov-avatar,
-    .prov-btn,
-    .prov-caja,
-    .prov-par,
-    .prov-ico,
-    .prov-fila,
-    .prov-direccion,
-    .prov-mapa,
-    .prov-chip,
-    .prov-control,
-    .prov-contador {
-        transition: none;
-    }
+.modo-oscuro .prov-caja-ambar {
+    background: #35332d;
+    border-color: #4a4538;
+}
+
+.modo-oscuro .prov-panel:hover {
+    border-color: #4a5560;
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.16);
+}
+
+.modo-oscuro .prov-caja-titulo,
+.modo-oscuro .prov-par span,
+.modo-oscuro .prov-etiqueta,
+.modo-oscuro .prov-direccion p {
+    color: #aeb6c0;
+}
+
+.modo-oscuro .prov-caja-titulo.ambar {
+    color: #e0b45b;
+}
+
+.modo-oscuro .prov-caja-nombre,
+.modo-oscuro .prov-par strong,
+.modo-oscuro .prov-valor,
+.modo-oscuro .prov-direccion strong {
+    color: #e2e6eb;
+}
+
+.modo-oscuro .prov-valor a {
+    color: #a9c4e8;
+}
+
+.modo-oscuro .prov-panel-titulo {
+    border-bottom-color: #3b444e;
+}
+
+.modo-oscuro .prov-fila,
+.modo-oscuro .prov-direccion + .prov-direccion {
+    border-color: #3b444e;
+}
+
+.modo-oscuro .prov-ico {
+    background: #303b49;
+}
+
+.modo-oscuro .prov-ico.verde {
+    background: #2b3d34;
+}
+
+.modo-oscuro .prov-ico.ambar {
+    background: #3d382b;
+}
+
+.modo-oscuro .prov-chip-verde {
+    background: #2b3d34;
+    color: #7fd3a3;
+}
+
+.modo-oscuro .prov-chip-azul {
+    background: #303b49;
+    color: #a9c4e8;
+}
+
+.modo-oscuro .prov-contador {
+    background: #303842;
+    border-color: #414b56;
+    color: #a9c4e8;
+}
+
+.modo-oscuro .prov-control {
+    background: #456da5;
+    border-color: #456da5;
+}
+
+.modo-oscuro .prov-control:hover {
+    background: #e0e5eb;
+    color: #456da5;
 }

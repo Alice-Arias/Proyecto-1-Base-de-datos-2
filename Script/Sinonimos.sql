@@ -1,3 +1,32 @@
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: Creación de sinónimos de la base de datos
+*
+* DESCRIPCION:
+* Crea nombres alternativos en el esquema dbo para las tablas utilizadas por el
+* proyecto dentro de la base de datos WideWorldImporters.
+*
+* Los sinónimos permiten utilizar nombres en español y más sencillos desde los
+* procedimientos almacenados, evitando tener que escribir directamente los nombres
+* originales de los esquemas Sales, Purchasing, Warehouse y Application.
+*
+* ENTRADA:
+* Base de datos WideWorldImporters y las tablas originales de sus diferentes esquemas.
+*
+* SALIDA:
+* Sinónimos disponibles dentro del esquema dbo que apuntan a las tablas originales.
+*
+* RESTRICCIONES:
+* Las tablas originales deben existir en la base de datos WideWorldImporters.
+* Los nombres de los sinónimos no deben estar siendo utilizados previamente.
+*
+* OBJETIVO:
+* Facilitar el acceso a las tablas de la base de datos utilizando nombres en español
+* y mantener una nomenclatura uniforme para el desarrollo del proyecto.
+*
+*-----------------------------------------------------------------------------------------*/
+
+
 USE WideWorldImporters;
 GO
 

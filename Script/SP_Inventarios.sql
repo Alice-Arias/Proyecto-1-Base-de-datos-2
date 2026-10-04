@@ -1,101 +1,140 @@
 USE WideWorldImporters;
+
 GO
 
-/* 
-   MODULO CLIENTES
-       SP_Inventarios_Listar
-       SP_Inventarios_Detalle
-       SP_Inventarios_Insertar
-       SP_Inventarios_Actualizar
-       SP_Inventarios_Eliminar
-   TIPOS DE ERROR
-       1 = falta un dato obligatorio o el formato es malo
-       2 = valor fuera de rango
-       3 = un registro relacionado no existe
-       4 = duplicado (ya existe un inventario con ese nombre)
-       5 = el inventario no existe
-       6 = el inventario tiene registros relacionados (no se puede borrar)
- */
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: Procedimientos almacenados del módulo de inventario
+*
+* DESCRIPCION: Contiene los procedimientos utilizados para listar, consultar,
+*              insertar, actualizar y eliminar productos del inventario.
+*
+* TIPOS DE ERROR:
+*     1 = falta un dato obligatorio o el formato es malo
+*     2 = valor fuera de rango
+*     3 = un registro relacionado no existe
+*     4 = duplicado
+*     5 = el inventario no existe
+*     6 = el inventario tiene registros relacionados y no se puede borrar
+*
+*-----------------------------------------------------------------------------------------*/
 
 
-/* =========================================================
-   1. LISTAR
-
-   Devuelve la lista de productos para la tabla principal.
-   Permite filtrar por nombre, grupo y cantidad en stock.
-   Los resultados se ordenan por nombre de la A - Z.
-   ========================================================= */
-
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: SP_Inventarios_Listar
+*
+* DESCRIPCION: Devuelve la lista de productos para la tabla principal del inventario.
+*              Permite filtrar por nombre, grupo y cantidad disponible.
+*
+* ENTRADA:
+*     @Nombre    nombre o parte del nombre del producto.
+*     @Grupo     nombre o parte del grupo de inventario.
+*     @Cantidad  cantidad mínima disponible.
+*
+* SALIDA: Lista de productos con su identificador, nombre, grupo y cantidad disponible.
+*
+* RESTRICCIONES: Los filtros son opcionales. La cantidad devuelve productos
+*                cuya existencia sea mayor o igual al valor indicado.
+*
+* OBJETIVO: Obtener los productos del inventario para mostrarlos en la tabla principal.
+*
+*-----------------------------------------------------------------------------------------*/
 CREATE OR ALTER PROCEDURE dbo.SP_Inventarios_Listar
     @Nombre NVARCHAR(100) = NULL,
     @Grupo NVARCHAR(100) = NULL,
     @Cantidad INT
-
 AS
 BEGIN
-
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
     SELECT
         pto.StockItemID,
         pto.StockItemName AS Producto,
-        STRING_AGG(g.StockGroupName, ', ') 
-            WITHIN GROUP (ORDER BY g.StockGroupName) 
+
+        /* Agrupa los grupos asociados al mismo producto. */
+        STRING_AGG(g.StockGroupName, ', ')
+            WITHIN GROUP (ORDER BY g.StockGroupName)
             AS Grupo,
+
         pi.QuantityOnHand AS Cantidad_Inventario
+
     FROM dbo.ProductosActuales AS pto
-    INNER JOIN dbo.ItemGrupos AS ig ON pto.StockItemID = ig.StockItemID
-    INNER JOIN dbo.GruposInventario AS g ON ig.StockGroupID = g.StockGroupID
-    INNER JOIN dbo.ProductosInventario AS pi ON pto.StockItemID = pi.StockItemID
+
+    /* Relaciona el producto con sus grupos de inventario. */
+    INNER JOIN dbo.ItemGrupos AS ig
+        ON pto.StockItemID = ig.StockItemID
+
+    INNER JOIN dbo.GruposInventario AS g
+        ON ig.StockGroupID = g.StockGroupID
+
+    /* Obtiene la cantidad disponible del producto. */
+    INNER JOIN dbo.ProductosInventario AS pi
+        ON pto.StockItemID = pi.StockItemID
 
     WHERE
-            (@Nombre IS NULL OR pto.StockItemName LIKE '%' + @Nombre + '%')
-            AND 
-            (@Grupo IS NULL OR g.StockGroupName LIKE '%' + @Grupo + '%')
-            AND
-            (@Cantidad IS NULL OR pi.QuantityOnHand >= @Cantidad)
+        (@Nombre IS NULL OR pto.StockItemName LIKE '%' + @Nombre + '%')
+        AND
+        (@Grupo IS NULL OR g.StockGroupName LIKE '%' + @Grupo + '%')
+        AND
+        (@Cantidad IS NULL OR pi.QuantityOnHand >= @Cantidad)
 
-    GROUP BY pto.StockItemID,
-             pto.StockItemName,
-             pi.QuantityOnHand
+    GROUP BY
+        pto.StockItemID,
+        pto.StockItemName,
+        pi.QuantityOnHand
 
-    
-
+    /* Ordena los productos alfabéticamente. */
     ORDER BY pto.StockItemName ASC;
-
 END
+
 GO
 
 
-/* =========================================================
-   2. DETALLE
-
-   Devuelve toda la informacion de un producto.
-   Recibe el StockItermID.
-   ========================================================= */
-
-
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: SP_Inventarios_Detalle
+*
+* DESCRIPCION: Devuelve toda la información disponible de uno o varios productos.
+*
+* ENTRADA:
+*     @StockItemID  identificador o lista de identificadores de productos.
+*
+* SALIDA: Información detallada del producto, proveedor, color, empaquetamiento,
+*         precios, peso, cantidad disponible y ubicación.
+*
+* RESTRICCIONES: Los identificadores deben ser valores numéricos separados por coma.
+*
+* OBJETIVO: Obtener la información completa de un producto para mostrarla en su detalle.
+*
+*-----------------------------------------------------------------------------------------*/
 CREATE OR ALTER PROCEDURE dbo.SP_Inventarios_Detalle
     @StockItemID NVARCHAR(MAX)
 AS
 BEGIN
-
     SET NOCOUNT ON;
-
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
-    SELECT 
+    SELECT
         pto.StockItemID,
         pto.StockItemName AS Producto,
         p.SupplierID AS Proveedor_ID,
         p.SupplierName AS Proveedor,
+
+        /* Si el color está vacío, muestra un texto descriptivo. */
         ISNULL(NULLIF(LTRIM(RTRIM(c.ColorName)), ''), 'Color sin definir') AS Color,
+
+        /* Si la marca está vacía, muestra un texto descriptivo. */
         ISNULL(NULLIF(LTRIM(RTRIM(pto.Brand)), ''), 'Marca sin definir') AS Marca,
+
         e.PackageTypeName AS Unidad_Empaquetamiento,
         em.PackageTypeName AS Empaquetamiento,
         pto.QuantityPerOuter AS Cantidad_Empaquetamiento,
         pto.Size AS Talla,
+
+        /* Calcula el impuesto correspondiente al precio unitario. */
         ROUND(pto.UnitPrice * (pto.TaxRate / 100.0), 2) AS Impuesto,
+
         pto.UnitPrice AS Precio_Unitario,
         pto.RecommendedRetailPrice AS Precio_Venta,
         pto.TypicalWeightPerUnit AS Peso,
@@ -104,33 +143,56 @@ BEGIN
         pi.BinLocation AS Ubicacion
 
     FROM dbo.ProductosActuales AS pto
-    INNER JOIN dbo.ProveedoresActuales AS p ON pto.SupplierID = p.SupplierID
-    LEFT JOIN dbo.ColoresProductos AS c ON pto.ColorID = c.ColorID
-    INNER JOIN dbo.EmpaquetamientoInventario e ON pto.UnitPackageID = e.PackageTypeID
-    INNER JOIN dbo.EmpaquetamientoInventario AS em ON pto.OuterPackageID = em.PackageTypeID
-    INNER JOIN dbo.ProductosInventario AS pi ON pto.StockItemID = pi.StockItemID
+
+    /* Obtiene la información del proveedor. */
+    INNER JOIN dbo.ProveedoresActuales AS p
+        ON pto.SupplierID = p.SupplierID
+
+    /* El color es opcional. */
+    LEFT JOIN dbo.ColoresProductos AS c
+        ON pto.ColorID = c.ColorID
+
+    /* Obtiene los tipos de empaquetamiento. */
+    INNER JOIN dbo.EmpaquetamientoInventario e
+        ON pto.UnitPackageID = e.PackageTypeID
+
+    INNER JOIN dbo.EmpaquetamientoInventario AS em
+        ON pto.OuterPackageID = em.PackageTypeID
+
+    /* Obtiene la cantidad y ubicación del inventario. */
+    INNER JOIN dbo.ProductosInventario AS pi
+        ON pto.StockItemID = pi.StockItemID
 
     WHERE pto.StockItemID IN
     (
+        /* Permite recibir uno o varios IDs separados por coma. */
         SELECT TRY_CAST(value AS INT)
-        FROM STRING_SPLIT(@StockItemID, ',') 
+        FROM STRING_SPLIT(@StockItemID, ',')
         WHERE TRY_CAST(value AS INT) IS NOT NULL
     );
-
 END
+
 GO
 
-/* =========================================================
-   3. INSERTAR
 
-   Utiliza una TRANSACCION porque realiza dos operaciones:
-    INSERT del producto.
-   Si ambas operaciones funcionan:  COMMIT
-   Si ocurre un error: ROLLBACK
-   ========================================================= */
-
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: SP_Inventario_Insertar
+*
+* DESCRIPCION: Registra un nuevo producto en el inventario.
+*
+* ENTRADA: Datos generales del producto, proveedor, empaquetamiento, precios,
+*          características y usuario que realiza el registro.
+*
+* SALIDA: Identificador del nuevo producto.
+*
+* RESTRICCIONES: Verifica datos obligatorios, rangos válidos, registros relacionados
+*                existentes y que no exista otro producto con el mismo nombre.
+*
+* OBJETIVO: Crear un nuevo producto de forma segura utilizando una transacción.
+*
+*-----------------------------------------------------------------------------------------*/
 CREATE OR ALTER PROCEDURE dbo.SP_Inventario_Insertar
-
     @StockItemName NVARCHAR(100),
     @SupplierID INT,
     @ColorID INT,
@@ -151,11 +213,10 @@ CREATE OR ALTER PROCEDURE dbo.SP_Inventario_Insertar
     @Photo VARBINARY(MAX),
     @CustomFields NVARCHAR(MAX),
     @LastEditedBy INT = 1
-
 AS
 BEGIN
 
-    
+    /* Verifica los datos obligatorios. */
     IF @StockItemName IS NULL
     BEGIN
         RAISERROR('El nombre del producto es obligatorio.', 16, 1);
@@ -216,6 +277,7 @@ BEGIN
         RETURN;
     END
 
+    /* Verifica que los valores numéricos estén dentro de rangos válidos. */
     IF @LeadTimeDays < 0
     BEGIN
         RAISERROR('Los días de entrega no pueden ser negativos.', 16, 2);
@@ -252,6 +314,7 @@ BEGIN
         RETURN;
     END
 
+    /* Verifica que los registros relacionados existan. */
     IF NOT EXISTS
     (
         SELECT 1
@@ -297,8 +360,7 @@ BEGIN
         RETURN;
     END
 
-
-    -- Verificar duplicado
+    /* Verifica que no exista otro producto con el mismo nombre. */
     IF EXISTS
     (
         SELECT 1
@@ -310,15 +372,13 @@ BEGIN
         RETURN;
     END
 
-
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
-
     SET XACT_ABORT ON;
 
     BEGIN TRY
-
         BEGIN TRANSACTION;
 
+        /* Inserta el nuevo producto. */
         INSERT INTO dbo.ProductosActuales
         (
             StockItemName,
@@ -366,41 +426,49 @@ BEGIN
             @LastEditedBy
         );
 
+        /* Obtiene el ID generado para el nuevo producto. */
         DECLARE @NuevoID INT;
 
         SELECT @NuevoID = StockItemID
         FROM dbo.ProductosActuales
         WHERE StockItemName = @StockItemName;
 
-
         COMMIT TRANSACTION;
 
         SELECT @NuevoID AS StockItemID;
 
     END TRY
+
     BEGIN CATCH
 
-        /* DESHACER TRANSACCION */
+        /* Deshace la transacción si ocurre un error. */
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
 
         THROW;
-
     END CATCH;
-
 END
+
 GO
 
-/* =========================================================
-   4. ACTUALIZAR
 
-   Modifica los datos de un producto existente.
-
-   Utiliza una TRANSACCION para proteger el UPDATE.
-   ========================================================= */
-
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: SP_Inventario_Actualizar
+*
+* DESCRIPCION: Modifica la información de un producto existente.
+*
+* ENTRADA: ID del producto y sus nuevos datos.
+*
+* SALIDA: Identificador del producto actualizado.
+*
+* RESTRICCIONES: El producto debe existir. También se validan datos obligatorios,
+*                rangos, relaciones y nombres duplicados.
+*
+* OBJETIVO: Actualizar un producto de forma segura utilizando una transacción.
+*
+*-----------------------------------------------------------------------------------------*/
 CREATE OR ALTER PROCEDURE dbo.SP_Inventario_Actualizar
-
     @StockItemID INT,
     @StockItemName NVARCHAR(100),
     @SupplierID INT,
@@ -422,16 +490,15 @@ CREATE OR ALTER PROCEDURE dbo.SP_Inventario_Actualizar
     @Photo VARBINARY(MAX),
     @CustomFields NVARCHAR(MAX),
     @LastEditedBy INT
-
 AS
 BEGIN
 
+    /* Verifica que el producto exista. */
     IF @StockItemID IS NULL
     BEGIN
         RAISERROR('El StockItemID es obligatorio.', 16, 1);
         RETURN;
     END
-
 
     IF NOT EXISTS
     (
@@ -444,6 +511,7 @@ BEGIN
         RETURN;
     END
 
+    /* Verifica los datos obligatorios. */
     IF @StockItemName IS NULL
     BEGIN
         RAISERROR('El nombre del producto es obligatorio.', 16, 1);
@@ -510,7 +578,7 @@ BEGIN
         RETURN;
     END
 
-
+    /* Valida los rangos permitidos. */
     IF @LeadTimeDays < 0
     BEGIN
         RAISERROR('Los días de entrega no pueden ser negativos.', 16, 2);
@@ -547,6 +615,7 @@ BEGIN
         RETURN;
     END
 
+    /* Verifica que los registros relacionados existan. */
     IF NOT EXISTS
     (
         SELECT 1
@@ -592,6 +661,7 @@ BEGIN
         RETURN;
     END
 
+    /* Evita que dos productos tengan el mismo nombre. */
     IF EXISTS
     (
         SELECT 1
@@ -604,17 +674,13 @@ BEGIN
         RETURN;
     END
 
-
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
-
     SET XACT_ABORT ON;
 
-
     BEGIN TRY
-
         BEGIN TRANSACTION;
 
-
+        /* Actualiza los datos del producto. */
         UPDATE dbo.ProductosActuales
         SET
             StockItemName = @StockItemName,
@@ -637,64 +703,58 @@ BEGIN
             Photo = @Photo,
             CustomFields = @CustomFields,
             LastEditedBy = @LastEditedBy
-
         WHERE StockItemID = @StockItemID;
-
 
         COMMIT TRANSACTION;
 
-
         SELECT @StockItemID AS StockItemID;
-
 
     END TRY
 
     BEGIN CATCH
 
+        /* Deshace la transacción si ocurre un error. */
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
 
         THROW;
-
     END CATCH;
-
 END
+
 GO
 
-/* =========================================================
-   5. ELIMINAR
 
-   Elimina un producto solamente si no posee registros
-   relacionados que impidan su eliminación.
-
-   Antes de eliminar se verifica:
-       - Transacciones del producto
-       - Registros de inventario
-       - Detalles de pedidos
-       - Detalles de facturas
-
-   Si el producto pertenece a grupos, se eliminan primero
-   sus relaciones en ItemGrupos.
-
-   Utiliza una TRANSACCION para proteger los DELETE.
-
-   ========================================================= */
-
-
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: SP_Inventario_Eliminar
+*
+* DESCRIPCION: Elimina un producto del inventario cuando no posee registros
+*              relacionados que impidan su eliminación.
+*
+* ENTRADA: @StockItemID  identificador del producto que se desea eliminar.
+*
+* SALIDA: Identificador del producto eliminado.
+*
+* RESTRICCIONES: No permite eliminar productos con transacciones, inventario,
+*                pedidos o facturas relacionados.
+*
+* OBJETIVO: Eliminar el producto y sus relaciones con grupos de inventario
+*           de forma segura mediante una transacción.
+*
+*-----------------------------------------------------------------------------------------*/
 CREATE OR ALTER PROCEDURE dbo.SP_Inventario_Eliminar
-
     @StockItemID INT
-
-AS 
+AS
 BEGIN
 
+    /* Verifica que se haya proporcionado un identificador. */
     IF @StockItemID IS NULL
     BEGIN
         RAISERROR('El StockItemID es obligatorio.', 16, 1);
         RETURN;
     END
 
-
+    /* Verifica que el producto exista. */
     IF NOT EXISTS
     (
         SELECT 1
@@ -706,7 +766,7 @@ BEGIN
         RETURN;
     END
 
-
+    /* Verifica si el producto tiene transacciones. */
     IF EXISTS
     (
         SELECT 1
@@ -722,7 +782,7 @@ BEGIN
         RETURN;
     END
 
-
+    /* Verifica si el producto tiene registros de inventario. */
     IF EXISTS
     (
         SELECT 1
@@ -738,7 +798,7 @@ BEGIN
         RETURN;
     END
 
-
+    /* Verifica si el producto pertenece a pedidos. */
     IF EXISTS
     (
         SELECT 1
@@ -754,7 +814,7 @@ BEGIN
         RETURN;
     END
 
-
+    /* Verifica si el producto pertenece a facturas. */
     IF EXISTS
     (
         SELECT 1
@@ -770,74 +830,83 @@ BEGIN
         RETURN;
     END
 
-
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
-
     SET XACT_ABORT ON;
 
-
     BEGIN TRY
-
         BEGIN TRANSACTION;
 
-        -- Eliminar relaciones del producto con grupos si es que existen
+        /* Elimina las relaciones del producto con los grupos. */
         DELETE FROM dbo.ItemGrupos
         WHERE StockItemID = @StockItemID;
 
-
-        -- Se elimina el producto
+        /* Elimina el producto. */
         DELETE FROM dbo.ProductosActuales
         WHERE StockItemID = @StockItemID;
 
-
         COMMIT TRANSACTION;
 
-
         SELECT @StockItemID AS StockItemID_Eliminado;
-
 
     END TRY
 
     BEGIN CATCH
 
+        /* Deshace la transacción si ocurre un error. */
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
 
         THROW;
-
     END CATCH;
-
 END
+
 GO
 
 
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: SP_Inventario_Opciones
+*
+* DESCRIPCION: Obtiene las opciones necesarias para llenar los campos
+*              desplegables del formulario de inventario.
+*
+* ENTRADA: No recibe parámetros.
+*
+* SALIDA: Devuelve tres conjuntos de resultados:
+*         proveedores, colores y tipos de paquete.
+*
+* RESTRICCIONES: Las opciones se obtienen directamente de los registros
+*                disponibles en la base de datos.
+*
+* OBJETIVO: Proporcionar al frontend las opciones necesarias para crear
+*           o editar productos.
+*
+*-----------------------------------------------------------------------------------------*/
 CREATE OR ALTER PROCEDURE dbo.SP_Inventario_Opciones
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- 1. Proveedores
+    /* 1. Proveedores disponibles. */
     SELECT
         SupplierID AS ID,
         SupplierName AS Nombre
     FROM dbo.ProveedoresActuales
     ORDER BY SupplierName;
 
-
-    -- 2. Colores
+    /* 2. Colores disponibles. */
     SELECT
         ColorID AS ID,
         ColorName AS Nombre
     FROM dbo.ColoresProductos
     ORDER BY ColorName;
 
-
-    -- 3. Tipos de paquete
+    /* 3. Tipos de paquete disponibles. */
     SELECT
         PackageTypeID AS ID,
         PackageTypeName AS Nombre
     FROM dbo.EmpaquetamientoInventario
     ORDER BY PackageTypeName;
-
 END;
+
 GO

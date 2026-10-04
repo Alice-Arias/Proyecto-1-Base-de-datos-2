@@ -272,6 +272,7 @@ input[type="number"]::-webkit-inner-spin-button {
 .topbar .user {
     display: flex;
     align-items: center;
+    margin-left: 80%;
     gap: 0.6rem;
     font-weight: 600;
     color: var(--text-dark);

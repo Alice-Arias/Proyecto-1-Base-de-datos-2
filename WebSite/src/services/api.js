@@ -763,3 +763,60 @@ export async function obtenerOpcionesVentas() {
   return data;
 
 }
+
+
+/*-------------------------------------
+MODULO: REPORTES
+-------------------------------------*/
+
+const rutasReportes = {
+  comprasProveedores: 'compras-proveedores',
+  ventasClientes: 'ventas-clientes',
+  topProductos: 'top-productos',
+  topClientes: 'top-clientes',
+  topProveedores: 'top-proveedores',
+  ventasCategorias: 'ventas-categorias',
+  seguimientoClientes: 'seguimiento-clientes',
+  seguimientoProveedores: 'seguimiento-proveedores',
+  rotacionInventario: 'rotacion-inventario',
+  metodoEnvioFavorito: 'metodo-envio-favorito'
+};
+
+export async function obtenerOpcionesReportes() {
+  const res = await fetch(`${API_URL}/reportes/opciones`);
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || 'No se pudieron obtener las opciones de reportes');
+  }
+
+  return data;
+}
+
+export async function ejecutarReporte(reporte, filtros = {}) {
+  const ruta = rutasReportes[reporte];
+
+  if (!ruta) {
+    throw new Error('El reporte solicitado no es válido');
+  }
+
+  const params = new URLSearchParams();
+
+  Object.entries(filtros).forEach(([nombre, valor]) => {
+    if (valor !== undefined && valor !== null && valor !== '') {
+      params.append(nombre, valor);
+    }
+  });
+
+  const query = params.toString();
+  const res = await fetch(
+    `${API_URL}/reportes/${ruta}${query ? `?${query}` : ''}`
+  );
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || 'No se pudo ejecutar el reporte');
+  }
+
+  return data;
+}

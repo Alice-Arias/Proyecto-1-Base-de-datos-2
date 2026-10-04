@@ -7,6 +7,7 @@ import ClientesPage from './pages/ClientesPage';
 import ProveedoresPage from './pages/ProveedoresPage';
 import InventarioPage from './pages/InventarioPage';
 import VentasPage from './pages/VentasPage';
+import ReportesPage from './pages/ReportesPage';
 
 import './App.css';
 
@@ -44,6 +45,7 @@ function App() {
                     {page === 'proveedores' && <ProveedoresPage />}
                     {page === 'inventario' && <InventarioPage />}
                     {page === 'ventas' && <VentasPage />}
+                    {page === 'reportes' && <ReportesPage />}
                 </div>
             </div>
 

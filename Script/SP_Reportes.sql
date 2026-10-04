@@ -782,17 +782,32 @@ BEGIN
             ID_MetodoEnvio,
             Metodo_Envio,
             Cantidad_Ventas,
-            DENSE_RANK() OVER (PARTITION BY ID_Ciudad ORDER BY Cantidad_Ventas DESC) AS Posicion
+            DENSE_RANK() OVER (
+                PARTITION BY ID_Ciudad, Anio, Mes
+                ORDER BY Cantidad_Ventas DESC
+            ) AS Posicion
 
         FROM VentasPorMetodo
     )
 
     SELECT
         r.Anio,
-        r.Mes,
-        r.ID_Ciudad,
+        CASE r.Mes
+            WHEN 1 THEN 'Enero'
+            WHEN 2 THEN 'Febrero'
+            WHEN 3 THEN 'Marzo'
+            WHEN 4 THEN 'Abril'
+            WHEN 5 THEN 'Mayo'
+            WHEN 6 THEN 'Junio'
+            WHEN 7 THEN 'Julio'
+            WHEN 8 THEN 'Agosto'
+            WHEN 9 THEN 'Septiembre'
+            WHEN 10 THEN 'Octubre'
+            WHEN 11 THEN 'Noviembre'
+            WHEN 12 THEN 'Diciembre'
+        END AS Mes,
         r.Ciudad,
-        r.ID_MetodoEnvio,
+        ---r.ID_MetodoEnvio,
         r.Metodo_Envio,
         r.Cantidad_Ventas,
         vf.Categoria_Cliente,
@@ -926,12 +941,12 @@ BEGIN
     FROM dbo.ProveedoresActuales
     ORDER BY SupplierName;
 
-    -- 7. Productos
-    SELECT
-        StockItemID AS ID,
-        StockItemName AS Nombre
-    FROM dbo.ProductosActuales
-    ORDER BY StockItemName;
+    -- 7. Categorias Proveedores
+    SELECT 
+        SupplierCategoryID AS ID,
+        SupplierCategoryName AS Nombre
+    FROM dbo.CategoriaProveedores
+    ORDER BY SupplierCategoryName;
 
 END
 GO

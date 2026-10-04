@@ -526,17 +526,153 @@ END
 GO
 
 
+/* =========================================================
+
+   8. SEGUIMIENTO DE COMPRAS DE PROVEEDORES
+
+   Devuelve un resumen de las compras realizadas a cada
+   proveedor, agrupadas por año y mes.
+
+   Muestra el monto total comprado, la primera y última
+   orden registrada durante el mes, la cantidad total
+   comprada y las cantidades mínima y máxima.
+
+   Permite filtrar los resultados por año, mes y categoría
+   de producto mediante entrada libre de texto.
+
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Seguimiento_Compras_Proveedores
+
+    @Anio INT = NULL,
+    @Mes INT = NULL,
+    @CategoriaProducto NVARCHAR(50) = NULL
+
+AS
+BEGIN
+
+    SET NOCOUNT ON;
+
+    SELECT
+        pa.SupplierID,
+        pa.SupplierName,
+        YEAR(oc.OrderDate) AS Anio,
+
+        CASE MONTH(oc.OrderDate)
+            WHEN 1 THEN 'Enero'
+            WHEN 2 THEN 'Febrero'
+            WHEN 3 THEN 'Marzo'
+            WHEN 4 THEN 'Abril'
+            WHEN 5 THEN 'Mayo'
+            WHEN 6 THEN 'Junio'
+            WHEN 7 THEN 'Julio'
+            WHEN 8 THEN 'Agosto'
+            WHEN 9 THEN 'Septiembre'
+            WHEN 10 THEN 'Octubre'
+            WHEN 11 THEN 'Noviembre'
+            WHEN 12 THEN 'Diciembre'
+        END AS Mes,
+
+        SUM(doc.OrderedOuters * doc.ExpectedUnitPricePerOuter) AS Monto_Total,
+        MIN(oc.OrderDate) AS Primera_Orden,
+        MAX(oc.OrderDate) AS Ultima_Orden,
+        SUM(doc.OrderedOuters) AS Cantidad_Total,
+        MIN(doc.OrderedOuters) AS Cantidad_Minima,
+        MAX(doc.OrderedOuters) AS Cantidad_Maxima
+
+    FROM dbo.ProveedoresActuales AS pa
+    INNER JOIN dbo.OrdenesCompra AS oc ON pa.SupplierID = oc.SupplierID
+    INNER JOIN dbo.DetalleOrdenCompra AS doc ON oc.PurchaseOrderID = doc.PurchaseOrderID
+    INNER JOIN dbo.ItemGrupos AS ig ON doc.StockItemID = ig.StockItemID
+    INNER JOIN dbo.GruposInventario AS g ON ig.StockGroupID = g.StockGroupID
+
+    WHERE (@Anio IS NULL OR YEAR(oc.OrderDate) = @Anio)
+        AND 
+          (@Mes IS NULL OR MONTH(oc.OrderDate) = @Mes)
+        AND 
+          (@CategoriaProducto IS NULL OR g.StockGroupName LIKE '%' + @CategoriaProducto + '%')
+
+    GROUP BY pa.SupplierID, pa.SupplierName, YEAR(oc.OrderDate), MONTH(oc.OrderDate)
+
+    ORDER BY pa.SupplierName, YEAR(oc.OrderDate), MONTH(oc.OrderDate);
+
+END
+GO
+
+
 CREATE OR ALTER PROCEDURE dbo.SP_Reportes_Opciones
 AS
 BEGIN
 
     SET NOCOUNT ON;
 
-    -- Nos permite saber los años disponibles en el sistema
+    -- 1. Años disponibles en las facturas
     SELECT DISTINCT
         YEAR(InvoiceDate) AS Anio
     FROM dbo.Facturas
     ORDER BY Anio;
+
+    -- 2. Años disponibles en las órdenes de compra
+    SELECT DISTINCT
+        YEAR(OrderDate) AS Anio
+    FROM dbo.OrdenesCompra
+    ORDER BY Anio;
+
+    -- 3. Meses disponibles
+    SELECT
+        1 AS ID,
+        'Enero' AS Nombre
+    UNION ALL
+    SELECT
+        2,
+        'Febrero'
+    UNION ALL
+    SELECT
+        3,
+        'Marzo'
+    UNION ALL
+    SELECT
+        4,
+        'Abril'
+    UNION ALL
+    SELECT
+        5,
+        'Mayo'
+    UNION ALL
+    SELECT
+        6,
+        'Junio'
+    UNION ALL
+    SELECT
+        7,
+        'Julio'
+    UNION ALL
+    SELECT
+        8,
+        'Agosto'
+    UNION ALL
+    SELECT
+        9,
+        'Septiembre'
+    UNION ALL
+    SELECT
+        10,
+        'Octubre'
+    UNION ALL
+    SELECT
+        11,
+        'Noviembre'
+    UNION ALL
+    SELECT
+        12,
+        'Diciembre';
+
+    -- 4. Categorías de productos
+    SELECT
+        StockGroupID AS ID,
+        StockGroupName AS Nombre
+    FROM dbo.GruposInventario
+    ORDER BY StockGroupName;
 
 END
 GO

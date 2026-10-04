@@ -1,15 +1,24 @@
-// ============================================================
-// URL BASE DE LA API
-// ============================================================
-//
-// Dirección donde está funcionando el servidor backend.
+/*-----------------------------------------------------------------------
+CONSTANTE: API_URL
+DESCRIPCION: Dirección base del servidor backend (Node + Express).
+RESTRICCIONES: La API debe estar en ejecución en ese puerto.
+OBJETIVO: Centralizar la ruta para no repetirla en cada petición.
+-----------------------------------*-----------------------------------*/
 
 const API_URL = 'http://localhost:4000/api';
 
+/*-------------------------------------
+MODULO: CLIENTES
+-------------------------------------*/
 
-// ============================================================
-// OBTENER LISTA DE CLIENTES
-// ============================================================
+/*----------------------------------------------------------------------------------------------------------------------
+NOMBRE: listarClientes
+DESCRIPCION: Consulta la lista de clientes aplicando filtros.
+ENTRADA: filtros { nombre, categoria, metodoEntrega } (todos opcionales).
+SALIDA: Arreglo de clientes (nombre, categoría, método de entrega).
+RESTRICCIONES: Texto parcial, máx. 100 caracteres por filtro. Los  filtros vacíos se ignoran y los acumulativos se suman.
+OBJETIVO: Llenar la tabla general del módulo de Clientes.
+-------------------------------------------------------------------------------------------------------------------------*/
 
 export async function listarClientes(filtros = {}) {
 
@@ -40,9 +49,14 @@ export async function listarClientes(filtros = {}) {
 }
 
 
-// ============================================================
-// OBTENER DETALLE DE CLIENTES
-// ============================================================
+/*-----------------------------------------------------------------------------
+NOMBRE: obtenerDetalleClientes
+DESCRIPCION: Obtiene la información completa de uno o varios clientes.
+ENTRADA: ids (un ID o un arreglo de IDs).
+SALIDA: Datos detallados de los clientes solicitados.
+RESTRICCIONES: Los IDs deben existir en la base de datos.
+OBJETIVO: Mostrar la ventana de detalle (botón Ver).
+--------------------------------------------------------------------------------*/
 
 export async function obtenerDetalleClientes(ids) {
 
@@ -63,9 +77,14 @@ export async function obtenerDetalleClientes(ids) {
 }
 
 
-// ============================================================
-// INSERTAR CLIENTE
-// ============================================================
+/*----------------------------------------------------*------------------------------------------------------------
+NOMBRE: insertarCliente
+DESCRIPCION: Envía los datos de un cliente nuevo para guardarlo.
+ENTRADA: cliente (objeto con los campos del formulario).
+SALIDA: Respuesta de la API con el resultado de la operación.
+RESTRICCIONES: Las validaciones (obligatorios, rangos, nombre único), las realiza el procedimiento almacenado.
+OBJETIVO: Registrar un cliente desde el formulario Agregar.
+------------------------------------------------------------------------------------------------------------------*/
 
 export async function insertarCliente(cliente) {
 
@@ -89,9 +108,14 @@ export async function insertarCliente(cliente) {
 }
 
 
-// ============================================================
-// ACTUALIZAR CLIENTE
-// ============================================================
+/*-------------------------------------------------------------------------------------------------
+NOMBRE: actualizarCliente
+DESCRIPCION: Envía los cambios de un cliente existente.
+ENTRADA: id (cliente a modificar), cliente (datos nuevos).
+SALIDA: Respuesta de la API con el resultado de la operación.
+RESTRICCIONES: El cliente debe existir; las reglas de validación, las aplica el procedimiento almacenado.
+OBJETIVO: Guardar los cambios del formulario Modificar.
+----------------------------------------------------------------------------------------------------------*/
 
 export async function actualizarCliente(id, cliente) {
 
@@ -115,9 +139,14 @@ export async function actualizarCliente(id, cliente) {
 }
 
 
-// ============================================================
-// ELIMINAR CLIENTE
-// ============================================================
+/*---------------------------------------------------------------------------------------------------------------
+NOMBRE: eliminarCliente
+DESCRIPCION: Solicita la eliminación de un cliente.
+ENTRADA: id (cliente a eliminar).
+SALIDA: Respuesta de la API con el resultado de la operación.
+RESTRICCIONES: No se elimina si tiene órdenes, facturas,  transacciones u otros registros relacionados.
+OBJETIVO: Ejecutar el botón Eliminar del módulo de Clientes.
+-------------------------------------------------------------------------------------------------------------------------*/
 
 export async function eliminarCliente(id) {
 
@@ -137,9 +166,14 @@ export async function eliminarCliente(id) {
 }
 
 
-// ============================================================
-// OBTENER OPCIONES PARA EL FORMULARIO DE CLIENTES
-// ============================================================
+/*--------------------------------------------------------------------------------------------------------------------
+NOMBRE: obtenerOpcionesClientes
+DESCRIPCION: Consulta las listas desplegables del formulario.
+ENTRADA: Ninguna.
+SALIDA: Opciones (categorías, contactos, métodos de entrega,ciudades, etc.).
+RESTRICCIONES: Requiere conexión con la API y la base de datos.
+OBJETIVO: Llenar los campos de selección al agregar o modificar.
+-------------------------------------------------------------------------------------------------------------------*/
 
 export async function obtenerOpcionesClientes() {
 
@@ -157,10 +191,19 @@ export async function obtenerOpcionesClientes() {
 }
 
 
-// ============================================================
-// PROVEEDORES
-// ============================================================
+/*-------------------------------------
+MODULO: PROVEEDORES
+-------------------------------------*/
 
+
+/*-------------------------------------------------------------------------------------------------------------
+NOMBRE: listarProveedores
+DESCRIPCION: Consulta la lista de proveedores aplicando filtros.
+ENTRADA: filtros { nombre, categoria, metodoEntrega } (todos opcionales).
+SALIDA: Arreglo de proveedores (nombre, categoría, método de entrega).
+RESTRICCIONES: Texto parcial, máx. 100 caracteres por filtro. Los  filtros vacíos se ignoran y los acumulativos se suman.
+OBJETIVO: Llenar la tabla general del módulo de Proveedores.
+---------------------------------------------------------------------------------------------------------------------------*/
 
 export async function listarProveedores(filtros = {}) {
 
@@ -191,6 +234,15 @@ export async function listarProveedores(filtros = {}) {
 }
 
 
+/*------------------------------------------------------------------------------
+NOMBRE: obtenerDetalleProveedores
+DESCRIPCION: Obtiene la información completa de uno o varios proveedores.
+ENTRADA: ids (un ID o un arreglo de IDs).
+SALIDA: Datos detallados de los proveedores solicitados.
+RESTRICCIONES: Los IDs deben existir en la base de datos.
+OBJETIVO: Mostrar la ventana de detalle (botón Ver).
+-----------------------------------------------------------------------------------------*/
+
 export async function obtenerDetalleProveedores(ids) {
 
   const idsStr = Array.isArray(ids)
@@ -209,6 +261,15 @@ export async function obtenerDetalleProveedores(ids) {
 
 }
 
+
+/*--------------------------------------------------------------------------------------------------------------------------
+NOMBRE: insertarProveedor
+DESCRIPCION: Envía los datos de un proveedor nuevo para guardarlo.
+ENTRADA: proveedor (objeto con los campos del formulario).
+SALIDA: Respuesta de la API con el resultado de la operación.
+RESTRICCIONES: Las validaciones (obligatorios, nombre único, sitio  web con http) las realiza el procedimiento almacenado.
+OBJETIVO: Registrar un proveedor desde el formulario Agregar.
+-----------------------------------------------------------------------------------------------------------------------------*/
 
 export async function insertarProveedor(proveedor) {
 
@@ -232,6 +293,15 @@ export async function insertarProveedor(proveedor) {
 }
 
 
+/*----------------------------------------------------------------------------------------------------------------
+NOMBRE: actualizarProveedor
+DESCRIPCION: Envía los cambios de un proveedor existente.
+ENTRADA: id (proveedor a modificar), proveedor (datos nuevos).
+SALIDA: Respuesta de la API con el resultado de la operación.
+RESTRICCIONES: El proveedor debe existir; las reglas de validación, las aplica el procedimiento almacenado.
+OBJETIVO: Guardar los cambios del formulario Modificar.
+-------------------------------------------------------------------------------------------------------------------*/
+
 export async function actualizarProveedor(id, proveedor) {
 
   const res = await fetch(
@@ -254,6 +324,15 @@ export async function actualizarProveedor(id, proveedor) {
 }
 
 
+/*-----------------------------------------------------------------------------------------------------
+NOMBRE: eliminarProveedor
+DESCRIPCION: Solicita la eliminación de un proveedor.
+ENTRADA: id (proveedor a eliminar).
+SALIDA: Respuesta de la API con el resultado de la operación.
+RESTRICCIONES: No se elimina si tiene órdenes de compra,transacciones o artículos en inventario.
+OBJETIVO: Ejecutar el botón Eliminar del módulo de Proveedores.
+-------------------------------------------------------------------------------------------------------*/
+
 export async function eliminarProveedor(id) {
 
   const res = await fetch(
@@ -272,6 +351,15 @@ export async function eliminarProveedor(id) {
 }
 
 
+/*-----------------------------------------------------------------------------------
+NOMBRE: obtenerOpcionesProveedores
+DESCRIPCION: Consulta las listas desplegables del formulario.
+ENTRADA: Ninguna.
+SALIDA: Opciones (categorías, contactos, métodos de entrega,ciudades, etc.).
+RESTRICCIONES: Requiere conexión con la API y la base de datos.
+OBJETIVO: Llenar los campos de selección al agregar o modificar.
+---------------------------------------------------------------------------------------*/
+
 export async function obtenerOpcionesProveedores() {
 
   const res = await fetch(`${API_URL}/proveedores/opciones`);
@@ -289,10 +377,19 @@ export async function obtenerOpcionesProveedores() {
 }
 
 
-// ============================================================
-// INVENTARIO
-// ============================================================
+/*-------------------------------------
+MODULO: INVENTARIO
+-------------------------------------*/
 
+
+/*--------------------------------------------------------------------------------------------------------------------------------
+NOMBRE: listarInventarios
+DESCRIPCION: Consulta los productos y sus existencias con filtros.
+ENTRADA: filtros { nombre, grupo, cantidad } (todos opcionales).
+SALIDA: Arreglo de productos (nombre, grupos, cantidad en stock).
+RESTRICCIONES: Nombre y grupo: texto parcial, máx. 100 caracteres. Cantidad: entero; muestra productos con esa cantidad o más (>=).
+OBJETIVO: Llenar la tabla general del módulo de Inventario.
+---------------------------------------------------------------------------------------------------------------------------------*/
 
 export async function listarInventarios(filtros = {}) {
 
@@ -325,6 +422,15 @@ export async function listarInventarios(filtros = {}) {
 }
 
 
+/*---------------------------------------------------------------------------
+NOMBRE: obtenerDetalleInventarios
+DESCRIPCION: Obtiene la información completa de uno o varios productos.
+ENTRADA: ids (un ID o un arreglo de IDs).
+SALIDA: Datos detallados de los productos solicitados.
+RESTRICCIONES: Los IDs deben existir en la base de datos.
+OBJETIVO: Mostrar la ventana de detalle (botón Ver).
+---------------------------------------------------------------------------------*/
+
 export async function obtenerDetalleInventarios(ids) {
 
   const idsStr = Array.isArray(ids)
@@ -343,6 +449,15 @@ export async function obtenerDetalleInventarios(ids) {
 
 }
 
+
+/*------------------------------------------------------------------------------------------------------------
+NOMBRE: insertarInventario
+DESCRIPCION: Envía los datos de un producto nuevo para guardarlo.
+ENTRADA: inventario (objeto con los campos del formulario).
+SALIDA: Respuesta de la API con el resultado de la operación.
+RESTRICCIONES: Nombre único; cantidad por empaque > 0; precios, impuesto y peso no negativos (valida el SP).
+OBJETIVO: Registrar un producto desde el formulario Agregar.
+---------------------------------------------------------------------------------------------------------------*/
 
 export async function insertarInventario(inventario) {
 
@@ -366,6 +481,15 @@ export async function insertarInventario(inventario) {
 }
 
 
+/*---------------------------------------------------------------------------------------------------------------
+NOMBRE: actualizarInventario
+DESCRIPCION: Envía los cambios de un producto existente.
+ENTRADA: id (producto a modificar), inventario (datos nuevos).
+SALIDA: Respuesta de la API con el resultado de la operación.
+RESTRICCIONES: El producto debe existir y se debe indicar el usuario que edita; el SP aplica las demás reglas.
+OBJETIVO: Guardar los cambios del formulario Modificar.
+-----------------------------------------------------------------------------------------------------------------------*/
+
 export async function actualizarInventario(id, inventario) {
 
   const res = await fetch(
@@ -388,6 +512,15 @@ export async function actualizarInventario(id, inventario) {
 }
 
 
+/*----------------------------------------------------------------------------------------------------
+NOMBRE: eliminarInventario
+DESCRIPCION: Solicita la eliminación de un producto.
+ENTRADA: id (producto a eliminar).
+SALIDA: Respuesta de la API con el resultado de la operación.
+RESTRICCIONES: No se elimina si tiene transacciones, registros de inventario, pedidos o facturas.
+OBJETIVO: Ejecutar el botón Eliminar del módulo de Inventario.
+---------------------------------------------------------------------------------------------------------*/
+
 export async function eliminarInventario(id) {
 
   const res = await fetch(
@@ -406,6 +539,15 @@ export async function eliminarInventario(id) {
 }
 
 
+/*---------------------------------------------------------------------
+NOMBRE: obtenerOpcionesInventario
+DESCRIPCION: Consulta las listas desplegables del formulario.
+ENTRADA: Ninguna.
+SALIDA: Opciones (proveedores, tipos de paquete, colores, etc.).
+RESTRICCIONES: Requiere conexión con la API y la base de datos.
+OBJETIVO: Llenar los campos de selección al agregar o modificar.
+---------------------------------------------------------------------------*/
+
 export async function obtenerOpcionesInventario() {
 
   const res = await fetch(`${API_URL}/inventarios/opciones`);
@@ -423,26 +565,19 @@ export async function obtenerOpcionesInventario() {
 }
 
 
-// ============================================================
-// VENTAS
-// ============================================================
+/*-------------------------------------
+MODULO: VENTAS
+-------------------------------------*/
 
 
-// ============================================================
-// OBTENER LISTA DE VENTAS
-// ============================================================
-//
-// Filtros acumulativos:
-// - numeroFactura
-// - fechaInicio / fechaFin (rango de fechas)
-// - cliente (texto libre, coincidencia parcial)
-// - metodoEntrega
-// - montoInicio / montoFin (rango de monto)
-//
-// GET /api/ventas
-//
-// El backend ejecutará: SP_Ventas_Listar
-// ============================================================
+/*--------------------------------------------------------------------------------------------------------------------------
+NOMBRE: listarVentas
+DESCRIPCION: Consulta la lista de facturas aplicando filtros. Ejecuta SP_Ventas_Listar (GET /api/ventas).
+ENTRADA: filtros { numeroFactura, fechaInicio, fechaFin, cliente,  metodoEntrega, montoInicio, montoFin } (todos opcionales).
+SALIDA: Arreglo de ventas (factura, fecha, cliente, método, monto).
+RESTRICCIONES: Factura: número exacto. Fechas y montos: rangos inclusivos. Cliente y método: texto parcial.
+OBJETIVO: Llenar la tabla general del módulo de Ventas.
+--------------------------------------------------------------------------------------------------------------------------*/
 
 export async function listarVentas(filtros = {}) {
 
@@ -491,18 +626,14 @@ export async function listarVentas(filtros = {}) {
 }
 
 
-// ============================================================
-// OBTENER DETALLE DE UNA VENTA
-// ============================================================
-//
-// A diferencia de clientes/proveedores/inventario, acá se
-// consulta UNA sola venta a la vez (el SP solo acepta un
-// InvoiceID). Devuelve { encabezado, lineas }.
-//
-// GET /api/ventas/:id
-//
-// El backend ejecutará: SP_Ventas_Detalle
-// ============================================================
+/*-----------------------------------------------------------------------------------------------
+NOMBRE: obtenerDetalleVenta
+DESCRIPCION: Obtiene el detalle de una factura Ejecuta SP_Ventas_Detalle (GET /api/ventas/:id).
+ENTRADA: id (número de la factura).
+SALIDA: Objeto { encabezado, lineas }.
+RESTRICCIONES: Solo una venta a la vez (el SP recibe un únicoInvoiceID); la factura debe existir.
+OBJETIVO: Mostrar la ventana de detalle (botón Ver).
+-------------------------------------------------------------------------------------------------*/
 
 export async function obtenerDetalleVenta(id) {
 
@@ -519,14 +650,14 @@ export async function obtenerDetalleVenta(id) {
 }
 
 
-// ============================================================
-// INSERTAR VENTA
-// ============================================================
-//
-// POST /api/ventas
-//
-// El backend ejecutará: SP_Ventas_Insertar
-// ============================================================
+/*----------------------------------------------------------------------------------------------------------------------------------
+NOMBRE: insertarVenta
+DESCRIPCION: Envía los datos de una factura nueva (encabezado y línea de producto).Ejecuta SP_Ventas_Insertar (POST /api/ventas).
+ENTRADA: venta (objeto con encabezado y línea de producto).
+SALIDA: Respuesta de la API con el resultado de la operación.
+RESTRICCIONES: Cantidad > 0; impuesto entre 0 y 100; el productodebe tener costo registrado (valida el SP).
+OBJETIVO: Registrar una venta desde el formulario Agregar.
+-------------------------------------------------------------------------------------------------------------------------------------------*/
 
 export async function insertarVenta(venta) {
 
@@ -550,14 +681,14 @@ export async function insertarVenta(venta) {
 }
 
 
-// ============================================================
-// ACTUALIZAR VENTA
-// ============================================================
-//
-// PUT /api/ventas/:id
-//
-// El backend ejecutará: SP_Ventas_Actualizar
-// ============================================================
+/*-----------------------------------------------------------------------------------------------------------
+NOMBRE: actualizarVenta
+DESCRIPCION: Envía los cambios de una factura existente. Ejecuta SP_Ventas_Actualizar (PUT /api/ventas/:id).
+ENTRADA: id (factura a modificar), venta (datos nuevos).
+SALIDA: Respuesta de la API con el resultado de la operación.
+RESTRICCIONES: La factura debe existir; el producto de la línea no se puede cambiar.
+OBJETIVO: Guardar los cambios del formulario Modificar.
+-----------------------------------------------------------------------------------------------------------*/
 
 export async function actualizarVenta(id, venta) {
 
@@ -581,26 +712,14 @@ export async function actualizarVenta(id, venta) {
 }
 
 
-// ============================================================
-// OBTENER OPCIONES PARA EL FORMULARIO DE VENTAS
-// ============================================================
-//
-// Devuelve: clientes, metodosEntrega, contactos, vendedores,
-// pedidos, productos, tiposPaquete.
-//
-// GET /api/ventas/opciones
-//
-// El backend ejecutará: SP_Ventas_Opciones
-// ============================================================
-
-// ============================================================
-// ELIMINAR VENTA
-// ============================================================
-//
-// DELETE /api/ventas/:id
-//
-// El backend ejecutará: SP_Ventas_Eliminar
-// ============================================================
+/*------------------------------------------------------------------------------------------------------
+NOMBRE: eliminarVenta
+DESCRIPCION: Solicita la eliminación de una factura., Ejecuta SP_Ventas_Eliminar (DELETE /api/ventas/:id).
+ENTRADA: id (factura a eliminar).
+SALIDA: Respuesta de la API con el resultado de la operación.
+RESTRICCIONES: Operación no contemplada en el alcance del módulo de Ventas; no se usa desde la interfaz.
+OBJETIVO: Dejar disponible el servicio de eliminación en la API.
+--------------------------------------------------------------------------------------------------------*/
 
 export async function eliminarVenta(id) {
 
@@ -619,6 +738,15 @@ export async function eliminarVenta(id) {
 
 }
 
+
+/*---------------------------------------------------------------------------------------
+NOMBRE: obtenerOpcionesVentas
+DESCRIPCION: Consulta las listas desplegables del formulario., Ejecuta SP_Ventas_Opciones (GET /api/ventas/opciones).
+ENTRADA: Ninguna.
+SALIDA: Objeto con clientes, métodos de entrega, contactos, vendedores, pedidos, productos y tipos de paquete.
+RESTRICCIONES: Requiere conexión con la API y la base de datos.
+OBJETIVO: Llenar los campos de selección al agregar o modificar.
+---------------------------------------------------------------------------------------------------------*/
 
 export async function obtenerOpcionesVentas() {
 

@@ -69,9 +69,64 @@ END
 GO
 
 
+/* =========================================================
+   2. DETALLE
+
+   Devuelve toda la informacion de una venta.
+   Recibe el InvoiceID.
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Proveedores_Detalle
+    @InvoiceID INT
+AS
+BEGIN
+
+    SET NOCOUNT ON;
+
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+    -- Encabezado
+    SELECT
+        f.InvoiceID,
+        ca.CustomerName AS Nombre_Cliente, 
+        fe.DeliveryMethodName AS Metodo_Entrega,
+        f.CustomerPurchaseOrderNumber AS Numero_Orden,
+        cts.FullName AS Persona_Contacto,
+        ctos.FullName AS Vendedor,
+        f.InvoiceDate AS Fecha_Factura,
+        f.DeliveryInstructions AS Intrucciones_Entrega
+
+    FROM dbo.Facturas f
+    INNER JOIN dbo.ClientesActuales AS ca ON f.CustomerID = ca.CustomerID
+    INNER JOIN dbo.FormasEntrega AS fe ON f.DeliveryMethodID = fe.DeliveryMethodID
+    INNER JOIN dbo.Contactos AS cts ON f.ContactPersonID = cts.PersonID
+    INNER JOIN dbo.Contactos AS ctos ON f.SalespersonPersonID = ctos.PersonID
+
+    WHERE f.InvoiceID = @InvoiceID; 
+
+    -- Detalle
+    SELECT 
+        pa.StockItemName AS Producto,
+        df.Quantity AS Cantidad,
+        df.UnitPrice AS Precio_Unitario,
+        df.TaxRate AS Impuesto_Aplicado,
+        df.TaxAmount AS Impuesto_Monto,
+        df.ExtendedPrice AS Total_Linea
+
+    FROM dbo.DetalleFacturas df
+    INNER JOIN dbo.ProductosActuales AS pa ON df.StockItemID = pa.StockItemID
+
+    WHERE df.InvoiceID = @InvoiceID;
+
+END
+GO
+
+
+
 -- Número de factura, fecha, cliente, método de entrega
 SELECT * FROM Sales.Invoices;
 
 -- Monto de factura
 SELECT * FROM Sales.InvoiceLines;
 
+SELECT * FROM Application.People;

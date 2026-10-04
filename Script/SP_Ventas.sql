@@ -28,7 +28,8 @@ GO
 
 CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Listar
     @NumeroFactura INT = NULL,
-    @Fecha DATE = NULL,
+    @FechaInicio DATE = NULL,
+    @FechaFin DATE = NULL,
     @Cliente NVARCHAR(100) = NULL,
     @DeliveryMethod NVARCHAR(50) = NULL,
     @Monto DECIMAL(18,2) = NULL
@@ -43,7 +44,7 @@ BEGIN
         f.InvoiceDate AS Fecha_Factura,
         c.CustomerName AS Nombre_Cliente,
         fe.DeliveryMethodName AS Metodo_Entrega,
-        SUM(df.ExtendedPrice + df.TaxAmount) AS Monto
+        df.ExtendedPrice AS Monto
 
     FROM dbo.Facturas f
     INNER JOIN dbo.ClientesActuales AS c ON f.CustomerID = c.CustomerID
@@ -53,7 +54,9 @@ BEGIN
     WHERE
         (@NumeroFactura IS NULL OR f.InvoiceID = @NumeroFactura)
         AND
-        (@Fecha IS NULL OR f.InvoiceDate = @Fecha)
+        (@FechaInicio IS NULL OR f.InvoiceDate >= @FechaInicio)
+        AND
+        (@FechaFin IS NULL OR f.InvoiceDate <= @FechaFin)
         AND
         (@Cliente IS NULL OR c.CustomerName LIKE '%' + @Cliente + '%')
         AND

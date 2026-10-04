@@ -1055,7 +1055,69 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE dbo.SP_Ventas_Opciones
+AS
+BEGIN
+    SET NOCOUNT ON;
 
+    -- 1. Clientes
+    SELECT
+        CustomerID AS ID,
+        CustomerName AS Nombre
+    FROM dbo.ClientesActuales
+    ORDER BY CustomerName;
+
+
+    -- 2. Métodos de entrega
+    SELECT
+        DeliveryMethodID AS ID,
+        DeliveryMethodName AS Nombre
+    FROM dbo.FormasEntrega
+    ORDER BY DeliveryMethodName;
+
+
+    -- 3. Contactos generales
+    SELECT
+        PersonID AS ID,
+        FullName AS Nombre
+    FROM dbo.Contactos
+    WHERE IsSalesperson = 0
+    ORDER BY FullName;
+
+    -- 4. Vendedores
+    SELECT
+        PersonID AS ID,
+        FullName AS Nombre
+    FROM dbo.Contactos
+    WHERE IsSalesperson = 1
+    ORDER BY FullName;
+
+
+    -- 5. Pedidos
+    SELECT
+        OrderID AS ID,
+        CustomerPurchaseOrderNumber AS Numero_Orden
+    FROM dbo.Pedidos
+    ORDER BY OrderID;
+
+
+    -- 6. Productos
+    SELECT
+        StockItemID AS ID,
+        StockItemName AS Nombre
+    FROM dbo.ProductosActuales
+    ORDER BY StockItemName;
+
+
+    -- 7. Tipos de paquete
+    SELECT
+        PackageTypeID AS ID,
+        PackageTypeName AS Nombre
+    FROM dbo.EmpaquetamientoInventario
+    ORDER BY PackageTypeName;
+
+END;
+GO
 
 -- Número de factura, fecha, cliente, método de entrega
 SELECT * FROM Sales.Invoices;

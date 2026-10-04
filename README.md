@@ -1,9 +1,13 @@
 # Proyecto 1 - Bases de Datos 2
 
 **Instituto Tecnológico de Costa Rica**
+
 **Curso:** Bases de Datos 2
+
 **Profesor:** Cristian Paz Campos Agüero
+
 **Fecha de entrega:** 4 de octubre de 2026
+
 **Hora de entrega:** 10:00 p. m.
 
 ## Integrantes

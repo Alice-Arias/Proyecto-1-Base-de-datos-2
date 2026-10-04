@@ -13,6 +13,9 @@ GO
 CREATE SYNONYM dbo.DetallesPedido FOR Sales.OrderLines;
 GO
 
+CREATE SYNONYM dbo.Pedidos FOR Sales.Orders;
+GO
+
 CREATE SYNONYM dbo.DetallesFactura FOR Sales.InvoiceLines;
 GO
 
@@ -56,4 +59,10 @@ CREATE SYNONYM dbo.EmpaquetamientoInventario FOR Warehouse.PackageTypes;
 GO
 
 CREATE SYNONYM dbo.ProductosTransacciones FOR Warehouse.StockItemTransactions;
+GO
+
+CREATE SYNONYM dbo.Facturas FOR Sales.Invoices;
+GO
+
+CREATE SYNONYM dbo.DetalleFacturas FOR Sales.InvoiceLines;
 GO

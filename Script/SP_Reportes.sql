@@ -239,13 +239,18 @@ GO
 
 /* =========================================================
 
-   2. TOP 5 PRODUCTOS QUE MÁS GANANCIA GENERAN
+   4. TOP 5 CLIENTES CON MÁS FACTURAS
 
-   Devuelve los 5 productos que generan mayor ganancia total
-   (LineProfit) por año, utilizando ranking denso (DENSE_RANK).
+   Devuelve los 5 clientes con mayor cantidad de facturas
+   emitidas a su nombre por año, utilizando ranking denso
+   (DENSE_RANK).
 
-   Permite filtrar los resultados por un año específico mediante
-   el parámetro @Anio. Si es NULL, procesa todos los años.
+   Muestra adicionalmente el monto total facturado a cada
+   cliente durante el año correspondiente.
+
+   Permite filtrar los resultados por un año específico
+   mediante el parámetro @Anio. Si es NULL, procesa todos
+   los años.
 
    ========================================================= */
 
@@ -270,7 +275,7 @@ BEGIN
         INNER JOIN dbo.ClientesActuales AS ca ON f.CustomerID = ca.CustomerID
         INNER JOIN dbo.DetalleFacturas AS df ON f.InvoiceID = df.InvoiceID
 
-        --WHERE @Anio IS NULL OR YEAR(f.InvoiceDate) = @Anio
+        WHERE @Anio IS NULL OR YEAR(f.InvoiceDate) = @Anio
 
         GROUP BY YEAR(f.InvoiceDate), f.CustomerID, ca.CustomerName
     ),
@@ -297,6 +302,75 @@ BEGIN
 
 END
 GO
+
+/* =========================================================
+
+   5. TOP 5 PROVEEDORES CON MÁS ÓRDENES DE COMPRA
+
+   Devuelve los 5 proveedores con mayor cantidad de órdenes
+   de compra emitidas a su nombre por año, utilizando ranking
+   denso (DENSE_RANK).
+
+   Muestra adicionalmente el monto total de las órdenes de
+   compra asociadas a cada proveedor durante el año
+   correspondiente.
+
+   Permite filtrar los resultados por un año específico
+   mediante el parámetro @Anio. Si es NULL, procesa todos
+   los años.
+
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Top_ProveedoresOrdenes
+
+    @Anio INT = NULL
+
+AS 
+BEGIN
+
+    WITH TotOrdenesProveedor AS (
+        SELECT 
+            YEAR(oc.OrderDate) AS Anio,
+            oc.SupplierID AS ID_Proveedor,
+            pa.SupplierName AS Nombre_Proveedor,
+            COUNT(DISTINCT oc.PurchaseOrderID) AS Cantidad_Ordenes,
+            SUM(doc.ReceivedOuters * doc.ExpectedUnitPricePerOuter) AS Monto
+            
+        FROM dbo.ProveedoresActuales pa
+        INNER JOIN dbo.OrdenesCompra AS oc ON pa.SupplierID = oc.SupplierID
+        INNER JOIN dbo.DetalleOrdenCompra AS doc ON oc.PurchaseOrderID = doc.PurchaseOrderID
+
+        WHERE @Anio IS NULL OR YEAR(oc.OrderDate) = @Anio
+
+        GROUP BY YEAR(oc.OrderDate), oc.SupplierID, pa.SupplierName
+    ),
+
+    RankingProveedores AS (
+        SELECT 
+            Anio,
+            ID_Proveedor,
+            Nombre_Proveedor,
+            DENSE_RANK() OVER (PARTITION BY Anio ORDER BY Cantidad_Ordenes DESC) AS Posicion,
+            Monto
+
+        FROM TotOrdenesProveedor
+    )
+
+    SELECT
+        Anio,
+        ID_Proveedor,
+        Nombre_Proveedor,
+        Posicion,
+        Monto
+
+    FROM RankingProveedores
+    WHERE Posicion <= 5
+    ORDER BY Anio, Posicion
+
+END
+GO
+
+
 
 CREATE OR ALTER PROCEDURE dbo.SP_Reportes_Opciones
 AS

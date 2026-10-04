@@ -178,17 +178,13 @@ GO
 
 /* =========================================================
 
-   2. TOP 5 PRODUCTOS QUE MÁS GENERAN
+   3. TOP 5 PRODUCTOS QUE MÁS GENERAN
 
-   Devuelve los montos maximos, minimos y promedio de las
-   compras realizadas por los clientes, agrupados por
-   categoria y cliente.
+   Devuelve los 5 productos que generan mayor ganancia total
+   por año, utilizando DENSE_RANK.
 
-   Utiliza ROLLUP para mostrar subtotales por categoria
-   y un total general.
-
-   Permite filtrar por categoria y nombre del cliente
-   mediante entrada libre de texto.
+   Permite filtrar los resultados por un año específico mediante
+   el parámetro @Anio. Si es NULL, procesa todos los años.
 
    ========================================================= */
 
@@ -241,6 +237,66 @@ BEGIN
 END
 GO
 
+/* =========================================================
+
+   2. TOP 5 PRODUCTOS QUE MÁS GANANCIA GENERAN
+
+   Devuelve los 5 productos que generan mayor ganancia total
+   (LineProfit) por año, utilizando ranking denso (DENSE_RANK).
+
+   Permite filtrar los resultados por un año específico mediante
+   el parámetro @Anio. Si es NULL, procesa todos los años.
+
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.SP_Top_ClientesFacturas
+
+    @Anio INT = NULL
+
+AS
+BEGIN
+
+    SET NOCOUNT ON;
+
+    WITH GananciaPorCliente AS (
+        SELECT 
+            YEAR(f.InvoiceDate) AS Anio,
+            f.CustomerID AS ID_Cliente,
+            ca.CustomerName AS Nombre_Cliente,
+            COUNT(DISTINCT f.InvoiceID) AS Cantidad_Facturas,
+            SUM(df.ExtendedPrice) AS Monto_Total_Facturado
+
+        FROM dbo.Facturas f  
+        INNER JOIN dbo.ClientesActuales AS ca ON f.CustomerID = ca.CustomerID
+        INNER JOIN dbo.DetalleFacturas AS df ON f.InvoiceID = df.InvoiceID
+
+        --WHERE @Anio IS NULL OR YEAR(f.InvoiceDate) = @Anio
+
+        GROUP BY YEAR(f.InvoiceDate), f.CustomerID, ca.CustomerName
+    ),
+
+    RankingClientes AS (
+        SELECT
+            Anio,
+            ID_Cliente,
+            Nombre_Cliente,
+            DENSE_RANK() OVER (PARTITION BY Anio ORDER BY Cantidad_Facturas DESC) AS Posicion,
+            Monto_Total_Facturado
+        FROM GananciaPorCliente
+    )
+
+    SELECT
+        Anio,
+        ID_Cliente,
+        Nombre_Cliente,
+        Posicion,
+        Monto_Total_Facturado
+    FROM RankingClientes
+    WHERE Posicion <= 5
+    ORDER BY Anio, Posicion
+
+END
+GO
 
 CREATE OR ALTER PROCEDURE dbo.SP_Reportes_Opciones
 AS
@@ -281,8 +337,7 @@ SELECT * FROM dbo.ClientesActuales;
 
 SELECT * FROM dbo.TiposCliente;
 
-SELECT TOP 5 *
-FROM dbo.OrdenesCompra;
+SELECT * FROM dbo.OrdenesCompra;
 
 SELECT TOP 5 *
 FROM dbo.DetalleOrdenCompra;

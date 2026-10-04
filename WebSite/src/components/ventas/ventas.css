@@ -929,54 +929,135 @@ a.vta-caja-nombre.vta-link-producto {
 
 /* ------------------------------------------------------------
    CAMPOS DE FECHA (filtro)
-   El input nativo type="date" se deja intacto (sigue abriendo
-   el calendario del navegador y se puede escribir a mano), pero
-   se envuelve en .vf-fecha-wrap para agregarle un ícono visible
-   y que todo el campo sea clickeable, no solo el ícono nativo.
-   ------------------------------------------------------------ */
 
+   Mantiene exactamente los mismos colores, bordes, fondo,
+   texto y estados de los demás campos del filtro.
+
+   Antes de seleccionar:
+   📅 Fecha inicio
+   📅 Fecha fin
+
+   Después de seleccionar:
+   📅 04/10/2026
+   ------------------------------------------------------------ */
 .vf-fecha-wrap {
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
+    min-height: 30px;
+    padding: 0.45rem 0.75rem;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--text-dark);
+    font-family: inherit;
+    font-size: 0.88rem;
     cursor: pointer;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+/* Igual que los demás campos al pasar el mouse */
+.vf-fecha-wrap:hover {
+    border-color: #b8c9dc;
 }
 
-.vf-fecha-wrap input[type="date"] {
-    padding-left: 2.1rem;
-    cursor: pointer;
-
-    /* Asegura separación pareja entre día/mes/año, evitando
-       que el navegador dibuje espacios irregulares. */
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.02em;
-
-    /* Fuerza que el popup nativo del calendario (el que abre
-       el navegador al tocar el campo) se dibuje en tema claro,
-       en vez del tema oscuro que toma por defecto en algunos
-       sistemas/navegadores. */
-    color-scheme: light;
+/* Igual que los demás campos al recibir el foco */
+.vf-fecha-wrap:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
 }
 
+/* Ícono */
 .vf-fecha-ico {
-    position: absolute;
-    left: 0.7rem;
+    flex-shrink: 0;
+    margin-right: 8px;
+
     color: var(--primary);
+
     pointer-events: none;
-    z-index: 1;
 }
 
-/* El selector nativo del navegador (el ícono de calendario que
-   ya trae el input) se deja funcional pero discreto, ya que
-   ahora el ícono propio es el protagonista visual. */
-.vf-fecha-wrap input[type="date"]::-webkit-calendar-picker-indicator {
-    opacity: 0;
+/* Texto que aparece antes de seleccionar */
+.vf-fecha-placeholder {
+    color: #9ca3af;
+    font-size: 0.88rem;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* Fecha seleccionada */
+.vf-fecha-valor {
+    color: var(--text-dark);
+    font-size: 0.88rem;
+    font-weight: 400;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* ------------------------------------------------------------
+   INPUT DATE REAL
+
+   Se mantiene funcionando para abrir el calendario nativo,
+   pero se hace transparente para que NO aparezca dd/mm/aaaa.
+   ------------------------------------------------------------ */
+
+.vf-input-fecha {
     position: absolute;
-    right: 0;
+    inset: 0;
+
     width: 100%;
     height: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    opacity: 0;
+
+    border: none;
     cursor: pointer;
+
+    z-index: 2;
 }
+
+.vf-input-fecha:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* ============================================================
+   MODO OSCURO
+   ============================================================ */
+
+.modo-oscuro .vf-fecha-wrap {
+    background: #1f242a;
+    border-color: #3b444e;
+    color: #e2e6eb;
+}
+
+.modo-oscuro .vf-fecha-wrap:hover {
+    border-color: #536170;
+}
+
+.modo-oscuro .vf-fecha-wrap:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.modo-oscuro .vf-fecha-ico {
+    color: #a9c4e8;
+}
+
+.modo-oscuro .vf-fecha-placeholder {
+    color: #7c8793;
+}
+
+.modo-oscuro .vf-fecha-valor {
+    color: #e2e6eb;
+}
+
 
 
 /* ============================================================

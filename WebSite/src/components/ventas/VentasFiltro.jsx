@@ -122,37 +122,53 @@ function VentasFiltro({ metodosEntrega = [], onBuscar, onRestaurar, onNuevo }) {
                 </select>
             </div>
 
-            <div className="vf-campo vf-fecha">
-                <div
-                    className="vf-fecha-wrap"
-                    onClick={() => abrirCalendario(refFechaInicio)}
-                    title="Fecha desde"
-                >
-                    <Calendar size={15} className="vf-fecha-ico" />
-                    <input
-                        ref={refFechaInicio}
-                        type="date"
-                        value={fechaInicio}
-                        onChange={(e) => setFechaInicio(e.target.value)}
-                    />
-                </div>
-            </div>
+<div className="vf-campo vf-fecha">
+    <div
+        className="vf-fecha-wrap"
+        onClick={() => abrirCalendario(refFechaInicio)}
+        title="Fecha inicio"
+    >
+        <Calendar size={15} className="vf-fecha-ico" />
 
-            <div className="vf-campo vf-fecha">
-                <div
-                    className="vf-fecha-wrap"
-                    onClick={() => abrirCalendario(refFechaFin)}
-                    title="Fecha hasta"
-                >
-                    <Calendar size={15} className="vf-fecha-ico" />
-                    <input
-                        ref={refFechaFin}
-                        type="date"
-                        value={fechaFin}
-                        onChange={(e) => setFechaFin(e.target.value)}
-                    />
-                </div>
-            </div>
+        <span className={fechaInicio ? "vf-fecha-valor" : "vf-fecha-placeholder"}>
+            {fechaInicio
+                ? new Date(fechaInicio + 'T00:00:00').toLocaleDateString('es-CR')
+                : "Fecha inicio"}
+        </span>
+
+        <input
+            ref={refFechaInicio}
+            type="date"
+            value={fechaInicio}
+            onChange={(e) => setFechaInicio(e.target.value)}
+            className="vf-input-fecha"
+        />
+    </div>
+</div>
+
+<div className="vf-campo vf-fecha">
+    <div
+        className="vf-fecha-wrap"
+        onClick={() => abrirCalendario(refFechaFin)}
+        title="Fecha fin"
+    >
+        <Calendar size={15} className="vf-fecha-ico" />
+
+        <span className={fechaFin ? "vf-fecha-valor" : "vf-fecha-placeholder"}>
+            {fechaFin
+                ? new Date(fechaFin + 'T00:00:00').toLocaleDateString('es-CR')
+                : "Fecha fin"}
+        </span>
+
+        <input
+            ref={refFechaFin}
+            type="date"
+            value={fechaFin}
+            onChange={(e) => setFechaFin(e.target.value)}
+            className="vf-input-fecha"
+        />
+    </div>
+</div>
 
             <div className="vf-campo vf-monto">
                 <input

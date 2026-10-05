@@ -540,6 +540,248 @@ Permite consultar información estadística generada a partir de los datos almac
 
 ---
 
+### 13.1 Glosario
+
+| Término | Significado |
+|:---|:---|
+| **`ROLLUP`** | Extensión de `GROUP BY` que, además de agrupar, agrega filas de **subtotal** por cada nivel y una fila de **total general**. Con `ROLLUP (Categoria, Proveedor)` se obtiene una fila por proveedor, un subtotal por categoría y un total general. |
+| **`GROUPING()`** | Devuelve `1` cuando la columna fue "colapsada" por el `ROLLUP` (fila de subtotal o total) y `0` en una fila normal. Se usa para escribir "Subtotal Categoría" y "Total General". |
+| **`DENSE_RANK()`** | Ranking que asigna posiciones **sin dejar huecos** y da la misma posición a los empates (1, 2, 2, 3). Por eso un "Top 5" puede devolver más de 5 filas si hay empates. |
+| **`PARTITION BY`** | Divide los datos en segmentos para que el ranking se reinicie en cada uno. Con `PARTITION BY Anio` el ranking empieza en 1 en cada año. |
+| **`PIVOT`** | Convierte valores de filas en columnas. Se usa para que cada año sea una columna de la matriz. |
+| **CTE (`WITH ... AS`)** | Consulta temporal con nombre que divide el cálculo en pasos antes del `SELECT` final. |
+| **`@Parametro IS NULL OR ...`** | Patrón de filtro opcional. Si el parámetro viene vacío (`NULL`) el filtro se ignora; si trae valor, se aplica. |
+| **`LIKE '%texto%'`** | Búsqueda parcial: encuentra todo lo que **contenga** el texto escrito. |
+| **Monto máximo / mínimo / promedio** | Se calculan sobre el monto de **cada orden o factura**, no sobre cada línea. Primero se suma el detalle por orden o factura y luego se aplican `MAX`, `MIN` y `AVG`. |
+| **Procedimiento almacenado (SP)** | Consulta guardada en SQL Server con parámetros. Cada reporte es un SP. |
+
+---
+
+### 13.2 Cómo funciona
+
+```text
+ReportesFiltro  ->  ReportesPage  ->  api.js  ->  Backend  ->  SP en SQL Server
+ (filtros)          (estado)         (ejecutarReporte)         (cálculo)
+                         |
+                         v
+                  ReportesTabla (resultados paginados)
+```
+
+1. **Al abrir la página** se ejecuta `SP_Reportes_Opciones`, que devuelve las listas de los filtros, y se ejecuta el primer reporte sin filtros.
+2. **El usuario elige un reporte** en el primer selector. Los filtros cambian según el reporte (catálogo `REPORTES` en `ReportesPage.jsx`).
+3. **Al presionar "Generar reporte"** (o Enter) se envía el id del reporte y los filtros a la API, que ejecuta el SP correspondiente.
+4. **`ReportesTabla`** arma las columnas con las llaves de la primera fila, da formato a números y fechas, alinea los números a la derecha y pagina de 10 en 10.
+5. **"CSV"** exporta en el navegador las filas del reporte actual, sin volver a consultar la base.
+
+| Tipo de filtro | Control | Comportamiento |
+|:---|:---|:---|
+| Texto libre | Campo de texto | Búsqueda parcial con `LIKE '%texto%'` (proveedor, cliente, producto). |
+| Año | Lista desplegable | Solo muestra años que **existen** en la base (facturas u órdenes de compra). |
+| Mes | Lista desplegable | Envía el número del mes (1 a 12). |
+| Categoría | Lista desplegable | Envía el nombre y el SP lo busca con `LIKE`. |
+
+---
+
+### 13.3 Reportes
+
+| # | Reporte | SP | Técnica principal | Filtros |
+|:-:|:---|:---|:---|:---|
+| 1 | Compras por proveedor | `SP_Reporte_ComprasProveedores` | `ROLLUP` | Categoría de proveedor, proveedor (texto) |
+| 2 | Ventas por cliente | `SP_Reporte_VentasToClientes` | `ROLLUP` | Categoría de cliente, cliente (texto) |
+| 3 | Productos con más ganancia | `SP_Top_GananciaProductos` | `DENSE_RANK` + `PARTITION BY` | Año |
+| 4 | Clientes con más facturas | `SP_Top_ClientesFacturas` | `DENSE_RANK` + `PARTITION BY` | Año |
+| 5 | Proveedores con más órdenes | `SP_Top_ProveedoresOrdenes` | `DENSE_RANK` + `PARTITION BY` | Año |
+| 6 | Ventas por categoría y año | `SP_Resumen_VentasCategorias` | `PIVOT` dinámico | Ninguno |
+| 7 | Seguimiento de compras de clientes | `SP_Seguimiento_Compras_Clientes` | Agrupación por mes | Año, mes, categoría de producto |
+| 8 | Seguimiento de compras a proveedores | `SP_Seguimiento_Compras_Proveedores` | Agrupación por mes | Año, mes, categoría de producto |
+| 9 | Rotación de inventario | `SP_Rotacion_Inventario` | Cálculo estadístico | Categoría de producto, año, proveedor |
+| 10 | Método de envío favorito | `SP_Metodo_Envio_Favorito` | `DENSE_RANK` + `PARTITION BY` | Año, mes, categoría de cliente, categoría de producto, producto |
+
+#### 13.3.1 Compras por proveedor
+
+**Qué hace:** muestra el monto más alto, el más bajo y el promedio de las órdenes de compra hechas a los proveedores, agrupados por categoría y proveedor.
+
+**Qué usa:** `PurchaseOrders`, su detalle, proveedores actuales y categorías de proveedor. Usa `ROLLUP`.
+
+**Cómo funciona:**
+1. Una CTE (`ComprasPorOrden`) calcula el monto de **cada orden**: `OrderedOuters * ExpectedUnitPricePerOuter` sumado por orden.
+2. El `SELECT` final agrupa con `ROLLUP (Categoría, Proveedor)` y aplica `MAX`, `MIN` y `AVG`.
+3. `GROUPING()` rotula las filas como proveedor normal, **"Subtotal Categoría"** o **"Total General"**.
+
+**Columnas:** `Nombre_Proveedor`, `Categoria_Proveedor`, `Monto_Maximo`, `Monto_Minimo`, `Monto_Promedio`.
+
+**Restricciones:**
+- Ambos filtros son opcionales y de texto parcial.
+- En las filas de subtotal y total, los valores se calculan sobre **todas las órdenes** del grupo, no sobre los proveedores.
+- La fila de total general muestra `-` en la categoría.
+
+#### 13.3.2 Ventas por cliente
+
+**Qué hace:** muestra el monto más alto, el más bajo y el promedio de las facturas de los clientes, agrupados por categoría y cliente.
+
+**Qué usa:** `Invoices`, su detalle, clientes actuales y tipos de cliente. Usa `ROLLUP`.
+
+**Cómo funciona:** igual que el reporte anterior, pero el monto de cada factura es `SUM(ExtendedPrice)` de sus líneas.
+
+**Columnas:** `Nombre_Cliente`, `Categoria_Cliente`, `Monto_Minimo`, `Monto_Maximo`, `Monto_Promedio`.
+
+**Restricciones:** filtros opcionales de texto parcial por cliente y categoría. Mismas reglas de subtotales y total general.
+
+#### 13.3.3 Top 5 de productos con más ganancia por año
+
+**Qué hace:** devuelve, para cada año, los 5 productos que más ganancia generaron.
+
+**Qué usa:** detalle de facturas (`LineProfit`), facturas y productos actuales. `DENSE_RANK() OVER (PARTITION BY Anio ORDER BY Ganancia_Total DESC)`.
+
+**Cómo funciona:**
+1. Suma `LineProfit` por año y producto.
+2. Asigna una posición dentro de cada año (`PARTITION BY Anio`).
+3. Conserva solo las posiciones menores o iguales a 5.
+
+**Columnas:** `Anio`, `ID_Producto`, `Producto`, `Ganancia_Total`, `Posicion`.
+
+**Restricciones:**
+- El filtro de año es una lista con **solo años válidos** de las facturas. Sin año, se muestran todos.
+- Por usar `DENSE_RANK`, los empates pueden producir más de 5 filas en un año.
+
+#### 13.3.4 Top 5 de clientes con más facturas por año
+
+**Qué hace:** devuelve, por año, los 5 clientes con mayor **cantidad de facturas** y el monto total facturado a cada uno.
+
+**Qué usa:** facturas, detalle y clientes actuales. `DENSE_RANK` con `PARTITION BY Anio`, ordenado por `Cantidad_Facturas`.
+
+**Columnas:** `Anio`, `ID_Cliente`, `Nombre_Cliente`, `Posicion`, `Monto_Total_Facturado`.
+
+**Restricciones:**
+- El ranking es por **cantidad de facturas**, no por monto.
+- Se usa `COUNT(DISTINCT InvoiceID)` porque el `JOIN` con el detalle repite cada factura por línea.
+- Filtro por un año válido (opcional).
+
+#### 13.3.5 Top 5 de proveedores con más órdenes de compra por año
+
+**Qué hace:** devuelve, por año, los 5 proveedores con más órdenes de compra y el monto total de esas órdenes.
+
+**Qué usa:** proveedores actuales, órdenes de compra y su detalle. `DENSE_RANK` con `PARTITION BY Anio`, ordenado por `Cantidad_Ordenes`.
+
+**Columnas:** `Anio`, `ID_Proveedor`, `Nombre_Proveedor`, `Posicion`, `Monto`.
+
+**Restricciones:**
+- El ranking es por **cantidad de órdenes**, no por monto.
+- El monto usa `ReceivedOuters` (cantidad **recibida**), mientras que los reportes 1 y 8 usan `OrderedOuters` (cantidad **ordenada**). Las cifras pueden diferir si hay órdenes sin recibir completas.
+- Filtro por un año válido de las órdenes de compra (opcional).
+
+#### 13.3.6 Matriz resumen de ventas por categoría y año
+
+**Qué hace:** presenta una fila por categoría de producto y una columna por cada año vendido, con el monto total de ventas en cada cruce.
+
+**Qué usa:** `PIVOT` con SQL dinámico (`sp_executesql`) y `STRING_AGG`.
+
+**Cómo funciona:**
+1. Obtiene los años distintos de las facturas y arma la lista de columnas (`[2013],[2014],...`).
+2. Construye el `SELECT` como texto incluyendo esas columnas.
+3. Lo ejecuta con `sp_executesql`. Si aparecen años nuevos, se agregan solos.
+
+**Columnas:** `ID_Categoria`, `Categoria` y una columna por cada año.
+
+**Restricciones:**
+- No tiene filtros.
+- Un producto puede pertenecer a **varias categorías**, por lo que su venta se cuenta en cada una. La suma de todas las categorías puede superar las ventas totales.
+- Las celdas sin ventas aparecen como `—` (valor `NULL`).
+
+#### 13.3.7 Seguimiento de compras de clientes
+
+**Qué hace:** resume, por cliente, año y mes: el monto total comprado, la primera y la última factura del mes, la cantidad total comprada y las cantidades mínima y máxima.
+
+**Qué usa:** clientes actuales, facturas, detalle y grupos de productos. Agrupa por cliente, año y mes y convierte el número del mes a su nombre con `CASE`.
+
+**Columnas:** `CustomerID`, `CustomerName`, `Anio`, `Mes`, `Monto_Total`, `Primera_Factura`, `Ultima_Factura`, `Cantidad_Total`, `Cantidad_Minima`, `Cantidad_Maxima`.
+
+**Restricciones:**
+- Todos los filtros son opcionales.
+- Filtra por **categoría de producto** (`StockGroupName`) con búsqueda parcial.
+- Las cantidades mínima y máxima son por **línea de factura**, no por factura completa.
+- Si un producto pertenece a varias categorías y no se filtra, sus montos se repiten por categoría.
+
+#### 13.3.8 Seguimiento de compras a proveedores
+
+**Qué hace:** igual que el reporte anterior, pero para proveedores y sus órdenes de compra.
+
+**Columnas:** `SupplierID`, `SupplierName`, `Anio`, `Mes`, `Monto_Total`, `Primera_Orden`, `Ultima_Orden`, `Cantidad_Total`, `Cantidad_Minima`, `Cantidad_Maxima`.
+
+**Restricciones:** mismas que el reporte 7. El monto usa `OrderedOuters * ExpectedUnitPricePerOuter`.
+
+#### 13.3.9 Rotación de inventario por producto
+
+**Qué hace:** estima cada cuántos **días rota el inventario** de un producto, es decir, cuántos días tardaría en agotarse el stock actual al ritmo de consumo del período.
+
+**Qué usa:** productos actuales, inventario (`QuantityOnHand`), transacciones de producto, grupos y proveedores.
+
+**Cómo funciona:**
+1. Define el período: el año elegido o, si no hay año, desde la primera hasta la última transacción.
+2. Calcula los **días del período** y la **cantidad consumida** (suma del valor absoluto de las transacciones con cantidad negativa).
+3. Aplica la fórmula:
+
+```text
+Dias_Rotacion = Stock_Actual * Dias_del_Periodo / Cantidad_Consumida
+```
+
+**Columnas:** `ID_Producto`, `Nombre_Producto`, `Categoria_Producto`, `Proveedor`, `Stock_Actual`, `Cantidad_Consumida`, `Dias_Rotacion`.
+
+**Restricciones:**
+- Es una **estimación**: usa el stock actual como aproximación del inventario promedio.
+- Solo aparecen productos con consumo en el período.
+- Un valor alto significa rotación lenta (stock parado); un valor bajo, rotación rápida.
+- El filtro de año se aplica al consumo, pero el stock siempre es el actual.
+- Un producto en varias categorías aparece una vez por categoría si no se filtra.
+
+#### 13.3.10 Método de envío favorito
+
+**Qué hace:** para cada ciudad de destino (por año y mes), determina qué método de envío se usó más, ordenado por cantidad de ventas.
+
+**Qué usa:** facturas, clientes, formas de entrega, ciudades, productos y grupos. `DENSE_RANK() OVER (PARTITION BY ID_Ciudad, Anio, Mes ORDER BY Cantidad_Ventas DESC)`.
+
+**Cómo funciona:**
+1. Una CTE (`VentasFiltradas`) aplica los filtros y trae una fila por factura, categoría y producto.
+2. `VentasPorMetodo` cuenta facturas distintas por ciudad, año, mes y método.
+3. `RankingMetodos` asigna posiciones y el `SELECT` final conserva la posición 1.
+4. Si hay empate, se muestran todos los métodos empatados.
+
+**Columnas:** `Anio`, `Mes`, `Ciudad`, `Metodo_Envio`, `Cantidad_Ventas`, `Categoria_Cliente`, `Categoria_Producto`, `Producto`.
+
+**Restricciones:**
+- La ciudad es la de **entrega del cliente** (`DeliveryCityID`).
+- Resultado ordenado por `Cantidad_Ventas` descendente y luego por ciudad.
+- Sin filtros de producto o categoría, una misma ciudad puede repetirse varias veces, una por cada combinación de categoría y producto vendida. Para ver una fila por ciudad conviene filtrar por producto o categoría.
+
+---
+
+### 13.4 Opciones de los filtros
+
+`SP_Reportes_Opciones` devuelve **7 resultados** en este orden:
+
+| # | Contenido | Se usa en |
+|:-:|:---|:---|
+| 1 | Años de facturas | Reportes 3, 4, 7, 10 |
+| 2 | Años de órdenes de compra | Reportes 5, 8, 9 |
+| 3 | Meses (1 a 12) | Reportes 7, 8, 10 |
+| 4 | Categorías de productos | Reportes 7, 8, 9, 10 |
+| 5 | Categorías de clientes | Reportes 2, 10 |
+| 6 | Proveedores | Reporte 9 |
+| 7 | Categorías de proveedores | Reporte 1 |
+
+Esto garantiza que los años elegidos sean **siempre válidos en la base de datos**.
+
+---
+
+### 13.5 Restricciones generales
+
+- Todo el cálculo (sumas, promedios, rankings, subtotales) ocurre en SQL Server. React solo envía filtros y muestra resultados.
+- Los filtros vacíos se ignoran.
+- Los resultados se muestran de 10 en 10 filas y la exportación a CSV incluye **todas** las filas del reporte.
+- Los textos libres usan búsqueda parcial: "ab" encuentra cualquier nombre que contenga "ab".
+- Los reportes dependen de las tablas y vistas del proyecto (`Facturas`, `OrdenesCompra`, `ClientesActuales`, `ProveedoresActuales`, `ProductosActuales`, etc.), que deben existir antes de crear los procedimientos.
+---
+
 ## 14. Mensajes de validación y tipos de error
 
 La aplicación cuenta con validaciones para evitar que se ingresen datos incorrectos o incompletos. Cuando una operación no puede realizarse, el sistema muestra un mensaje indicando el problema para que el usuario pueda corregir la información ingresada.

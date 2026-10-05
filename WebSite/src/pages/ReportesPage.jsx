@@ -5,8 +5,9 @@
 * DESCRIPCION: Componente de pagina que permite consultar reportes estadisticos de
 * ventas, compras e inventario. Ofrece un catalogo de 10 reportes, cada uno con sus
 * propios filtros, carga las opciones de los filtros desde la API, ejecuta el reporte
-* seleccionado, muestra los resultados en una tabla paginada de 10 filas por pagina,
-* calcula estadisticas de la consulta y permite exportar los resultados a un archivo CSV.
+* seleccionado, oculta las columnas de identificadores, muestra los resultados en una
+* tabla paginada de 10 filas por pagina, calcula estadisticas de la consulta y permite
+* exportar los resultados a un archivo CSV.
 *
 * ENTRADA: Reporte seleccionado y valores de filtros ingresados desde ReportesFiltro,
 * y datos devueltos por las funciones ejecutarReporte y obtenerOpcionesReportes del
@@ -169,6 +170,54 @@ const OPCIONES_VACIAS = {
 
 /*---------------------------------------------------------------------------------------*
 *
+* NOMBRE: ES_ID
+*
+* DESCRIPCION: Expresion regular que reconoce las llaves de columnas que son
+* identificadores: la llave "id", las que empiezan con "ID_" (ID_Producto, ID_Cliente,
+* ID_Proveedor, ID_Categoria...) y las que terminan en "ID" (CustomerID, SupplierID,
+* StockItemID...).
+*
+* ENTRADA: Ninguna.
+*
+* SALIDA: Expresion regular.
+*
+* RESTRICCIONES: Distingue mayusculas para no ocultar columnas cuyo nombre termine en
+* "id" en minuscula como parte de una palabra normal.
+*
+* OBJETIVO: Identificar las columnas que no deben mostrarse al usuario.
+*
+*---------------------------------------------------------------------------------------*/
+
+const ES_ID = /^id$|^ID_|ID$/;
+
+
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: quitarIds
+*
+* DESCRIPCION: Elimina de cada fila las columnas que son identificadores segun ES_ID.
+*
+* ENTRADA: filas - arreglo de objetos devuelto por la API.
+*
+* SALIDA: Nuevo arreglo de objetos sin las columnas de identificadores.
+*
+* RESTRICCIONES: Si la API devuelve algo que no es un arreglo, retorna un arreglo vacio.
+*
+* OBJETIVO: Evitar que los identificadores se muestren en la tabla o se exporten al CSV.
+*
+*---------------------------------------------------------------------------------------*/
+
+function quitarIds(filas) {
+  if (!Array.isArray(filas)) return [];
+
+  return filas.map((fila) =>
+    Object.fromEntries(Object.entries(fila).filter(([llave]) => !ES_ID.test(llave)))
+  );
+}
+
+
+/*---------------------------------------------------------------------------------------*
+*
 * NOMBRE: descargarCSV
 *
 * DESCRIPCION: Convierte las filas del reporte en un archivo CSV y lo descarga. Usa como
@@ -246,7 +295,7 @@ function ReportesPage() {
   // RESULTADOS
   // ----------------------------------------------------------
 
-  // Filas devueltas por el reporte.
+  // Filas devueltas por el reporte, ya sin columnas de identificadores.
   const [filas, setFilas] = useState([]);
 
 
@@ -299,8 +348,8 @@ function ReportesPage() {
   *
   * DESCRIPCION: Ejecuta un reporte en la API con los filtros recibidos. Si no se indican
   * valores, usa el reporte y los filtros actuales. Reinicia la paginacion a la primera
-  * pagina, controla el indicador de carga y, si ocurre un error, vacia los resultados y
-  * guarda el mensaje de error.
+  * pagina, controla el indicador de carga, quita las columnas de identificadores de los
+  * resultados y, si ocurre un error, vacia los resultados y guarda el mensaje de error.
   *
   * ENTRADA: id - identificador del reporte (por defecto reporteId).
   * valores - objeto con los filtros a aplicar (por defecto filtros).
@@ -321,7 +370,7 @@ function ReportesPage() {
     setPagina(1);
 
     try {
-      setFilas(await ejecutarReporte(id, valores));
+      setFilas(quitarIds(await ejecutarReporte(id, valores)));
     } catch (err) {
       setFilas([]);
       setError(err.message || 'No se pudo cargar el reporte.');
@@ -336,8 +385,9 @@ function ReportesPage() {
   * NOMBRE: useEffect de carga inicial
   *
   * DESCRIPCION: Al montar el componente carga las opciones de los filtros y ejecuta el
-  * primer reporte. La variable activo evita actualizar el estado si el componente se
-  * desmonta antes de que responda la API.
+  * primer reporte, quitando las columnas de identificadores de sus resultados. La
+  * variable activo evita actualizar el estado si el componente se desmonta antes de que
+  * responda la API.
   *
   * ENTRADA: Arreglo de dependencias vacio.
   *
@@ -363,7 +413,7 @@ function ReportesPage() {
 
     ejecutarReporte(REPORTES[0].id, {})
       .then((datos) => {
-        if (activo) setFilas(datos);
+        if (activo) setFilas(quitarIds(datos));
       })
       .catch((err) => {
         if (activo) setError(err.message || 'No se pudo cargar el reporte.');

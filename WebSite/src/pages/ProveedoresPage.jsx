@@ -1,3 +1,33 @@
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: Pagina de proveedores (ProveedoresPage)
+*
+* DESCRIPCION: Componente de pagina que gestiona los proveedores registrados en Wide
+* World Importers. Carga y lista los proveedores, permite filtrarlos por nombre,
+* categoria y metodo de entrega, seleccionarlos con checkbox, consultar el detalle de
+* uno o varios proveedores, y crear, modificar y eliminar proveedores mediante modales.
+* Calcula estadisticas, muestra los resultados en una tabla paginada de 10 registros por
+* pagina y presenta mensajes de exito o error en un modal de notificacion.
+*
+* ENTRADA: Filtros ingresados por el usuario (nombre, categoria y metodo de entrega),
+* acciones sobre la tabla (ver, editar, eliminar, seleccionar) y datos devueltos por las
+* funciones listarProveedores y obtenerDetalleProveedores del servicio api.
+*
+* SALIDA: Interfaz con encabezado, tarjetas de estadisticas, barra de herramientas,
+* tabla de proveedores con paginacion, modales de operaciones y mensajes de
+* confirmacion o error.
+*
+* RESTRICCIONES: Requiere que el servicio api este disponible y que existan los
+* componentes ProveedoresTabla, ProveedorDetalleModal, ProveedorNuevoModal,
+* ProveedorEditarModal, ProveedorEliminarModal y StatCard en las rutas indicadas. Los
+* proveedores deben incluir los campos Categoria_Proveedor y Metodo_Entrega para generar
+* las opciones de los filtros.
+*
+* OBJETIVO: Permitir consultar, crear, modificar y eliminar proveedores desde una unica
+* pantalla, mostrando informacion resumida y actualizada.
+*
+*---------------------------------------------------------------------------------------*/
+
 // ============================================================
 // IMPORTACIONES DE REACT
 // ============================================================
@@ -41,28 +71,43 @@ import {
 } from '../services/api';
 
 
-// ============================================================
-// CANTIDAD MÁXIMA DE PROVEEDORES POR PÁGINA
-// ============================================================
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: POR_PAGINA
+*
+* DESCRIPCION: Constante que define la cantidad maxima de proveedores que se muestran
+* por pagina en la tabla.
+*
+* ENTRADA: Ninguna.
+*
+* SALIDA: Valor numerico 10.
+*
+* RESTRICCIONES: Debe ser un numero entero mayor que cero.
+*
+* OBJETIVO: Controlar el tamano de la paginacion de la tabla de proveedores.
+*
+*---------------------------------------------------------------------------------------*/
 
 const POR_PAGINA = 10;
 
 
-// ============================================================
-// ProveedoresPage
-//
-// Página principal de proveedores.
-//
-// Aquí se controla:
-//
-// - Carga de proveedores.
-// - Filtros (nombre, categoría, método de entrega).
-// - Selección de proveedores.
-// - Consulta de detalles.
-// - Crear, modificar y eliminar proveedores.
-// - Estadísticas.
-// - Paginación.
-// ============================================================
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: ProveedoresPage
+*
+* DESCRIPCION: Componente principal de la pagina de proveedores. Define los estados de
+* la pantalla, las funciones de carga de datos, los manejadores de filtros, seleccion y
+* modales, y los calculos de estadisticas y paginacion, y retorna la interfaz completa.
+*
+* ENTRADA: Ninguna (no recibe props).
+*
+* SALIDA: Elemento JSX con la pagina de proveedores.
+*
+* RESTRICCIONES: Debe renderizarse dentro de la aplicacion con acceso a la API.
+*
+* OBJETIVO: Centralizar la gestion de proveedores en una sola vista.
+*
+*---------------------------------------------------------------------------------------*/
 
 function ProveedoresPage() {
 
@@ -70,11 +115,11 @@ function ProveedoresPage() {
   // PROVEEDORES
   // ----------------------------------------------------------
 
-  // Proveedores que se están mostrando (lista completa o filtrada).
+  // Proveedores que se estan mostrando (lista completa o filtrada).
   const [proveedores, setProveedores] = useState([]);
 
   // Todos los proveedores sin filtrar. Se usa para las
-  // estadísticas y para las opciones de los filtros.
+  // estadisticas y para las opciones de los filtros.
   const [todosProveedores, setTodosProveedores] = useState([]);
 
 
@@ -88,7 +133,7 @@ function ProveedoresPage() {
 
 
   // ----------------------------------------------------------
-  // SELECCIÓN (guarda los SupplierID marcados con checkbox)
+  // SELECCION (guarda los SupplierID marcados con checkbox)
   // ----------------------------------------------------------
 
   const [seleccionados, setSeleccionados] = useState([]);
@@ -102,7 +147,7 @@ function ProveedoresPage() {
 
 
   // ----------------------------------------------------------
-  // ESTADO DE CARGA Y PAGINACIÓN
+  // ESTADO DE CARGA Y PAGINACION
   // ----------------------------------------------------------
 
   const [cargando, setCargando] = useState(false);
@@ -119,23 +164,35 @@ function ProveedoresPage() {
 
 
   // ----------------------------------------------------------
-  // MENSAJE (éxito o error)
+  // MENSAJE (exito o error)
   // ----------------------------------------------------------
 
   const [mensaje, setMensaje] = useState(null);
 
 
-  // ============================================================
-  // cargarProveedores
-  //
-  // Consulta la API con los filtros recibidos.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: cargarProveedores
+  *
+  * DESCRIPCION: Consulta los proveedores a la API con los filtros recibidos, reinicia la
+  * paginacion a la primera pagina y controla el indicador de carga. Si ocurre un error
+  * muestra un mensaje de error.
+  *
+  * ENTRADA: filtros - objeto con los criterios de busqueda (por defecto vacio).
+  *
+  * SALIDA: Actualiza los estados proveedores, cargando, pagina y mensaje.
+  *
+  * RESTRICCIONES: Requiere conexion con la API mediante listarProveedores.
+  *
+  * OBJETIVO: Obtener y mostrar el listado de proveedores segun los filtros indicados.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const cargarProveedores = async (filtros = {}) => {
 
     setCargando(true);
 
-    // Cada nueva búsqueda comienza en la página 1.
+    // Cada nueva busqueda comienza en la pagina 1.
     setPagina(1);
 
     try {
@@ -162,12 +219,24 @@ function ProveedoresPage() {
   };
 
 
-  // ============================================================
-  // cargarTodosProveedores
-  //
-  // Recarga la lista completa. Se usa después de insertar,
-  // modificar o eliminar.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: cargarTodosProveedores
+  *
+  * DESCRIPCION: Recarga la lista completa de proveedores sin filtros y actualiza tanto
+  * la lista mostrada como la lista general. Se usa despues de insertar, modificar o
+  * eliminar un proveedor.
+  *
+  * ENTRADA: Ninguna.
+  *
+  * SALIDA: Actualiza los estados todosProveedores, proveedores y pagina.
+  *
+  * RESTRICCIONES: Requiere conexion con la API mediante listarProveedores. Si falla, el
+  * error solo se registra en consola.
+  *
+  * OBJETIVO: Mantener la tabla y las estadisticas sincronizadas con los cambios.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const cargarTodosProveedores = async () => {
 
@@ -190,9 +259,23 @@ function ProveedoresPage() {
   };
 
 
-  // ============================================================
-  // CARGA INICIAL
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: useEffect de carga inicial
+  *
+  * DESCRIPCION: Al montar el componente carga el listado de proveedores y la lista
+  * completa sin filtrar, que se usa para las estadisticas y las opciones de los filtros.
+  *
+  * ENTRADA: Arreglo de dependencias vacio.
+  *
+  * SALIDA: Ejecucion de cargarProveedores y actualizacion del estado todosProveedores.
+  *
+  * RESTRICCIONES: Se ejecuta unicamente en el montaje del componente. Si la carga de la
+  * lista completa falla, el error se ignora.
+  *
+  * OBJETIVO: Inicializar los datos de la pantalla.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   useEffect(() => {
 
@@ -205,11 +288,24 @@ function ProveedoresPage() {
   }, []);
 
 
-  // ============================================================
-  // aplicarFiltros
-  //
-  // Combina los cambios recibidos con los filtros actuales.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: aplicarFiltros
+  *
+  * DESCRIPCION: Combina los cambios recibidos con los filtros actuales (nombre,
+  * categoria y metodo de entrega) y ejecuta la busqueda. Los filtros que no vienen en
+  * los cambios conservan su valor actual.
+  *
+  * ENTRADA: cambios - objeto con los filtros modificados (por defecto vacio).
+  *
+  * SALIDA: Ejecucion de cargarProveedores con el conjunto completo de filtros.
+  *
+  * RESTRICCIONES: Los cambios solo deben contener las llaves nombre, categoria o
+  * metodoEntrega.
+  *
+  * OBJETIVO: Aplicar los filtros sin perder los que ya estaban seleccionados.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const aplicarFiltros = (cambios = {}) => {
 
@@ -237,9 +333,23 @@ function ProveedoresPage() {
   };
 
 
-  // ============================================================
-  // restaurarFiltros
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: restaurarFiltros
+  *
+  * DESCRIPCION: Limpia los filtros y la seleccion de proveedores y vuelve a cargar el
+  * listado completo.
+  *
+  * ENTRADA: Ninguna.
+  *
+  * SALIDA: Actualiza los estados nombre, categoria, metodoEntrega y seleccionados, y
+  * ejecuta cargarProveedores sin filtros.
+  *
+  * RESTRICCIONES: Requiere conexion con la API mediante listarProveedores.
+  *
+  * OBJETIVO: Volver a la vista sin filtros.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const restaurarFiltros = () => {
 
@@ -253,11 +363,22 @@ function ProveedoresPage() {
   };
 
 
-  // ============================================================
-  // toggleSeleccion
-  //
-  // Agrega o quita un SupplierID de la lista de seleccionados.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: toggleSeleccion
+  *
+  * DESCRIPCION: Agrega un SupplierID a la lista de seleccionados si no estaba, o lo
+  * quita si ya estaba.
+  *
+  * ENTRADA: id - identificador del proveedor (SupplierID).
+  *
+  * SALIDA: Actualiza el estado seleccionados.
+  *
+  * RESTRICCIONES: El id debe corresponder a un proveedor existente.
+  *
+  * OBJETIVO: Controlar los proveedores marcados con checkbox en la tabla.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const toggleSeleccion = (id) => {
 
@@ -272,9 +393,23 @@ function ProveedoresPage() {
   };
 
 
-  // ============================================================
-  // verUno (botón del ojo)
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: verUno
+  *
+  * DESCRIPCION: Solicita a la API el detalle de un proveedor (boton del ojo) y lo
+  * guarda en el estado para abrir el modal de detalle. Si ocurre un error muestra un
+  * mensaje.
+  *
+  * ENTRADA: id - identificador del proveedor.
+  *
+  * SALIDA: Actualiza los estados proveedoresModal o mensaje.
+  *
+  * RESTRICCIONES: Requiere un identificador valido y conexion con la API.
+  *
+  * OBJETIVO: Mostrar la informacion completa de un proveedor.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const verUno = async (id) => {
 
@@ -299,11 +434,24 @@ function ProveedoresPage() {
   };
 
 
-  // ============================================================
-  // verSeleccionados
-  //
-  // Detalle de todos los proveedores marcados con checkbox.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: verSeleccionados
+  *
+  * DESCRIPCION: Solicita a la API el detalle de todos los proveedores marcados con
+  * checkbox y lo guarda en el estado para abrir el modal de detalle. Si ocurre un error
+  * muestra un mensaje.
+  *
+  * ENTRADA: Ninguna (usa el estado seleccionados).
+  *
+  * SALIDA: Actualiza los estados proveedoresModal o mensaje.
+  *
+  * RESTRICCIONES: Debe haber al menos un proveedor seleccionado; el boton se deshabilita
+  * en caso contrario. Requiere conexion con la API.
+  *
+  * OBJETIVO: Consultar en un solo modal el detalle de varios proveedores.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const verSeleccionados = async () => {
 
@@ -333,6 +481,24 @@ function ProveedoresPage() {
   // CALLBACKS DE LOS MODALES
   // ============================================================
 
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: proveedorCreado
+  *
+  * DESCRIPCION: Se ejecuta cuando el modal de nuevo proveedor termina con exito. Cierra
+  * el modal, limpia la seleccion, recarga el listado completo y muestra un mensaje de
+  * confirmacion.
+  *
+  * ENTRADA: Ninguna.
+  *
+  * SALIDA: Actualiza los estados mostrarNuevo, seleccionados, proveedores y mensaje.
+  *
+  * RESTRICCIONES: Debe invocarse solo despues de crear el proveedor correctamente.
+  *
+  * OBJETIVO: Reflejar el nuevo proveedor en la tabla y notificar al usuario.
+  *
+  *-----------------------------------------------------------------------------------*/
+
   const proveedorCreado = async () => {
 
     setMostrarNuevo(false);
@@ -348,6 +514,24 @@ function ProveedoresPage() {
 
   };
 
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: proveedorActualizado
+  *
+  * DESCRIPCION: Se ejecuta cuando el modal de edicion termina con exito. Cierra el
+  * modal, limpia la seleccion, recarga el listado completo y muestra un mensaje de
+  * confirmacion.
+  *
+  * ENTRADA: Ninguna.
+  *
+  * SALIDA: Actualiza los estados proveedorEditar, seleccionados, proveedores y mensaje.
+  *
+  * RESTRICCIONES: Debe invocarse solo despues de actualizar el proveedor correctamente.
+  *
+  * OBJETIVO: Reflejar los cambios del proveedor en la tabla y notificar al usuario.
+  *
+  *-----------------------------------------------------------------------------------*/
+
   const proveedorActualizado = async () => {
 
     setProveedorEditar(null);
@@ -362,6 +546,25 @@ function ProveedoresPage() {
     });
 
   };
+
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: proveedorEliminado
+  *
+  * DESCRIPCION: Se ejecuta cuando el modal de eliminacion termina con exito. Cierra el
+  * modal, limpia la seleccion, recarga el listado completo y muestra un mensaje de
+  * confirmacion.
+  *
+  * ENTRADA: Ninguna.
+  *
+  * SALIDA: Actualiza los estados proveedorEliminar, seleccionados, proveedores y
+  * mensaje.
+  *
+  * RESTRICCIONES: Debe invocarse solo despues de eliminar el proveedor correctamente.
+  *
+  * OBJETIVO: Quitar el proveedor eliminado de la tabla y notificar al usuario.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const proveedorEliminado = async () => {
 
@@ -379,12 +582,25 @@ function ProveedoresPage() {
   };
 
 
-  // ============================================================
-  // OPCIONES DE LOS FILTROS
-  //
-  // new Set() elimina repetidos, filter(Boolean) elimina vacíos
-  // y sort() ordena alfabéticamente.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: Opciones de los filtros
+  *
+  * DESCRIPCION: Genera las listas de categorias y metodos de entrega disponibles a
+  * partir de todos los proveedores. new Set() elimina repetidos, filter(Boolean)
+  * elimina vacios y sort() ordena alfabeticamente.
+  *
+  * ENTRADA: Estado todosProveedores.
+  *
+  * SALIDA: Variables categoriasDisponibles y metodosDisponibles.
+  *
+  * RESTRICCIONES: Usa los campos Categoria_Proveedor y Metodo_Entrega de cada
+  * proveedor.
+  *
+  * OBJETIVO: Llenar las listas desplegables de los filtros y la estadistica de
+  * categorias.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const categoriasDisponibles = [
     ...new Set(todosProveedores.map((p) => p.Categoria_Proveedor))
@@ -399,9 +615,22 @@ function ProveedoresPage() {
     .sort();
 
 
-  // ============================================================
-  // PAGINACIÓN
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: Calculo de paginacion
+  *
+  * DESCRIPCION: Calcula el total de paginas y obtiene el subconjunto de proveedores que
+  * corresponde a la pagina actual.
+  *
+  * ENTRADA: Estados proveedores y pagina, constante POR_PAGINA.
+  *
+  * SALIDA: Variables totalPaginas y proveedoresPagina.
+  *
+  * RESTRICCIONES: El total de paginas es como minimo 1.
+  *
+  * OBJETIVO: Mostrar los proveedores divididos en paginas.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const totalPaginas = Math.max(
     1,
@@ -413,7 +642,23 @@ function ProveedoresPage() {
     pagina * POR_PAGINA
   );
 
-  // Máximo 5 botones de página, con la página actual al centro.
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: numerosPagina
+  *
+  * DESCRIPCION: Calcula los numeros de pagina que se muestran como botones, con un
+  * maximo de 5 botones centrados en la pagina actual y ajustados a los limites.
+  *
+  * ENTRADA: Estados pagina y totalPaginas.
+  *
+  * SALIDA: Arreglo de numeros de pagina visibles.
+  *
+  * RESTRICCIONES: Maximo 5 botones; si hay menos paginas se muestran todas.
+  *
+  * OBJETIVO: Generar los botones de navegacion de la paginacion.
+  *
+  *-----------------------------------------------------------------------------------*/
+
   const numerosPagina = (() => {
 
     const maxBotones = 5;
@@ -443,9 +688,22 @@ function ProveedoresPage() {
   })();
 
 
-  // ============================================================
-  // FECHA Y HORA (formato Costa Rica, 24 horas)
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: Fecha y hora actuales
+  *
+  * DESCRIPCION: Obtiene la fecha y la hora del momento del renderizado y las formatea
+  * con la configuracion regional es-CR (hora en formato de 24 horas).
+  *
+  * ENTRADA: Fecha actual del sistema.
+  *
+  * SALIDA: Variables fechaTexto y horaTexto.
+  *
+  * RESTRICCIONES: Los valores se calculan en cada renderizado y no se actualizan solos.
+  *
+  * OBJETIVO: Mostrar la fecha y la hora en el encabezado de la pagina.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const ahora = new Date();
 
@@ -504,7 +762,7 @@ function ProveedoresPage() {
       </div>
 
 
-      {/* ESTADÍSTICAS */}
+      {/* ESTADISTICAS */}
 
       <div className="stats-row">
 
@@ -558,7 +816,7 @@ function ProveedoresPage() {
 
           </div>
 
-          {/* Filtro por categoría */}
+          {/* Filtro por categoria */}
 
           <select
             value={categoria}
@@ -574,7 +832,7 @@ function ProveedoresPage() {
             ))}
           </select>
 
-          {/* Filtro por método de entrega */}
+          {/* Filtro por metodo de entrega */}
 
           <select
             value={metodoEntrega}
@@ -634,7 +892,7 @@ function ProveedoresPage() {
               onEliminar={(proveedor) => setProveedorEliminar(proveedor)}
             />
 
-            {/* PAGINACIÓN */}
+            {/* PAGINACION */}
 
             <div className="paginacion">
 
@@ -732,7 +990,7 @@ function ProveedoresPage() {
       )}
 
 
-      {/* MENSAJE DE ÉXITO / ERROR */}
+      {/* MENSAJE DE EXITO / ERROR */}
 
       {mensaje && (
 

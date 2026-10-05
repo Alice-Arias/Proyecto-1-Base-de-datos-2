@@ -1,8 +1,42 @@
-
-// ============================================================
-// MODAL PARA CREAR UN NUEVO CLIENTE
-// ============================================================
-
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: Modal para crear un nuevo cliente (ClienteNuevoModal)
+*
+* DESCRIPCION: Componente que muestra una ventana modal con un formulario para registrar
+* un nuevo cliente. El formulario esta dividido en cuatro paneles: Informacion
+* principal (nombre, categoria, grupo de compra, contactos y cliente por facturar),
+* Entrega y contacto (metodo de entrega, ciudad, telefono, fax y sitio web),
+* Informacion de pago (limite de credito, descuento y dias de gracia) y Direcciones
+* (direccion de entrega, direccion postal y codigo postal). Al abrirse carga desde la
+* API las opciones de las listas desplegables (categorias, grupos de compra, contactos,
+* clientes, metodos de entrega y ciudades). Al enviar el formulario convierte los campos
+* numericos, guarda el cliente mediante la API y le avisa al componente padre. Mientras
+* se cargan las opciones o se guarda el cliente, los controles se deshabilitan y se
+* muestra un indicador de progreso.
+*
+* ENTRADA: onCerrar - funcion que cierra el modal. Se ejecuta al presionar la X, el
+* boton Cancelar o al hacer clic en el fondo.
+* onClienteCreado - funcion del componente padre que se ejecuta cuando el cliente se
+* guarda correctamente y recibe la respuesta de la API.
+* onMostrarMensaje - funcion del componente padre que muestra un mensaje de error
+* (opcional) y recibe un objeto con las llaves tipo, titulo y mensaje.
+* Tambien usa las funciones insertarCliente y obtenerOpcionesClientes del servicio api.
+*
+* SALIDA: Elemento JSX con el modal y el formulario de nuevo cliente.
+*
+* RESTRICCIONES: Requiere que el servicio api este disponible y que existan los estilos
+* de las clases modal-fondo, modal-contenido, modal-cliente-form, cd-encabezado,
+* cd-avatar, cd-titulo, cd-subtitulo, modal-cerrar, cd-panel, cd-panel-titulo, cd-ico,
+* form-grid, campo, campo-completo, modal-footer, btn, btn-claro, btn-azul y girando.
+* Los campos obligatorios son nombre, categoria, contacto principal, metodo de entrega,
+* ciudad de entrega, telefono, direccion de entrega, codigo postal y direccion postal.
+* El UsuarioID se envia con el valor fijo 1. Como onMostrarMensaje es una dependencia
+* del useEffect, si el padre la crea de nuevo en cada renderizado las opciones se
+* volveran a cargar cada vez; conviene que el padre la mantenga estable.
+*
+* OBJETIVO: Permitir registrar un nuevo cliente desde la pagina de clientes.
+*
+*---------------------------------------------------------------------------------------*/
 
 import {
     X,
@@ -71,15 +105,32 @@ function ClienteNuevoModal({
         ciudades: []
     });
 
-    // Indica si las opciones todavía están cargando.
+    // Indica si las opciones todavia estan cargando.
     const [cargandoOpciones, setCargandoOpciones] = useState(true);
 
-    // Indica si se está guardando el cliente.
+    // Indica si se esta guardando el cliente.
     const [guardando, setGuardando] = useState(false);
 
-    // ========================================================
-    // CARGAR OPCIONES DESDE LA BASE DE DATOS
-    // ========================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: useEffect de carga de opciones
+    *
+    * DESCRIPCION: Al abrirse el modal consulta a la API las opciones de las listas
+    * desplegables (categorias, grupos de compra, contactos, clientes, metodos de
+    * entrega y ciudades) y las guarda en el estado. Mientras responde mantiene activo
+    * el indicador cargandoOpciones. Si ocurre un error lo registra en consola y, si
+    * existe onMostrarMensaje, muestra un mensaje de error.
+    *
+    * ENTRADA: Dependencia onMostrarMensaje.
+    *
+    * SALIDA: Actualiza los estados opciones y cargandoOpciones.
+    *
+    * RESTRICCIONES: Requiere conexion con la API mediante obtenerOpcionesClientes. Si
+    * alguna lista no viene en la respuesta se usa un arreglo vacio.
+    *
+    * OBJETIVO: Llenar las listas desplegables del formulario.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     useEffect(() => {
 
@@ -125,9 +176,24 @@ function ClienteNuevoModal({
 
     }, [onMostrarMensaje]);
 
-    // ========================================================
-    // CAMBIAR VALOR DE UN CAMPO
-    // ========================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: cambiarCampo
+    *
+    * DESCRIPCION: Actualiza en el estado formulario el campo que el usuario modifico.
+    * Usa el atributo name del control para saber que campo cambiar y conserva el resto
+    * de los valores.
+    *
+    * ENTRADA: e - evento de cambio del control (input o select).
+    *
+    * SALIDA: Actualiza el estado formulario.
+    *
+    * RESTRICCIONES: El atributo name del control debe coincidir con una llave del
+    * estado formulario.
+    *
+    * OBJETIVO: Mantener sincronizados los controles con los datos del formulario.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const cambiarCampo = (e) => {
 
@@ -140,9 +206,27 @@ function ClienteNuevoModal({
 
     };
 
-    // ========================================================
-    // GUARDAR CLIENTE
-    // ========================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: guardarCliente
+    *
+    * DESCRIPCION: Se ejecuta al enviar el formulario. Evita el envio normal, convierte
+    * los campos numericos (los campos opcionales vacios se envian como null), envia el
+    * cliente a la API mediante insertarCliente y le avisa al componente padre con
+    * onClienteCreado. Si ocurre un error muestra un mensaje. Al terminar desactiva el
+    * indicador de guardado.
+    *
+    * ENTRADA: e - evento de envio del formulario.
+    *
+    * SALIDA: Actualiza el estado guardando y ejecuta onClienteCreado o
+    * onMostrarMensaje.
+    *
+    * RESTRICCIONES: Requiere conexion con la API mediante insertarCliente. Los campos
+    * obligatorios son validados por el propio formulario antes de llegar a esta funcion.
+    *
+    * OBJETIVO: Registrar el nuevo cliente en la base de datos.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const guardarCliente = async (e) => {
 
@@ -153,7 +237,7 @@ function ClienteNuevoModal({
         try {
 
             // ==================================================
-            // CONVERTIR LOS CAMPOS NUMÉRICOS
+            // CONVERTIR LOS CAMPOS NUMERICOS
             // ==================================================
 
             const datos = {
@@ -288,7 +372,7 @@ function ClienteNuevoModal({
                 <form onSubmit={guardarCliente}>
 
                     {/* ==================================================
-                        INFORMACIÓN PRINCIPAL
+                        INFORMACION PRINCIPAL
                     ================================================== */}
 
                     <div className="cd-panel">
@@ -325,7 +409,7 @@ function ClienteNuevoModal({
 
                             </div>
 
-                            {/* Categoría */}
+                            {/* Categoria */}
 
                             <div className="campo">
 
@@ -545,7 +629,7 @@ function ClienteNuevoModal({
 
                         <div className="form-grid">
 
-                            {/* Método de entrega */}
+                            {/* Metodo de entrega */}
 
                             <div className="campo">
 
@@ -627,7 +711,7 @@ function ClienteNuevoModal({
 
                             </div>
 
-                            {/* Teléfono */}
+                            {/* Telefono */}
 
                             <div className="campo">
 
@@ -694,7 +778,7 @@ function ClienteNuevoModal({
                     </div>
 
                     {/* ==================================================
-                        INFORMACIÓN DE PAGO
+                        INFORMACION DE PAGO
                     ================================================== */}
 
                     <div className="cd-panel">
@@ -711,7 +795,7 @@ function ClienteNuevoModal({
 
                         <div className="form-grid">
 
-                            {/* Límite de crédito */}
+                            {/* Limite de credito */}
 
                             <div className="campo">
 
@@ -751,7 +835,7 @@ function ClienteNuevoModal({
 
                             </div>
 
-                            {/* Días de gracia */}
+                            {/* Dias de gracia */}
 
                             <div className="campo">
 
@@ -792,7 +876,7 @@ function ClienteNuevoModal({
 
                         <div className="form-grid">
 
-                            {/* Dirección de entrega */}
+                            {/* Direccion de entrega */}
 
                             <div className="campo campo-completo">
 
@@ -812,7 +896,7 @@ function ClienteNuevoModal({
 
                             </div>
 
-                            {/* Dirección de entrega adicional */}
+                            {/* Direccion de entrega adicional */}
 
                             <div className="campo campo-completo">
 
@@ -831,7 +915,7 @@ function ClienteNuevoModal({
 
                             </div>
 
-                            {/* Código postal */}
+                            {/* Codigo postal */}
 
                             <div className="campo">
 
@@ -851,7 +935,7 @@ function ClienteNuevoModal({
 
                             </div>
 
-                            {/* Dirección postal */}
+                            {/* Direccion postal */}
 
                             <div className="campo">
 
@@ -871,7 +955,7 @@ function ClienteNuevoModal({
 
                             </div>
 
-                            {/* Dirección postal adicional */}
+                            {/* Direccion postal adicional */}
 
                             <div className="campo campo-completo">
 

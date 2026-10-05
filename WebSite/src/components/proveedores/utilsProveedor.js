@@ -1,8 +1,47 @@
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: Utilidades del formulario de proveedores (FORMULARIO_VACIO, formularioDesdeDetalle,
+* validarProveedor y armarDatos)
+*
+* DESCRIPCION: Modulo de apoyo para los formularios de proveedores (crear y editar).
+* Exporta cuatro elementos: FORMULARIO_VACIO (valores iniciales del formulario),
+* formularioDesdeDetalle (convierte el detalle devuelto por la API en datos de
+* formulario), validarProveedor (valida los campos y devuelve el primer error) y
+* armarDatos (convierte el formulario en el objeto que se envia a la API).
+*
+* ENTRADA: Segun la funcion: el detalle de un proveedor (formularioDesdeDetalle) o el
+* objeto del formulario (validarProveedor y armarDatos).
+*
+* SALIDA: Un objeto de formulario, un mensaje de error o null, y un objeto de datos para
+* la API, segun la funcion.
+*
+* RESTRICCIONES: Los limites de longitud de la validacion deben coincidir con los
+* tamanos de los parametros de los procedimientos almacenados. El UsuarioID se envia con
+* el valor fijo 1. Este archivo no contiene componentes ni JSX.
+*
+* OBJETIVO: Centralizar la logica de valores iniciales, conversion, validacion y armado
+* de datos de los formularios de proveedores, para reutilizarla en los modales.
+*
+*---------------------------------------------------------------------------------------*/
 
-
-// ------------------------------------------------------------
-// VALORES INICIALES
-// ------------------------------------------------------------
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: FORMULARIO_VACIO
+*
+* DESCRIPCION: Objeto con los valores iniciales del formulario de proveedores. Todos los
+* campos de texto y los IDs comienzan como texto vacio, los dias de pago comienzan en
+* '7' y el UsuarioID en 1.
+*
+* ENTRADA: Ninguna.
+*
+* SALIDA: Objeto con todos los campos del formulario.
+*
+* RESTRICCIONES: Debe contener todas las llaves que usan el formulario, la validacion y
+* armarDatos.
+*
+* OBJETIVO: Servir como estado inicial al crear un nuevo proveedor.
+*
+*---------------------------------------------------------------------------------------*/
 
 export const FORMULARIO_VACIO = {
     Nombre: '',
@@ -33,12 +72,27 @@ export const FORMULARIO_VACIO = {
 };
 
 
-// ------------------------------------------------------------
-// DETALLE (SP_Proveedores_Detalle) → FORMULARIO
-//
-// Los select trabajan con texto, por eso los IDs se convierten
-// a String. Los valores null pasan a '' para los inputs.
-// ------------------------------------------------------------
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: formularioDesdeDetalle
+*
+* DESCRIPCION: Convierte el detalle de un proveedor (resultado de
+* SP_Proveedores_Detalle) en un objeto con la estructura del formulario. Los select
+* trabajan con texto, por eso los IDs se convierten a String, y los valores null pasan a
+* texto vacio para los inputs. Si el detalle no trae la ciudad postal, se usa la ciudad
+* de entrega. Si no trae los dias de gracia, se usa '7'.
+*
+* ENTRADA: d - objeto con el detalle del proveedor devuelto por la API.
+*
+* SALIDA: Objeto con los campos del formulario, con IDs como texto y sin valores null.
+*
+* RESTRICCIONES: Los campos Ciudad_Postal_ID y Codigo_Postal_Postal solo llegan si
+* SP_Proveedores_Detalle devuelve PostalCityID y PostalPostalCode. El UsuarioID se
+* establece en 1.
+*
+* OBJETIVO: Cargar los datos de un proveedor existente en el formulario de edicion.
+*
+*---------------------------------------------------------------------------------------*/
 
 export function formularioDesdeDetalle(d) {
 
@@ -91,14 +145,30 @@ export function formularioDesdeDetalle(d) {
 }
 
 
-// ------------------------------------------------------------
-// VALIDACIÓN
-//
-// Devuelve el PRIMER mensaje de error que encuentre,
-// o null si todo está bien.
-// Los límites coinciden con los tamaños de los parámetros
-// de los procedimientos almacenados.
-// ------------------------------------------------------------
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: validarProveedor
+*
+* DESCRIPCION: Valida los campos del formulario de proveedores y devuelve el PRIMER
+* mensaje de error que encuentre, o null si todo esta bien. Revisa, en este orden, la
+* informacion principal, la entrega y contacto, los datos bancarios y de pago, y las
+* direcciones. Verifica campos obligatorios, longitudes maximas, que el sitio web
+* empiece con http:// o https:// y que los dias de gracia sean un entero entre 0 y 365.
+* Los limites coinciden con los tamanos de los parametros de los procedimientos
+* almacenados.
+*
+* ENTRADA: f - objeto con los datos del formulario.
+*
+* SALIDA: Texto con el primer mensaje de error, o null si no hay errores.
+*
+* RESTRICCIONES: El objeto debe tener las mismas llaves que FORMULARIO_VACIO. Los
+* espacios al inicio y al final se ignoran al medir longitudes y comprobar campos
+* vacios. Los mensajes devueltos son texto visible para el usuario.
+*
+* OBJETIVO: Evitar enviar a la API datos incompletos o que excedan los limites de la
+* base de datos.
+*
+*---------------------------------------------------------------------------------------*/
 
 export function validarProveedor(f) {
 
@@ -108,7 +178,7 @@ export function validarProveedor(f) {
 
     const reglas = [
 
-        // ---------- Información principal ----------
+        // ---------- Informacion principal ----------
 
         !t(f.Nombre) &&
             'Debe ingresar el nombre del proveedor.',
@@ -209,12 +279,27 @@ export function validarProveedor(f) {
 }
 
 
-// ------------------------------------------------------------
-// FORMULARIO → DATOS PARA LA API
-//
-// - Los IDs pasan a número.
-// - Los campos opcionales vacíos se envían como null.
-// ------------------------------------------------------------
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: armarDatos
+*
+* DESCRIPCION: Convierte el objeto del formulario en el objeto de datos que se envia a
+* la API. Los IDs obligatorios pasan a numero, los IDs opcionales vacios pasan a null,
+* los textos obligatorios se limpian de espacios y los textos opcionales vacios se
+* envian como null. Los dias de pago pasan a numero y el UsuarioID usa el valor del
+* formulario o 1 si no existe.
+*
+* ENTRADA: f - objeto con los datos del formulario.
+*
+* SALIDA: Objeto con los datos listos para enviar a la API.
+*
+* RESTRICCIONES: Debe llamarse despues de validarProveedor, ya que no valida los datos.
+* Los campos Telefono, Fax y SitioWeb se envian como texto aunque esten vacios (no se
+* convierten a null).
+*
+* OBJETIVO: Preparar los datos del formulario en el formato que espera la API.
+*
+*---------------------------------------------------------------------------------------*/
 
 export function armarDatos(f) {
 

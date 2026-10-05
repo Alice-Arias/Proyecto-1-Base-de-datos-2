@@ -1,3 +1,31 @@
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: Pagina de ventas (VentasPage)
+*
+* DESCRIPCION: Componente de pagina que gestiona las ventas registradas en Wide World
+* Importers. Carga y lista las ventas con filtros, las ordena por nombre de cliente,
+* calcula estadisticas (cantidad de ventas, monto total y clientes distintos), muestra
+* los resultados en una tabla paginada de 10 registros por pagina y administra los
+* modales de detalle, creacion, edicion y eliminacion de ventas. Tambien muestra
+* mensajes de exito o error en un modal de notificacion.
+*
+* ENTRADA: Filtros de busqueda ingresados desde VentasFiltro, acciones del usuario sobre
+* la tabla (ver detalle, editar, eliminar), y datos devueltos por las funciones
+* listarVentas, obtenerDetalleVenta y obtenerOpcionesVentas del servicio api.
+*
+* SALIDA: Interfaz con encabezado, tarjetas de estadisticas, tabla de ventas con
+* paginacion, modales de operaciones y mensajes de confirmacion o error.
+*
+* RESTRICCIONES: Requiere que el servicio api este disponible y que existan los
+* componentes VentasFiltro, VentasTabla, VentaDetalleModal, VentaNuevoModal,
+* VentaEditarModal, VentaEliminarModal y StatCard en las rutas indicadas. Las ventas
+* deben incluir los campos Nombre_Cliente y Monto para ordenar y calcular totales.
+*
+* OBJETIVO: Permitir consultar, crear, modificar y eliminar ventas desde una unica
+* pantalla, mostrando informacion resumida y actualizada.
+*
+*---------------------------------------------------------------------------------------*/
+
 // ============================================================
 // IMPORTACIONES DE REACT
 // ============================================================
@@ -41,10 +69,49 @@ import {
 } from '../services/api';
 
 
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: POR_PAGINA
+*
+* DESCRIPCION: Constante que define la cantidad de ventas que se muestran por pagina
+* en la tabla.
+*
+* ENTRADA: Ninguna.
+*
+* SALIDA: Valor numerico 10.
+*
+* RESTRICCIONES: Debe ser un numero entero mayor que cero.
+*
+* OBJETIVO: Controlar el tamano de la paginacion de la tabla de ventas.
+*
+*---------------------------------------------------------------------------------------*/
+
 const POR_PAGINA = 10;
 
 
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: VentasPage
+*
+* DESCRIPCION: Componente principal de la pagina de ventas. Define los estados de la
+* pantalla, las funciones de carga de datos, los manejadores de eventos de los modales
+* y los calculos de estadisticas y paginacion, y retorna la interfaz completa.
+*
+* ENTRADA: Ninguna (no recibe props).
+*
+* SALIDA: Elemento JSX con la pagina de ventas.
+*
+* RESTRICCIONES: Debe renderizarse dentro de la aplicacion con acceso a la API.
+*
+* OBJETIVO: Centralizar la gestion de ventas en una sola vista.
+*
+*---------------------------------------------------------------------------------------*/
+
 function VentasPage() {
+
+    // ============================================================
+    // ESTADOS
+    // ============================================================
 
     const [ventas, setVentas] = useState([]);
     const [metodosEntrega, setMetodosEntrega] = useState([]);
@@ -66,6 +133,25 @@ function VentasPage() {
     const [mensaje, setMensaje] = useState(null);
 
 
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: ordenarPorCliente
+    *
+    * DESCRIPCION: Devuelve una copia de la lista de ventas ordenada alfabeticamente por
+    * el nombre del cliente, usando la configuracion regional en espanol e ignorando
+    * mayusculas y acentos.
+    *
+    * ENTRADA: lista - arreglo de ventas.
+    *
+    * SALIDA: Nuevo arreglo de ventas ordenado por Nombre_Cliente.
+    *
+    * RESTRICCIONES: Los elementos deben ser objetos; si Nombre_Cliente no existe se
+    * trata como texto vacio.
+    *
+    * OBJETIVO: Presentar las ventas ordenadas por cliente en la tabla.
+    *
+    *-----------------------------------------------------------------------------------*/
+
     const ordenarPorCliente = (lista) => {
 
         return [...lista].sort((a, b) =>
@@ -78,6 +164,24 @@ function VentasPage() {
         );
     };
 
+
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: cargarVentas
+    *
+    * DESCRIPCION: Consulta las ventas a la API aplicando los filtros recibidos, las
+    * ordena por cliente, reinicia la paginacion a la primera pagina y controla el
+    * indicador de carga. Si ocurre un error muestra un mensaje de error.
+    *
+    * ENTRADA: filtros - objeto con los criterios de busqueda (por defecto vacio).
+    *
+    * SALIDA: Actualiza los estados ventas, cargando, pagina y mensaje.
+    *
+    * RESTRICCIONES: Requiere conexion con la API mediante listarVentas.
+    *
+    * OBJETIVO: Obtener y mostrar el listado de ventas segun los filtros indicados.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const cargarVentas = async (filtros = {}) => {
 
@@ -106,6 +210,24 @@ function VentasPage() {
     };
 
 
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: cargarMetodosEntrega
+    *
+    * DESCRIPCION: Obtiene desde la API las opciones disponibles para ventas y guarda
+    * la lista de metodos de entrega en el estado.
+    *
+    * ENTRADA: Ninguna.
+    *
+    * SALIDA: Actualiza el estado metodosEntrega.
+    *
+    * RESTRICCIONES: Requiere conexion con la API mediante obtenerOpcionesVentas. Si
+    * falla, el error solo se registra en consola.
+    *
+    * OBJETIVO: Proveer los metodos de entrega al componente de filtros.
+    *
+    *-----------------------------------------------------------------------------------*/
+
     const cargarMetodosEntrega = () => {
 
         obtenerOpcionesVentas()
@@ -118,6 +240,23 @@ function VentasPage() {
     };
 
 
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: useEffect de carga inicial
+    *
+    * DESCRIPCION: Al montar el componente carga el listado de ventas y los metodos de
+    * entrega una sola vez.
+    *
+    * ENTRADA: Arreglo de dependencias vacio.
+    *
+    * SALIDA: Ejecucion de cargarVentas y cargarMetodosEntrega.
+    *
+    * RESTRICCIONES: Se ejecuta unicamente en el montaje del componente.
+    *
+    * OBJETIVO: Inicializar los datos de la pantalla.
+    *
+    *-----------------------------------------------------------------------------------*/
+
     useEffect(() => {
 
         cargarVentas();
@@ -125,6 +264,23 @@ function VentasPage() {
 
     }, []);
 
+
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: verDetalle
+    *
+    * DESCRIPCION: Solicita a la API el detalle de una venta y lo guarda en el estado
+    * para abrir el modal de detalle. Si ocurre un error muestra un mensaje.
+    *
+    * ENTRADA: invoiceId - identificador de la factura de la venta.
+    *
+    * SALIDA: Actualiza los estados ventaDetalle o mensaje.
+    *
+    * RESTRICCIONES: Requiere un identificador valido y conexion con la API.
+    *
+    * OBJETIVO: Mostrar la informacion completa de una venta en modo lectura.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const verDetalle = async (invoiceId) => {
 
@@ -150,6 +306,23 @@ function VentasPage() {
     // VENTA CREADA
     // ============================================================
 
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: ventaCreada
+    *
+    * DESCRIPCION: Se ejecuta cuando el modal de nueva venta termina con exito. Cierra
+    * el modal, recarga el listado y muestra un mensaje de confirmacion.
+    *
+    * ENTRADA: Ninguna.
+    *
+    * SALIDA: Actualiza los estados mostrarNuevo, ventas y mensaje.
+    *
+    * RESTRICCIONES: Debe invocarse solo despues de crear la venta correctamente.
+    *
+    * OBJETIVO: Reflejar la nueva venta en la tabla y notificar al usuario.
+    *
+    *-----------------------------------------------------------------------------------*/
+
     const ventaCreada = async () => {
 
         setMostrarNuevo(false);
@@ -167,6 +340,23 @@ function VentasPage() {
     // ============================================================
     // VENTA ACTUALIZADA
     // ============================================================
+
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: ventaActualizada
+    *
+    * DESCRIPCION: Se ejecuta cuando el modal de edicion termina con exito. Cierra el
+    * modal, recarga el listado y muestra un mensaje de confirmacion.
+    *
+    * ENTRADA: Ninguna.
+    *
+    * SALIDA: Actualiza los estados ventaEditar, ventas y mensaje.
+    *
+    * RESTRICCIONES: Debe invocarse solo despues de actualizar la venta correctamente.
+    *
+    * OBJETIVO: Reflejar los cambios de la venta en la tabla y notificar al usuario.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const ventaActualizada = async () => {
 
@@ -186,6 +376,23 @@ function VentasPage() {
     // VENTA ELIMINADA
     // ============================================================
 
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: ventaEliminada
+    *
+    * DESCRIPCION: Se ejecuta cuando el modal de eliminacion termina con exito. Cierra
+    * el modal, recarga el listado y muestra un mensaje de confirmacion.
+    *
+    * ENTRADA: Ninguna.
+    *
+    * SALIDA: Actualiza los estados ventaEliminar, ventas y mensaje.
+    *
+    * RESTRICCIONES: Debe invocarse solo despues de eliminar la venta correctamente.
+    *
+    * OBJETIVO: Quitar la venta eliminada de la tabla y notificar al usuario.
+    *
+    *-----------------------------------------------------------------------------------*/
+
     const ventaEliminada = async () => {
 
         setVentaEliminar(null);
@@ -200,6 +407,27 @@ function VentasPage() {
     };
 
 
+    // ============================================================
+    // ESTADISTICAS Y PAGINACION
+    // ============================================================
+
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: Calculo de estadisticas
+    *
+    * DESCRIPCION: Calcula la cantidad total de ventas, la suma de los montos y la
+    * cantidad de clientes distintos a partir de la lista de ventas cargada.
+    *
+    * ENTRADA: Estado ventas.
+    *
+    * SALIDA: Variables totalVentas, montoTotal y clientesUnicos.
+    *
+    * RESTRICCIONES: El campo Monto se convierte a numero; si no es valido cuenta como 0.
+    *
+    * OBJETIVO: Alimentar las tarjetas de estadisticas de la pantalla.
+    *
+    *-----------------------------------------------------------------------------------*/
+
     const totalVentas = ventas.length;
 
     const montoTotal = ventas.reduce(
@@ -212,6 +440,23 @@ function VentasPage() {
     ).size;
 
 
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: Calculo de paginacion
+    *
+    * DESCRIPCION: Calcula el total de paginas y obtiene el subconjunto de ventas que
+    * corresponde a la pagina actual.
+    *
+    * ENTRADA: Estados ventas y pagina, constante POR_PAGINA.
+    *
+    * SALIDA: Variables totalPaginas y ventasPagina.
+    *
+    * RESTRICCIONES: El total de paginas es como minimo 1.
+    *
+    * OBJETIVO: Mostrar las ventas divididas en paginas.
+    *
+    *-----------------------------------------------------------------------------------*/
+
     const totalPaginas = Math.max(
         1,
         Math.ceil(ventas.length / POR_PAGINA)
@@ -222,6 +467,23 @@ function VentasPage() {
         pagina * POR_PAGINA
     );
 
+
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: numerosPagina
+    *
+    * DESCRIPCION: Calcula los numeros de pagina que se muestran como botones, con un
+    * maximo de 5 botones centrados en la pagina actual y ajustados a los limites.
+    *
+    * ENTRADA: Estados pagina y totalPaginas.
+    *
+    * SALIDA: Arreglo de numeros de pagina visibles.
+    *
+    * RESTRICCIONES: Maximo 5 botones; si hay menos paginas se muestran todas.
+    *
+    * OBJETIVO: Generar los botones de navegacion de la paginacion.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const numerosPagina = (() => {
 
@@ -256,6 +518,23 @@ function VentasPage() {
     })();
 
 
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: Fecha y hora actuales
+    *
+    * DESCRIPCION: Obtiene la fecha y la hora del momento del renderizado y las formatea
+    * con la configuracion regional es-CR (hora en formato de 24 horas).
+    *
+    * ENTRADA: Fecha actual del sistema.
+    *
+    * SALIDA: Variables fechaTexto y horaTexto.
+    *
+    * RESTRICCIONES: Los valores se calculan en cada renderizado y no se actualizan solos.
+    *
+    * OBJETIVO: Mostrar la fecha y la hora en el encabezado de la pagina.
+    *
+    *-----------------------------------------------------------------------------------*/
+
     const ahora = new Date();
 
     const fechaTexto = ahora.toLocaleDateString('es-CR', {
@@ -271,6 +550,10 @@ function VentasPage() {
         hour12: false
     });
 
+
+    // ============================================================
+    // INTERFAZ
+    // ============================================================
 
     return (
 

@@ -877,7 +877,7 @@ En cada una de las dos terminales presione **`Ctrl + C`** para detener la API y 
 
 ## 19. Video de la aplicación
 
-[Ver video en YouTube](ENLACE_AQUI)
+[Ver video en YouTube](https://youtu.be/yNP0uIx7Occ)
 
 ---
 

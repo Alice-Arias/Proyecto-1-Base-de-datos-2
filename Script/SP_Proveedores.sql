@@ -743,18 +743,6 @@ BEGIN
         RETURN;
     END
 
-    /* Verifica que no exista un proveedor con el mismo nombre. */
-    IF EXISTS
-    (
-        SELECT 1
-        FROM dbo.ProveedoresActuales
-        WHERE SupplierName = @Nombre
-    )
-    BEGIN
-        RAISERROR('Ya existe un proveedor con ese nombre.', 16, 4);
-        RETURN;
-    END
-
     SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     SET XACT_ABORT ON;
 

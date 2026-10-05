@@ -83,6 +83,7 @@ const clientesRoutes = require('./routes/clientes.routes');
 const proveedoresRoutes = require('./routes/proveedores.routes');
 const inventarioRoutes = require('./routes/inventario.routes');
 const ventasRoutes = require('./routes/ventas.routes');
+const reportesRoutes = require('./routes/reportes.routes');
 
 
 /*---------------------------------------------------------------------------------------*
@@ -223,6 +224,8 @@ app.use('/api/inventarios', inventarioRoutes);
 *---------------------------------------------------------------------------------------*/
 
 app.use('/api/ventas', ventasRoutes);
+
+app.use('/api/reportes', reportesRoutes);
 
 
 /*---------------------------------------------------------------------------------------*

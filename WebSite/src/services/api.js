@@ -763,3 +763,87 @@ export async function obtenerOpcionesVentas() {
   return data;
 
 }
+
+
+/*-------------------------------------
+MODULO: REPORTES
+-------------------------------------*/
+
+/*-------------------------------------------------------------------------------------------------
+CONSTANTE: rutasReportes
+DESCRIPCION: Relaciona el identificador utilizado por la interfaz con la ruta correspondiente de la API.
+ENTRADA: Identificadores internos de los reportes.
+SALIDA: Objeto con el segmento de URL para cada consulta.
+RESTRICCIONES: Cada ruta debe existir bajo /api/reportes en el backend.
+OBJETIVO: Centralizar el mapeo entre reportes de React y endpoints de Express.
+--------------------------------------------------------------------------------------------------*/
+
+const rutasReportes = {
+  comprasProveedores: 'compras-proveedores',
+  ventasClientes: 'ventas-clientes',
+  topProductos: 'top-productos',
+  topClientes: 'top-clientes',
+  topProveedores: 'top-proveedores',
+  ventasCategorias: 'ventas-categorias',
+  seguimientoClientes: 'seguimiento-clientes',
+  seguimientoProveedores: 'seguimiento-proveedores',
+  rotacionInventario: 'rotacion-inventario',
+  metodoEnvioFavorito: 'metodo-envio-favorito'
+};
+
+/*-------------------------------------------------------------------------------------------------
+NOMBRE: obtenerOpcionesReportes
+DESCRIPCION: Consulta las listas de años, meses, categorías y proveedores que utilizan los filtros.
+ENTRADA: Ninguna.
+SALIDA: Objeto de opciones devuelto por GET /api/reportes/opciones.
+RESTRICCIONES: Requiere conexión con la API y SQL Server.
+OBJETIVO: Llenar los menús desplegables de la vista de reportes.
+--------------------------------------------------------------------------------------------------*/
+
+export async function obtenerOpcionesReportes() {
+  const res = await fetch(`${API_URL}/reportes/opciones`);
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || 'No se pudieron obtener las opciones de reportes');
+  }
+
+  return data;
+}
+
+/*-------------------------------------------------------------------------------------------------
+NOMBRE: ejecutarReporte
+DESCRIPCION: Envía los filtros seleccionados y consulta el reporte indicado en la API.
+ENTRADA: reporte (identificador incluido en rutasReportes), filtros (objeto opcional de parámetros).
+SALIDA: Arreglo JSON con las filas devueltas por el procedimiento almacenado.
+RESTRICCIONES: El identificador debe existir en rutasReportes; los filtros vacíos se omiten.
+OBJETIVO: Obtener los resultados para mostrarlos en la tabla de reportes.
+--------------------------------------------------------------------------------------------------*/
+
+export async function ejecutarReporte(reporte, filtros = {}) {
+  const ruta = rutasReportes[reporte];
+
+  if (!ruta) {
+    throw new Error('El reporte solicitado no es válido');
+  }
+
+  const params = new URLSearchParams();
+
+  Object.entries(filtros).forEach(([nombre, valor]) => {
+    if (valor !== undefined && valor !== null && valor !== '') {
+      params.append(nombre, valor);
+    }
+  });
+
+  const query = params.toString();
+  const res = await fetch(
+    `${API_URL}/reportes/${ruta}${query ? `?${query}` : ''}`
+  );
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || 'No se pudo ejecutar el reporte');
+  }
+
+  return data;
+}

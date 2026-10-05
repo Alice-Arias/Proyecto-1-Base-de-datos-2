@@ -1,3 +1,36 @@
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: Tabla de clientes (ClientesTabla)
+*
+* DESCRIPCION: Componente que muestra la lista de clientes en una tabla con las columnas
+* de seleccion (checkbox), Nombre Cliente, Categoria, Metodo de entrega y Acciones. Cada
+* fila incluye un checkbox para seleccionar el cliente y tres iconos de accion: ver
+* detalles (ojo), modificar (lapiz) y eliminar (basurero). Si la lista de clientes esta
+* vacia, muestra en su lugar el mensaje "No se encontraron clientes.". Si un cliente no
+* tiene metodo de entrega se muestra un guion.
+*
+* ENTRADA: clientes - arreglo de clientes que se muestran en la tabla.
+* seleccionados - arreglo con los CustomerID de los clientes marcados con checkbox.
+* onToggleSeleccion - funcion que se ejecuta al marcar o desmarcar un checkbox y recibe
+* el CustomerID del cliente.
+* onVerUno - funcion que se ejecuta al presionar el ojo y recibe el CustomerID.
+* onEditar - funcion que se ejecuta al presionar el lapiz y recibe el cliente completo.
+* onEliminar - funcion que se ejecuta al presionar el basurero y recibe el cliente
+* completo.
+*
+* SALIDA: Elemento JSX con la tabla de clientes, o un parrafo con un mensaje cuando no
+* hay clientes.
+*
+* RESTRICCIONES: Requiere que existan los estilos de las clases tabla-clientes,
+* acciones-cel, ver, editar y eliminar. Cada cliente debe incluir los campos CustomerID,
+* Nombre_Cliente, Categoria_Cliente y Metodo_Entrega. Las propiedades clientes y
+* seleccionados deben ser arreglos y las funciones de accion deben estar definidas, de
+* lo contrario ocurre un error al renderizar o al hacer clic.
+*
+* OBJETIVO: Presentar los clientes y permitir seleccionarlos, consultarlos, modificarlos
+* y eliminarlos desde la pagina de clientes.
+*
+*---------------------------------------------------------------------------------------*/
 
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 
@@ -44,10 +77,10 @@ function ClientesTabla({
           {/* Nombre del cliente */}
           <th>Nombre Cliente</th>
 
-          {/* Categoría del cliente */}
+          {/* Categoria del cliente */}
           <th>Categoría</th>
 
-          {/* Método de entrega */}
+          {/* Metodo de entrega */}
           <th>Método de entrega</th>
 
           {/* Botones de acciones */}
@@ -96,7 +129,7 @@ function ClientesTabla({
             </td>
 
             {/* =================================================
-                CATEGORÍA
+                CATEGORIA
                 ================================================= */}
 
             <td>
@@ -104,7 +137,7 @@ function ClientesTabla({
             </td>
 
             {/* =================================================
-                MÉTODO DE ENTREGA
+                METODO DE ENTREGA
                 ================================================= */}
 
             <td>
@@ -128,7 +161,7 @@ function ClientesTabla({
                   className="ver"
                   title="Ver detalles"
 
-                  // El CustomerID sigue utilizándose
+                  // El CustomerID sigue utilizandose
                   // internamente para buscar el cliente.
 
                   onClick={() =>

@@ -1,3 +1,33 @@
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: Pagina de inventario (InventariosPage)
+*
+* DESCRIPCION: Componente de pagina que gestiona los productos de inventario registrados
+* en Wide World Importers. Carga y lista los productos, permite filtrarlos por nombre y
+* grupo, seleccionarlos con checkbox, consultar el detalle de uno o varios productos, y
+* crear, modificar y eliminar productos mediante modales. Calcula estadisticas, muestra
+* los resultados en una tabla paginada de 10 registros por pagina y presenta mensajes de
+* exito o error en un modal de notificacion.
+*
+* ENTRADA: Filtros ingresados por el usuario (nombre y grupo), acciones sobre la tabla
+* (ver, editar, eliminar, seleccionar) y datos devueltos por las funciones
+* listarInventarios y obtenerDetalleInventarios del servicio api.
+*
+* SALIDA: Interfaz con encabezado, tarjetas de estadisticas, barra de herramientas,
+* tabla de productos con paginacion, modales de operaciones y mensajes de confirmacion
+* o error.
+*
+* RESTRICCIONES: Requiere que el servicio api este disponible y que existan los
+* componentes InventariosTabla, InventarioDetalleModal, InventarioNuevoModal,
+* InventarioEditarModal, InventarioEliminarModal y StatCard en las rutas indicadas. Los
+* productos deben incluir el campo Grupo (valores unidos por comas) para generar las
+* opciones del filtro.
+*
+* OBJETIVO: Permitir consultar, crear, modificar y eliminar productos de inventario
+* desde una unica pantalla, mostrando informacion resumida y actualizada.
+*
+*---------------------------------------------------------------------------------------*/
+
 // ============================================================
 // IMPORTACIONES DE REACT
 // ============================================================
@@ -42,32 +72,43 @@ import {
 } from '../services/api';
 
 
-// ============================================================
-// CANTIDAD MÁXIMA DE PRODUCTOS POR PÁGINA
-// ============================================================
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: POR_PAGINA
+*
+* DESCRIPCION: Constante que define la cantidad maxima de productos que se muestran por
+* pagina en la tabla.
+*
+* ENTRADA: Ninguna.
+*
+* SALIDA: Valor numerico 10.
+*
+* RESTRICCIONES: Debe ser un numero entero mayor que cero.
+*
+* OBJETIVO: Controlar el tamano de la paginacion de la tabla de inventario.
+*
+*---------------------------------------------------------------------------------------*/
 
 const POR_PAGINA = 10;
 
 
-// ============================================================
-// InventariosPage
-//
-// Esta es la página principal de inventario.
-//
-// Aquí se controla:
-//
-// - Carga de productos.
-// - Filtros (nombre y grupo).
-// - Selección de productos.
-// - Consulta de detalles.
-// - Crear productos.
-// - Modificar productos.
-// - Eliminar productos.
-// - Estadísticas.
-// - Paginación.
-// - Estado de carga.
-//
-// ============================================================
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: InventariosPage
+*
+* DESCRIPCION: Componente principal de la pagina de inventario. Define los estados de la
+* pantalla, las funciones de carga de datos, los manejadores de filtros, seleccion y
+* modales, y los calculos de estadisticas y paginacion, y retorna la interfaz completa.
+*
+* ENTRADA: Ninguna (no recibe props).
+*
+* SALIDA: Elemento JSX con la pagina de inventario.
+*
+* RESTRICCIONES: Debe renderizarse dentro de la aplicacion con acceso a la API.
+*
+* OBJETIVO: Centralizar la gestion de productos de inventario en una sola vista.
+*
+*---------------------------------------------------------------------------------------*/
 
 function InventariosPage() {
 
@@ -75,13 +116,13 @@ function InventariosPage() {
     // INVENTARIOS
     // ============================================================
 
-    // Productos que actualmente se están mostrando.
+    // Productos que actualmente se estan mostrando.
     const [inventarios, setInventarios] = useState([]);
 
     // Guarda todos los productos sin filtrar.
     //
     // Se utiliza para obtener los grupos disponibles
-    // y para calcular las estadísticas.
+    // y para calcular las estadisticas.
     const [todosInventarios, setTodosInventarios] = useState([]);
 
 
@@ -97,7 +138,7 @@ function InventariosPage() {
 
 
     // ============================================================
-    // SELECCIÓN DE PRODUCTOS
+    // SELECCION DE PRODUCTOS
     // ============================================================
 
     // Guarda los StockItemID seleccionados.
@@ -108,9 +149,9 @@ function InventariosPage() {
     // MODAL DE DETALLE
     // ============================================================
 
-    // Guarda los productos que se mostrarán en el modal.
+    // Guarda los productos que se mostraran en el modal.
     //
-    // null significa que el modal está cerrado.
+    // null significa que el modal esta cerrado.
     const [inventariosModal, setInventariosModal] =
         useState(null);
 
@@ -123,7 +164,7 @@ function InventariosPage() {
 
 
     // ============================================================
-    // PAGINACIÓN
+    // PAGINACION
     // ============================================================
 
     const [pagina, setPagina] = useState(1);
@@ -159,13 +200,23 @@ function InventariosPage() {
     const [mensaje, setMensaje] = useState(null);
 
 
-    // ============================================================
-    // cargarInventarios
-    //
-    // Consulta la API para obtener los productos.
-    //
-    // Puede recibir filtros.
-    // ============================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: cargarInventarios
+    *
+    * DESCRIPCION: Consulta los productos a la API con los filtros recibidos, reinicia la
+    * paginacion a la primera pagina y controla el indicador de carga. Si ocurre un error
+    * muestra un mensaje de error.
+    *
+    * ENTRADA: filtros - objeto con los criterios de busqueda (por defecto vacio).
+    *
+    * SALIDA: Actualiza los estados inventarios, cargando, pagina y mensaje.
+    *
+    * RESTRICCIONES: Requiere conexion con la API mediante listarInventarios.
+    *
+    * OBJETIVO: Obtener y mostrar el listado de productos segun los filtros indicados.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const cargarInventarios = async (filtros = {}) => {
 
@@ -197,13 +248,23 @@ function InventariosPage() {
     };
 
 
-    // ============================================================
-    // cargarTodosInventarios
-    //
-    // Vuelve a cargar todos los productos.
-    //
-    // Se utiliza después de insertar, modificar o eliminar.
-    // ============================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: cargarTodosInventarios
+    *
+    * DESCRIPCION: Recarga la lista completa de productos sin filtros y actualiza tanto
+    * la lista mostrada como la lista general. Se usa despues de insertar, modificar o
+    * eliminar un producto. Si ocurre un error muestra un mensaje.
+    *
+    * ENTRADA: Ninguna.
+    *
+    * SALIDA: Actualiza los estados todosInventarios, inventarios, pagina y mensaje.
+    *
+    * RESTRICCIONES: Requiere conexion con la API mediante listarInventarios.
+    *
+    * OBJETIVO: Mantener la tabla y las estadisticas sincronizadas con los cambios.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const cargarTodosInventarios = async () => {
 
@@ -215,8 +276,8 @@ function InventariosPage() {
             setTodosInventarios(datos);
             setInventarios(datos);
 
-            // Después de actualizar la lista volvemos
-            // a la primera página.
+            // Despues de actualizar la lista volvemos
+            // a la primera pagina.
             setPagina(1);
 
         } catch (err) {
@@ -233,9 +294,25 @@ function InventariosPage() {
     };
 
 
-    // ============================================================
-    // CARGA INICIAL
-    // ============================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: useEffect de carga inicial
+    *
+    * DESCRIPCION: Al montar el componente carga el listado de productos y la lista
+    * completa sin filtrar, que se usa para las estadisticas y las opciones del filtro
+    * de grupo.
+    *
+    * ENTRADA: Arreglo de dependencias vacio.
+    *
+    * SALIDA: Ejecucion de cargarInventarios y actualizacion del estado
+    * todosInventarios.
+    *
+    * RESTRICCIONES: Se ejecuta unicamente en el montaje del componente. Si la carga de
+    * la lista completa falla, el error solo se registra en consola.
+    *
+    * OBJETIVO: Inicializar los datos de la pantalla.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     useEffect(() => {
 
@@ -252,11 +329,24 @@ function InventariosPage() {
     }, []);
 
 
-    // ============================================================
-    // aplicarFiltros
-    //
-    // Combina los filtros nuevos con los que ya estaban activos.
-    // ============================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: aplicarFiltros
+    *
+    * DESCRIPCION: Combina los cambios recibidos con los filtros actuales (nombre y
+    * grupo), guarda los valores usados, limpia la seleccion y ejecuta la busqueda. Los
+    * filtros que no vienen en los cambios conservan su valor actual.
+    *
+    * ENTRADA: cambios - objeto con los filtros modificados (por defecto vacio).
+    *
+    * SALIDA: Actualiza los estados nombre, grupo y seleccionados, y ejecuta
+    * cargarInventarios con el conjunto completo de filtros.
+    *
+    * RESTRICCIONES: Los cambios solo deben contener las llaves nombre o grupo.
+    *
+    * OBJETIVO: Aplicar los filtros sin perder los que ya estaban seleccionados.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const aplicarFiltros = (cambios = {}) => {
 
@@ -273,7 +363,7 @@ function InventariosPage() {
                     : grupo
         };
 
-        // Guardamos los valores utilizados para la búsqueda.
+        // Guardamos los valores utilizados para la busqueda.
         setNombre(filtros.nombre);
         setGrupo(filtros.grupo);
 
@@ -283,9 +373,23 @@ function InventariosPage() {
     };
 
 
-    // ============================================================
-    // restaurarFiltros
-    // ============================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: restaurarFiltros
+    *
+    * DESCRIPCION: Limpia los filtros y la seleccion de productos y vuelve a cargar el
+    * listado completo.
+    *
+    * ENTRADA: Ninguna.
+    *
+    * SALIDA: Actualiza los estados nombre, grupo y seleccionados, y ejecuta
+    * cargarInventarios sin filtros.
+    *
+    * RESTRICCIONES: Requiere conexion con la API mediante listarInventarios.
+    *
+    * OBJETIVO: Volver a la vista sin filtros.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const restaurarFiltros = () => {
 
@@ -298,11 +402,22 @@ function InventariosPage() {
     };
 
 
-    // ============================================================
-    // toggleSeleccion
-    //
-    // Selecciona o deselecciona un producto.
-    // ============================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: toggleSeleccion
+    *
+    * DESCRIPCION: Agrega un StockItemID a la lista de seleccionados si no estaba, o lo
+    * quita si ya estaba.
+    *
+    * ENTRADA: id - identificador del producto (StockItemID).
+    *
+    * SALIDA: Actualiza el estado seleccionados.
+    *
+    * RESTRICCIONES: El id debe corresponder a un producto existente.
+    *
+    * OBJETIVO: Controlar los productos marcados con checkbox en la tabla.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const toggleSeleccion = (id) => {
 
@@ -317,11 +432,22 @@ function InventariosPage() {
     };
 
 
-    // ============================================================
-    // verUno
-    //
-    // Obtiene el detalle de un producto.
-    // ============================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: verUno
+    *
+    * DESCRIPCION: Solicita a la API el detalle de un producto y lo guarda en el estado
+    * para abrir el modal de detalle. Si ocurre un error muestra un mensaje.
+    *
+    * ENTRADA: id - identificador del producto.
+    *
+    * SALIDA: Actualiza los estados inventariosModal o mensaje.
+    *
+    * RESTRICCIONES: Requiere un identificador valido y conexion con la API.
+    *
+    * OBJETIVO: Mostrar la informacion completa de un producto.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const verUno = async (id) => {
 
@@ -346,11 +472,24 @@ function InventariosPage() {
     };
 
 
-    // ============================================================
-    // verSeleccionados
-    //
-    // Obtiene los detalles de todos los productos seleccionados.
-    // ============================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: verSeleccionados
+    *
+    * DESCRIPCION: Solicita a la API el detalle de todos los productos marcados con
+    * checkbox y lo guarda en el estado para abrir el modal de detalle. Si no hay
+    * productos seleccionados no hace nada. Si ocurre un error muestra un mensaje.
+    *
+    * ENTRADA: Ninguna (usa el estado seleccionados).
+    *
+    * SALIDA: Actualiza los estados inventariosModal o mensaje.
+    *
+    * RESTRICCIONES: Debe haber al menos un producto seleccionado. Requiere conexion con
+    * la API.
+    *
+    * OBJETIVO: Consultar en un solo modal el detalle de varios productos.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const verSeleccionados = async () => {
 
@@ -385,6 +524,24 @@ function InventariosPage() {
     // INVENTARIO CREADO
     // ============================================================
 
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: inventarioCreado
+    *
+    * DESCRIPCION: Se ejecuta cuando el modal de nuevo producto termina con exito. Cierra
+    * el modal, limpia la seleccion, recarga el listado completo y muestra un mensaje de
+    * confirmacion.
+    *
+    * ENTRADA: Ninguna.
+    *
+    * SALIDA: Actualiza los estados mostrarNuevo, seleccionados, inventarios y mensaje.
+    *
+    * RESTRICCIONES: Debe invocarse solo despues de crear el producto correctamente.
+    *
+    * OBJETIVO: Reflejar el nuevo producto en la tabla y notificar al usuario.
+    *
+    *-----------------------------------------------------------------------------------*/
+
     const inventarioCreado = async () => {
 
         setMostrarNuevo(false);
@@ -404,6 +561,26 @@ function InventariosPage() {
     // ============================================================
     // INVENTARIO ACTUALIZADO
     // ============================================================
+
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: inventarioActualizado
+    *
+    * DESCRIPCION: Se ejecuta cuando el modal de edicion termina con exito. Cierra el
+    * modal, limpia la seleccion, recarga el listado completo y muestra un mensaje de
+    * confirmacion.
+    *
+    * ENTRADA: Ninguna.
+    *
+    * SALIDA: Actualiza los estados inventarioEditar, seleccionados, inventarios y
+    * mensaje.
+    *
+    * RESTRICCIONES: Debe invocarse solo despues de actualizar el producto
+    * correctamente.
+    *
+    * OBJETIVO: Reflejar los cambios del producto en la tabla y notificar al usuario.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const inventarioActualizado = async () => {
 
@@ -425,6 +602,25 @@ function InventariosPage() {
     // INVENTARIO ELIMINADO
     // ============================================================
 
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: inventarioEliminado
+    *
+    * DESCRIPCION: Se ejecuta cuando el modal de eliminacion termina con exito. Cierra el
+    * modal, limpia la seleccion, recarga el listado completo y muestra un mensaje de
+    * confirmacion.
+    *
+    * ENTRADA: Ninguna.
+    *
+    * SALIDA: Actualiza los estados inventarioEliminar, seleccionados, inventarios y
+    * mensaje.
+    *
+    * RESTRICCIONES: Debe invocarse solo despues de eliminar el producto correctamente.
+    *
+    * OBJETIVO: Quitar el producto eliminado de la tabla y notificar al usuario.
+    *
+    *-----------------------------------------------------------------------------------*/
+
     const inventarioEliminado = async () => {
 
         setInventarioEliminar(null);
@@ -441,18 +637,26 @@ function InventariosPage() {
     };
 
 
-    // ============================================================
-    // GRUPOS DISPONIBLES
-    //
-    // El SP devuelve los grupos unidos mediante STRING_AGG.
-    //
-    // Por ejemplo:
-    //
-    // "Beverages, Chocolate"
-    //
-    // Separamos nuevamente los grupos para obtener
-    // las opciones disponibles.
-    // ============================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: gruposDisponibles
+    *
+    * DESCRIPCION: Genera la lista de grupos disponibles a partir de todos los productos.
+    * El procedimiento almacenado devuelve los grupos unidos mediante STRING_AGG, por
+    * ejemplo "Beverages, Chocolate", por lo que se separan nuevamente por coma, se
+    * eliminan espacios y vacios, se quitan repetidos con new Set() y se ordenan.
+    *
+    * ENTRADA: Estado todosInventarios.
+    *
+    * SALIDA: Arreglo ordenado de grupos unicos.
+    *
+    * RESTRICCIONES: Usa el campo Grupo de cada producto; si no existe se trata como
+    * texto vacio.
+    *
+    * OBJETIVO: Llenar la lista desplegable del filtro de grupo y la estadistica de
+    * grupos.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const gruposDisponibles = [
         ...new Set(
@@ -468,9 +672,22 @@ function InventariosPage() {
     ].sort();
 
 
-    // ============================================================
-    // PAGINACIÓN
-    // ============================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: Calculo de paginacion
+    *
+    * DESCRIPCION: Calcula el total de paginas y obtiene el subconjunto de productos que
+    * corresponde a la pagina actual.
+    *
+    * ENTRADA: Estados inventarios y pagina, constante POR_PAGINA.
+    *
+    * SALIDA: Variables totalPaginas e inventariosPagina.
+    *
+    * RESTRICCIONES: El total de paginas es como minimo 1.
+    *
+    * OBJETIVO: Mostrar los productos divididos en paginas.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const totalPaginas = Math.max(
         1,
@@ -487,9 +704,22 @@ function InventariosPage() {
         );
 
 
-    // ============================================================
-    // NÚMEROS DE PÁGINA DINÁMICOS
-    // ============================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: numerosPagina
+    *
+    * DESCRIPCION: Calcula los numeros de pagina que se muestran como botones, con un
+    * maximo de 5 botones centrados en la pagina actual y ajustados a los limites.
+    *
+    * ENTRADA: Estados pagina y totalPaginas.
+    *
+    * SALIDA: Arreglo de numeros de pagina visibles.
+    *
+    * RESTRICCIONES: Maximo 5 botones; si hay menos paginas se muestran todas.
+    *
+    * OBJETIVO: Generar los botones de navegacion de la paginacion.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const numerosPagina = (() => {
 
@@ -527,9 +757,22 @@ function InventariosPage() {
     })();
 
 
-    // ============================================================
-    // FECHA Y HORA
-    // ============================================================
+    /*-----------------------------------------------------------------------------------*
+    *
+    * NOMBRE: Fecha y hora actuales
+    *
+    * DESCRIPCION: Obtiene la fecha y la hora del momento del renderizado y las formatea
+    * con la configuracion regional es-CR (hora en formato de 24 horas).
+    *
+    * ENTRADA: Fecha actual del sistema.
+    *
+    * SALIDA: Variables fechaTexto y horaTexto.
+    *
+    * RESTRICCIONES: Los valores se calculan en cada renderizado y no se actualizan solos.
+    *
+    * OBJETIVO: Mostrar la fecha y la hora en el encabezado de la pagina.
+    *
+    *-----------------------------------------------------------------------------------*/
 
     const ahora = new Date();
 
@@ -607,7 +850,7 @@ function InventariosPage() {
 
 
             {/* ====================================================
-                ESTADÍSTICAS
+                ESTADISTICAS
                 ==================================================== */}
 
             <div className="stats-row">
@@ -818,7 +1061,7 @@ function InventariosPage() {
                         />
 
 
-                        {/* PAGINACIÓN */}
+                        {/* PAGINACION */}
 
                         <div className="paginacion">
 
@@ -870,7 +1113,7 @@ function InventariosPage() {
                                 </button>
 
 
-                                {/* NÚMEROS */}
+                                {/* NUMEROS */}
 
                                 {numerosPagina.map((n) => (
 

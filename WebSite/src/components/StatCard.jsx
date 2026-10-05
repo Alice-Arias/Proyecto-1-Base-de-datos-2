@@ -1,15 +1,33 @@
-
-// StatCard
-// Este componente crea una tarjeta para mostrar una estadística.
-// La tarjeta puede mostrar:
-// - Un icono.
-// - Un color.
-// - Un título o etiqueta.
-// - Un valor principal.
-// - Un cambio o texto adicional.
-// - Una barra de progreso.
-// Dependiendo de si recibe "progress", muestra una barra
-// de progreso o muestra información adicional debajo.
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: Tarjeta de estadistica (StatCard)
+*
+* DESCRIPCION: Componente que crea una tarjeta para mostrar una estadistica. La tarjeta
+* muestra un icono con color, una etiqueta, un valor principal y, en la parte inferior,
+* una barra de progreso o informacion adicional. Si recibe la propiedad progress muestra
+* la barra de progreso (verde si el color es green y amarilla en cualquier otro caso);
+* si no la recibe, muestra el cambio (delta) y el texto adicional (sub).
+*
+* ENTRADA: icon - componente de icono que se dibuja en la tarjeta (se recibe como Icon).
+* color - nombre del color del icono (por ejemplo blue, green o yellow).
+* label - titulo o etiqueta de la estadistica.
+* value - valor principal que se muestra.
+* delta - cambio que se muestra junto al texto adicional (opcional).
+* sub - texto adicional que se muestra debajo (opcional).
+* progress - porcentaje de la barra de progreso de 0 a 100 (opcional).
+*
+* SALIDA: Elemento JSX con la tarjeta de estadistica.
+*
+* RESTRICCIONES: Requiere que existan los estilos de las clases stat-card, stat-top,
+* stat-icon, stat-label, stat-value, stat-progress, stat-progress-fill, stat-sub y
+* stat-delta, y las variables CSS --green y --yellow. La propiedad icon es obligatoria,
+* ya que se usa como componente. La propiedad progress debe ser un numero; si es
+* undefined se muestra la informacion adicional en lugar de la barra.
+*
+* OBJETIVO: Mostrar de forma resumida y reutilizable los datos estadisticos en las
+* paginas de la aplicacion.
+*
+*---------------------------------------------------------------------------------------*/
 
 function StatCard({
   icon: Icon,

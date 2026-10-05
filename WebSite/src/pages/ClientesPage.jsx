@@ -1,3 +1,33 @@
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: Pagina de clientes (ClientesPage)
+*
+* DESCRIPCION: Componente de pagina que gestiona los clientes registrados en Wide World
+* Importers. Carga y lista los clientes, permite filtrarlos por nombre, categoria y
+* metodo de entrega, seleccionarlos con checkbox, consultar el detalle de uno o varios
+* clientes, y crear, modificar y eliminar clientes mediante modales. Calcula
+* estadisticas, muestra los resultados en una tabla paginada de 10 registros por pagina
+* y presenta mensajes de exito o error en un modal de notificacion.
+*
+* ENTRADA: Filtros ingresados por el usuario (nombre, categoria y metodo de entrega),
+* acciones sobre la tabla (ver, editar, eliminar, seleccionar) y datos devueltos por las
+* funciones listarClientes y obtenerDetalleClientes del servicio api.
+*
+* SALIDA: Interfaz con encabezado, tarjetas de estadisticas, barra de herramientas,
+* tabla de clientes con paginacion, modales de operaciones y mensajes de confirmacion o
+* error.
+*
+* RESTRICCIONES: Requiere que el servicio api este disponible y que existan los
+* componentes ClientesTabla, ClienteDetalleModal, ClienteNuevoModal, ClienteEditarModal,
+* ClienteEliminarModal y StatCard en las rutas indicadas. Los clientes deben incluir los
+* campos Categoria_Cliente y Metodo_Entrega para generar las opciones de los filtros.
+* Las funciones insertarCliente, actualizarCliente, eliminarCliente y el icono
+* AlertTriangle se importan pero no se usan directamente en este archivo.
+*
+* OBJETIVO: Permitir consultar, crear, modificar y eliminar clientes desde una unica
+* pantalla, mostrando informacion resumida y actualizada.
+*
+*---------------------------------------------------------------------------------------*/
 
 import { useEffect, useState } from 'react';
 
@@ -43,32 +73,43 @@ import {
 } from '../services/api';
 
 
-// ============================================================
-// CANTIDAD MÁXIMA DE CLIENTES POR PÁGINA
-// ============================================================
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: POR_PAGINA
+*
+* DESCRIPCION: Constante que define la cantidad maxima de clientes que se muestran por
+* pagina en la tabla.
+*
+* ENTRADA: Ninguna.
+*
+* SALIDA: Valor numerico 10.
+*
+* RESTRICCIONES: Debe ser un numero entero mayor que cero.
+*
+* OBJETIVO: Controlar el tamano de la paginacion de la tabla de clientes.
+*
+*---------------------------------------------------------------------------------------*/
 
 const POR_PAGINA = 10;
 
 
-// ============================================================
-// ClientesPage
-//
-// Esta es la página principal de clientes.
-//
-// Aquí se controla:
-//
-// - Carga de clientes.
-// - Filtros.
-// - Selección de clientes.
-// - Consulta de detalles.
-// - Crear clientes.
-// - Modificar clientes.
-// - Eliminar clientes.
-// - Estadísticas.
-// - Paginación.
-// - Estado de carga.
-//
-// ============================================================
+/*---------------------------------------------------------------------------------------*
+*
+* NOMBRE: ClientesPage
+*
+* DESCRIPCION: Componente principal de la pagina de clientes. Define los estados de la
+* pantalla, las funciones de carga de datos, los manejadores de filtros, seleccion y
+* modales, y los calculos de estadisticas y paginacion, y retorna la interfaz completa.
+*
+* ENTRADA: Ninguna (no recibe props).
+*
+* SALIDA: Elemento JSX con la pagina de clientes.
+*
+* RESTRICCIONES: Debe renderizarse dentro de la aplicacion con acceso a la API.
+*
+* OBJETIVO: Centralizar la gestion de clientes en una sola vista.
+*
+*---------------------------------------------------------------------------------------*/
 
 function ClientesPage() {
 
@@ -77,7 +118,7 @@ function ClientesPage() {
   // CLIENTES
   // ============================================================
 
-  // Clientes que actualmente se están mostrando.
+  // Clientes que actualmente se estan mostrando.
   //
   // Puede ser la lista completa o una lista filtrada.
 
@@ -86,8 +127,8 @@ function ClientesPage() {
 
   // Guarda todos los clientes sin filtrar.
   //
-  // Se utiliza principalmente para obtener las categorías
-  // y métodos de entrega disponibles.
+  // Se utiliza principalmente para obtener las categorias
+  // y metodos de entrega disponibles.
 
   const [todosClientes, setTodosClientes] = useState([]);
 
@@ -101,18 +142,18 @@ function ClientesPage() {
   const [nombre, setNombre] = useState('');
 
 
-  // Categoría seleccionada.
+  // Categoria seleccionada.
 
   const [categoria, setCategoria] = useState('');
 
 
-  // Método de entrega seleccionado.
+  // Metodo de entrega seleccionado.
 
   const [metodoEntrega, setMetodoEntrega] = useState('');
 
 
   // ============================================================
-  // SELECCIÓN DE CLIENTES
+  // SELECCION DE CLIENTES
   // ============================================================
 
   // Guarda los CustomerID de los clientes seleccionados.
@@ -124,9 +165,9 @@ function ClientesPage() {
   // MODAL DE DETALLE
   // ============================================================
 
-  // Guarda los clientes que se mostrarán dentro del modal.
+  // Guarda los clientes que se mostraran dentro del modal.
   //
-  // null significa que el modal está cerrado.
+  // null significa que el modal esta cerrado.
 
   const [clientesModal, setClientesModal] = useState(null);
 
@@ -135,16 +176,16 @@ function ClientesPage() {
   // ESTADO DE CARGA
   // ============================================================
 
-  // Indica si actualmente se están cargando clientes.
+  // Indica si actualmente se estan cargando clientes.
 
   const [cargando, setCargando] = useState(false);
 
 
   // ============================================================
-  // PAGINACIÓN
+  // PAGINACION
   // ============================================================
 
-  // Número de página actual.
+  // Numero de pagina actual.
 
   const [pagina, setPagina] = useState(1);
 
@@ -153,8 +194,8 @@ function ClientesPage() {
   // MODAL NUEVO CLIENTE
   // ============================================================
 
-  // true  → muestra el formulario.
-  // false → formulario cerrado.
+  // true  = muestra el formulario.
+  // false = formulario cerrado.
 
   const [mostrarNuevo, setMostrarNuevo] = useState(false);
 
@@ -163,7 +204,7 @@ function ClientesPage() {
   // CLIENTE PARA EDITAR
   // ============================================================
 
-  // Guarda el cliente que se seleccionó con el lápiz.
+  // Guarda el cliente que se selecciono con el lapiz.
   //
   // null significa que no hay cliente seleccionado.
 
@@ -174,7 +215,7 @@ function ClientesPage() {
   // CLIENTE PARA ELIMINAR
   // ============================================================
 
-  // Guarda el cliente que se seleccionó con el basurero.
+  // Guarda el cliente que se selecciono con el basurero.
   //
   // null significa que no hay cliente seleccionado.
 
@@ -185,18 +226,29 @@ function ClientesPage() {
   // MENSAJES
   // ============================================================
 
-  // Guarda un mensaje que puede mostrarse después de
+  // Guarda un mensaje que puede mostrarse despues de
   // crear, modificar o eliminar un cliente.
 
   const [mensaje, setMensaje] = useState(null);
 
 
-  // ============================================================
-  // cargarClientes
-  //
-  // Esta función consulta la API para obtener los clientes.
-  // Puede recibir filtros.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: cargarClientes
+  *
+  * DESCRIPCION: Consulta los clientes a la API con los filtros recibidos, reinicia la
+  * paginacion a la primera pagina y controla el indicador de carga. Si ocurre un error
+  * muestra un mensaje de error.
+  *
+  * ENTRADA: filtros - objeto con los criterios de busqueda (por defecto vacio).
+  *
+  * SALIDA: Actualiza los estados clientes, cargando, pagina y mensaje.
+  *
+  * RESTRICCIONES: Requiere conexion con la API mediante listarClientes.
+  *
+  * OBJETIVO: Obtener y mostrar el listado de clientes segun los filtros indicados.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const cargarClientes = async (filtros = {}) => {
 
@@ -205,7 +257,7 @@ function ClientesPage() {
     setCargando(true);
 
 
-    // Cada nueva búsqueda comienza desde la página 1.
+    // Cada nueva busqueda comienza desde la pagina 1.
 
     setPagina(1);
 
@@ -247,14 +299,24 @@ function ClientesPage() {
   };
 
 
-  // ============================================================
-  // cargarTodosClientes
-  //
-  // Vuelve a cargar todos los clientes.
-  //
-  // Esta función se utiliza después de insertar, modificar
-  // o eliminar un cliente.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: cargarTodosClientes
+  *
+  * DESCRIPCION: Recarga la lista completa de clientes sin filtros y actualiza tanto la
+  * lista mostrada como la lista general. Se usa despues de insertar, modificar o
+  * eliminar un cliente.
+  *
+  * ENTRADA: Ninguna.
+  *
+  * SALIDA: Actualiza los estados todosClientes y clientes.
+  *
+  * RESTRICCIONES: Requiere conexion con la API mediante listarClientes. Si falla, el
+  * error solo se registra en consola.
+  *
+  * OBJETIVO: Mantener la tabla y las estadisticas sincronizadas con los cambios.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const cargarTodosClientes = async () => {
 
@@ -275,9 +337,24 @@ function ClientesPage() {
   };
 
 
-  // ============================================================
-  // CARGA INICIAL
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: useEffect de carga inicial
+  *
+  * DESCRIPCION: Al montar el componente carga el listado de clientes y la lista
+  * completa sin filtrar, que se usa para las estadisticas y las opciones de los
+  * filtros.
+  *
+  * ENTRADA: Arreglo de dependencias vacio.
+  *
+  * SALIDA: Ejecucion de cargarClientes y actualizacion del estado todosClientes.
+  *
+  * RESTRICCIONES: Se ejecuta unicamente en el montaje del componente. Si la carga de la
+  * lista completa falla, el error se ignora.
+  *
+  * OBJETIVO: Inicializar los datos de la pantalla.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   useEffect(() => {
 
@@ -286,8 +363,8 @@ function ClientesPage() {
     cargarClientes();
 
 
-    // También obtenemos todos los clientes para utilizarlos
-    // en las estadísticas y en las opciones de los filtros.
+    // Tambien obtenemos todos los clientes para utilizarlos
+    // en las estadisticas y en las opciones de los filtros.
 
     listarClientes()
       .then((datos) => setTodosClientes(datos))
@@ -296,14 +373,25 @@ function ClientesPage() {
   }, []);
 
 
-  // ============================================================
-  // aplicarFiltros
-  //
-  // Recibe los cambios realizados en los filtros.
-  //
-  // Combina esos cambios con los filtros que ya estaban
-  // seleccionados.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: aplicarFiltros
+  *
+  * DESCRIPCION: Recibe los cambios realizados en los filtros y los combina con los
+  * filtros que ya estaban seleccionados (nombre, categoria y metodo de entrega). Los
+  * filtros que no vienen en los cambios conservan su valor actual. Luego ejecuta la
+  * busqueda.
+  *
+  * ENTRADA: cambios - objeto con los filtros modificados (por defecto vacio).
+  *
+  * SALIDA: Ejecucion de cargarClientes con el conjunto completo de filtros.
+  *
+  * RESTRICCIONES: Los cambios solo deben contener las llaves nombre, categoria o
+  * metodoEntrega.
+  *
+  * OBJETIVO: Aplicar los filtros sin perder los que ya estaban seleccionados.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const aplicarFiltros = (cambios = {}) => {
 
@@ -320,7 +408,7 @@ function ClientesPage() {
           : nombre,
 
 
-      // Lo mismo para la categoría.
+      // Lo mismo para la categoria.
 
       categoria:
         cambios.categoria !== undefined
@@ -328,7 +416,7 @@ function ClientesPage() {
           : categoria,
 
 
-      // Lo mismo para el método de entrega.
+      // Lo mismo para el metodo de entrega.
 
       metodoEntrega:
         cambios.metodoEntrega !== undefined
@@ -338,19 +426,30 @@ function ClientesPage() {
     };
 
 
-    // Ejecutamos la búsqueda con los filtros construidos.
+    // Ejecutamos la busqueda con los filtros construidos.
 
     cargarClientes(filtros);
 
   };
 
 
-  // ============================================================
-  // restaurarFiltros
-  //
-  // Limpia todos los filtros y vuelve a cargar
-  // todos los clientes.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: restaurarFiltros
+  *
+  * DESCRIPCION: Limpia todos los filtros y la seleccion de clientes y vuelve a cargar
+  * el listado completo.
+  *
+  * ENTRADA: Ninguna.
+  *
+  * SALIDA: Actualiza los estados nombre, categoria, metodoEntrega y seleccionados, y
+  * ejecuta cargarClientes sin filtros.
+  *
+  * RESTRICCIONES: Requiere conexion con la API mediante listarClientes.
+  *
+  * OBJETIVO: Volver a la vista sin filtros.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const restaurarFiltros = () => {
 
@@ -367,32 +466,41 @@ function ClientesPage() {
   };
 
 
-  // ============================================================
-  // toggleSeleccion
-  //
-  // Selecciona o deselecciona un cliente.
-  //
-  // Recibe el CustomerID.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: toggleSeleccion
+  *
+  * DESCRIPCION: Selecciona o deselecciona un cliente. Si el CustomerID ya estaba en la
+  * lista de seleccionados lo quita, y si no estaba lo agrega.
+  *
+  * ENTRADA: id - identificador del cliente (CustomerID).
+  *
+  * SALIDA: Actualiza el estado seleccionados.
+  *
+  * RESTRICCIONES: El id debe corresponder a un cliente existente.
+  *
+  * OBJETIVO: Controlar los clientes marcados con checkbox en la tabla.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const toggleSeleccion = (id) => {
 
     setSeleccionados((prev) =>
 
-      // Preguntamos si el ID ya está seleccionado.
+      // Preguntamos si el ID ya esta seleccionado.
 
       prev.includes(id)
 
         ?
 
-        // Si ya está seleccionado:
+        // Si ya esta seleccionado:
         // lo eliminamos de la lista.
 
         prev.filter((x) => x !== id)
 
         :
 
-        // Si no está seleccionado:
+        // Si no esta seleccionado:
         // lo agregamos a la lista.
 
         [...prev, id]
@@ -402,13 +510,23 @@ function ClientesPage() {
   };
 
 
-  // ============================================================
-  // verUno
-  //
-  // Esto es cuando tocamos el ojo.
-  //
-  // Obtiene los detalles de un solo cliente.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: verUno
+  *
+  * DESCRIPCION: Se ejecuta al presionar el boton del ojo. Solicita a la API el detalle
+  * de un solo cliente y lo guarda en el estado para abrir el modal de detalle. Si
+  * ocurre un error muestra un mensaje.
+  *
+  * ENTRADA: id - identificador del cliente (CustomerID).
+  *
+  * SALIDA: Actualiza los estados clientesModal o mensaje.
+  *
+  * RESTRICCIONES: Requiere un identificador valido y conexion con la API.
+  *
+  * OBJETIVO: Mostrar la informacion completa de un cliente.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const verUno = async (id) => {
 
@@ -438,12 +556,24 @@ function ClientesPage() {
   };
 
 
-  // ============================================================
-  // verSeleccionados
-  //
-  // Obtiene los detalles de todos los clientes
-  // seleccionados mediante los checkbox.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: verSeleccionados
+  *
+  * DESCRIPCION: Solicita a la API el detalle de todos los clientes marcados con
+  * checkbox y lo guarda en el estado para abrir el modal de detalle. Si ocurre un error
+  * muestra un mensaje.
+  *
+  * ENTRADA: Ninguna (usa el estado seleccionados).
+  *
+  * SALIDA: Actualiza los estados clientesModal o mensaje.
+  *
+  * RESTRICCIONES: Debe haber al menos un cliente seleccionado; el boton se deshabilita
+  * en caso contrario. Requiere conexion con la API.
+  *
+  * OBJETIVO: Consultar en un solo modal el detalle de varios clientes.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const verSeleccionados = async () => {
 
@@ -475,11 +605,23 @@ function ClientesPage() {
   };
 
 
-  // ============================================================
-  // CLIENTE CREADO
-  //
-  // Se ejecuta cuando ClienteNuevoModal termina correctamente.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: clienteCreado
+  *
+  * DESCRIPCION: Se ejecuta cuando ClienteNuevoModal termina con exito. Cierra el
+  * formulario, limpia la seleccion, recarga el listado completo y muestra un mensaje de
+  * confirmacion.
+  *
+  * ENTRADA: Ninguna.
+  *
+  * SALIDA: Actualiza los estados mostrarNuevo, seleccionados, clientes y mensaje.
+  *
+  * RESTRICCIONES: Debe invocarse solo despues de crear el cliente correctamente.
+  *
+  * OBJETIVO: Reflejar el nuevo cliente en la tabla y notificar al usuario.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const clienteCreado = async () => {
 
@@ -488,17 +630,17 @@ function ClientesPage() {
     setMostrarNuevo(false);
 
 
-    // Quitamos cualquier selección anterior.
+    // Quitamos cualquier seleccion anterior.
 
     setSeleccionados([]);
 
 
-    // Volvemos a cargar la información.
+    // Volvemos a cargar la informacion.
 
     await cargarTodosClientes();
 
 
-    // Mostramos mensaje de éxito.
+    // Mostramos mensaje de exito.
 
     setMensaje({
       tipo: 'exito',
@@ -509,15 +651,27 @@ function ClientesPage() {
   };
 
 
-  // ============================================================
-  // CLIENTE ACTUALIZADO
-  //
-  // Se ejecuta cuando ClienteEditarModal termina correctamente.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: clienteActualizado
+  *
+  * DESCRIPCION: Se ejecuta cuando ClienteEditarModal termina con exito. Cierra el
+  * formulario de edicion, limpia la seleccion, recarga el listado completo y muestra un
+  * mensaje de confirmacion.
+  *
+  * ENTRADA: Ninguna.
+  *
+  * SALIDA: Actualiza los estados clienteEditar, seleccionados, clientes y mensaje.
+  *
+  * RESTRICCIONES: Debe invocarse solo despues de actualizar el cliente correctamente.
+  *
+  * OBJETIVO: Reflejar los cambios del cliente en la tabla y notificar al usuario.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const clienteActualizado = async () => {
 
-    // Cerramos el formulario de edición.
+    // Cerramos el formulario de edicion.
 
     setClienteEditar(null);
 
@@ -532,7 +686,7 @@ function ClientesPage() {
     await cargarTodosClientes();
 
 
-    // Mostramos mensaje de éxito.
+    // Mostramos mensaje de exito.
 
     setMensaje({
       tipo: 'exito',
@@ -543,11 +697,23 @@ function ClientesPage() {
   };
 
 
-  // ============================================================
-  // CLIENTE ELIMINADO
-  //
-  // Se ejecuta cuando ClienteEliminarModal termina correctamente.
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: clienteEliminado
+  *
+  * DESCRIPCION: Se ejecuta cuando ClienteEliminarModal termina con exito. Cierra el
+  * modal, limpia la seleccion, recarga el listado completo y muestra un mensaje de
+  * confirmacion.
+  *
+  * ENTRADA: Ninguna.
+  *
+  * SALIDA: Actualiza los estados clienteEliminar, seleccionados, clientes y mensaje.
+  *
+  * RESTRICCIONES: Debe invocarse solo despues de eliminar el cliente correctamente.
+  *
+  * OBJETIVO: Quitar el cliente eliminado de la tabla y notificar al usuario.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const clienteEliminado = async () => {
 
@@ -566,7 +732,7 @@ function ClientesPage() {
     await cargarTodosClientes();
 
 
-    // Mostramos mensaje de éxito.
+    // Mostramos mensaje de exito.
 
     setMensaje({
       tipo: 'exito',
@@ -577,17 +743,24 @@ function ClientesPage() {
   };
 
 
-  // ============================================================
-  // CATEGORÍAS DISPONIBLES
-  // ============================================================
-
-  // Obtenemos las categorías existentes en todos los clientes.
-  //
-  // new Set() elimina valores repetidos.
-  //
-  // filter(Boolean) elimina valores vacíos.
-  //
-  // sort() ordena alfabéticamente.
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: categoriasDisponibles
+  *
+  * DESCRIPCION: Obtiene las categorias existentes en todos los clientes. new Set()
+  * elimina valores repetidos, filter(Boolean) elimina valores vacios y sort() ordena
+  * alfabeticamente.
+  *
+  * ENTRADA: Estado todosClientes.
+  *
+  * SALIDA: Arreglo ordenado de categorias unicas.
+  *
+  * RESTRICCIONES: Usa el campo Categoria_Cliente de cada cliente.
+  *
+  * OBJETIVO: Llenar la lista desplegable del filtro de categoria y la estadistica de
+  * categorias.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const categoriasDisponibles = [
 
@@ -608,9 +781,22 @@ function ClientesPage() {
     .sort();
 
 
-  // ============================================================
-  // MÉTODOS DE ENTREGA DISPONIBLES
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: metodosDisponibles
+  *
+  * DESCRIPCION: Obtiene los metodos de entrega existentes en todos los clientes,
+  * eliminando repetidos y vacios y ordenandolos alfabeticamente.
+  *
+  * ENTRADA: Estado todosClientes.
+  *
+  * SALIDA: Arreglo ordenado de metodos de entrega unicos.
+  *
+  * RESTRICCIONES: Usa el campo Metodo_Entrega de cada cliente.
+  *
+  * OBJETIVO: Llenar la lista desplegable del filtro de metodo de entrega.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   const metodosDisponibles = [
 
@@ -631,34 +817,62 @@ function ClientesPage() {
     .sort();
 
 
-  // ============================================================
-  // PAGINACIÓN
-  // ============================================================
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: Calculo de paginacion
+  *
+  * DESCRIPCION: Calcula cuantas paginas existen y obtiene unicamente los clientes que
+  * pertenecen a la pagina actual.
+  *
+  * ENTRADA: Estados clientes y pagina, constante POR_PAGINA.
+  *
+  * SALIDA: Variables totalPaginas y clientesPagina.
+  *
+  * RESTRICCIONES: El total de paginas es como minimo 1.
+  *
+  * OBJETIVO: Mostrar los clientes divididos en paginas.
+  *
+  *-----------------------------------------------------------------------------------*/
 
-  // Calculamos cuántas páginas existen.
+  // Calculamos cuantas paginas existen.
   const totalPaginas = Math.max(
     1,
     Math.ceil(clientes.length / POR_PAGINA)
   );
 
-  // Obtenemos únicamente los clientes que pertenecen
-  // a la página actual.
+  // Obtenemos unicamente los clientes que pertenecen
+  // a la pagina actual.
   const clientesPagina = clientes.slice(
     (pagina - 1) * POR_PAGINA,
     pagina * POR_PAGINA
   );
 
-  // ============================================================
-  // NÚMEROS DE PÁGINA DINÁMICOS
-  // ============================================================
 
-  // Como máximo mostramos 5 botones.
-  // Los números se van desplazando conforme avanzamos.
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: numerosPagina
+  *
+  * DESCRIPCION: Calcula los numeros de pagina que se muestran como botones, con un
+  * maximo de 5 botones centrados en la pagina actual y ajustados a los limites. Los
+  * numeros se van desplazando conforme se avanza.
+  *
+  * ENTRADA: Estados pagina y totalPaginas.
+  *
+  * SALIDA: Arreglo de numeros de pagina visibles.
+  *
+  * RESTRICCIONES: Maximo 5 botones; si hay menos paginas se muestran todas.
+  *
+  * OBJETIVO: Generar los botones de navegacion de la paginacion.
+  *
+  *-----------------------------------------------------------------------------------*/
+
+  // Como maximo mostramos 5 botones.
+  // Los numeros se van desplazando conforme avanzamos.
   const numerosPagina = (() => {
 
     const maxBotones = 5;
 
-    // Si existen 5 páginas o menos,
+    // Si existen 5 paginas o menos,
     // mostramos todas.
     if (totalPaginas <= maxBotones) {
       return Array.from(
@@ -667,7 +881,7 @@ function ClientesPage() {
       );
     }
 
-    // Intentamos colocar la página actual
+    // Intentamos colocar la pagina actual
     // en el centro de los 5 botones.
     let inicio = pagina - 2;
     let fin = pagina + 2;
@@ -680,13 +894,13 @@ function ClientesPage() {
     }
 
     // Si estamos al final,
-    // mostramos las últimas 5 páginas.
+    // mostramos las ultimas 5 paginas.
     if (fin > totalPaginas) {
       fin = totalPaginas;
       inicio = totalPaginas - maxBotones + 1;
     }
 
-    // Creamos los números.
+    // Creamos los numeros.
     return Array.from(
       { length: fin - inicio + 1 },
       (_, i) => inicio + i
@@ -694,9 +908,24 @@ function ClientesPage() {
 
   })();
 
-  // ============================================================
-  // FECHA Y HORA
-  // ============================================================
+
+  /*-----------------------------------------------------------------------------------*
+  *
+  * NOMBRE: Fecha y hora actuales
+  *
+  * DESCRIPCION: Obtiene la fecha y la hora del momento del renderizado, convierte la
+  * fecha al formato de Costa Rica y la hora al formato de 24 horas con la configuracion
+  * regional es-CR.
+  *
+  * ENTRADA: Fecha actual del sistema.
+  *
+  * SALIDA: Variables fechaTexto y horaTexto.
+  *
+  * RESTRICCIONES: Los valores se calculan en cada renderizado y no se actualizan solos.
+  *
+  * OBJETIVO: Mostrar la fecha y la hora en el encabezado de la pagina.
+  *
+  *-----------------------------------------------------------------------------------*/
 
   // Obtenemos la fecha y hora actual.
 
@@ -802,7 +1031,7 @@ function ClientesPage() {
 
 
       {/* ========================================================
-          ESTADÍSTICAS
+          ESTADISTICAS
           ======================================================== */}
 
       <div className="stats-row">
@@ -879,7 +1108,7 @@ function ClientesPage() {
           </div>
 
 
-          {/* FILTRO CATEGORÍA */}
+          {/* FILTRO CATEGORIA */}
 
           <select
 
@@ -887,7 +1116,7 @@ function ClientesPage() {
 
             onChange={(e) => {
 
-              // Guardamos la categoría seleccionada.
+              // Guardamos la categoria seleccionada.
 
               setCategoria(e.target.value);
 
@@ -930,7 +1159,7 @@ function ClientesPage() {
           </select>
 
 
-          {/* FILTRO MÉTODO DE ENTREGA */}
+          {/* FILTRO METODO DE ENTREGA */}
 
           <select
 
@@ -938,7 +1167,7 @@ function ClientesPage() {
 
             onChange={(e) => {
 
-              // Guardamos el método seleccionado.
+              // Guardamos el metodo seleccionado.
 
               setMetodoEntrega(e.target.value);
 
@@ -1080,7 +1309,7 @@ function ClientesPage() {
             {/* ==================================================
                 TABLA DE CLIENTES
 
-                Aquí enviamos también las funciones de editar
+                Aqui enviamos tambien las funciones de editar
                 y eliminar.
                 ================================================== */}
 
@@ -1095,7 +1324,7 @@ function ClientesPage() {
               onVerUno={verUno}
 
 
-              // Cuando se presiona el lápiz.
+              // Cuando se presiona el lapiz.
 
               onEditar={(cliente) => {
 
@@ -1116,7 +1345,7 @@ function ClientesPage() {
 
 
             {/* ==================================================
-    PAGINACIÓN
+    PAGINACION
     ================================================== */}
 
             <div className="paginacion">
@@ -1145,7 +1374,7 @@ function ClientesPage() {
 
               <div className="paginas">
 
-                {/* BOTÓN ANTERIOR */}
+                {/* BOTON ANTERIOR */}
 
                 <button
                   disabled={pagina === 1}
@@ -1159,7 +1388,7 @@ function ClientesPage() {
                 </button>
 
 
-                {/* NÚMEROS DE PÁGINA */}
+                {/* NUMEROS DE PAGINA */}
 
                 {numerosPagina.map((n) => (
 
@@ -1180,7 +1409,7 @@ function ClientesPage() {
                 ))}
 
 
-                {/* BOTÓN SIGUIENTE */}
+                {/* BOTON SIGUIENTE */}
 
                 <button
                   disabled={pagina === totalPaginas}
